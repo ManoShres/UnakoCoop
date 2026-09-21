@@ -1,0 +1,627 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-primary: #006b47;
+  --color-primary-container: #00875a;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #ffffff;
+  --color-secondary: #006c49;
+  --color-secondary-container: #6cf8bb;
+  --color-surface-canvas: #f8fafc;
+  --color-surface-card: #ffffff;
+  --color-surface-container-low: #eff4ff;
+  --color-surface-container: #e5eeff;
+  --color-surface-container-high: #dce9ff;
+  --color-surface-container-highest: #d3e4fe;
+  --color-surface-dark: #0f172a;
+  --color-surface-dark-card: #1e293b;
+  --color-surface-bright: #ffffff;
+  --color-tertiary-fixed-dim: #cbd5e1;
+  --color-primary-fixed-dim: #a7f3d0;
+  --color-on-tertiary: #f8fafc;
+  --color-surface-variant: #d3e4fe;
+  --color-brand-accent-lime: #22c55e;
+  --color-brand-accent-light: #e8f5e9;
+  --color-status-success: #16a34a;
+  --color-status-danger: #ef4444;
+  --color-status-warning: #f59e0b;
+  --color-on-surface: #0b1c30;
+  --color-on-surface-variant: #3e4942;
+  --color-outline: #6e7a71;
+  --color-outline-variant: #bdcac0;
+  --color-error: #ba1a1a;
+
+  --font-sans: 'Inter', 'Mukta', system-ui, sans-serif;
+  --font-headline: 'Plus Jakarta Sans', 'Mukta', system-ui, sans-serif;
+
+  /* Custom Spacing Tokens from Stitch */
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2.5rem;
+  --spacing-space-2xl: 4rem;
+  --spacing-gutter: 2rem;
+  --spacing-gutter-sm: 1.25rem;
+  --spacing-gutter-lg: 2.75rem;
+  --spacing-gutter-xl: 3.5rem;
+
+  /* Custom Typographic Scale Tokens from Stitch */
+  --text-label-sm: 0.75rem; /* 12px */
+  --text-label-sm--line-height: 1rem; /* 16px */
+  --text-label-sm--letter-spacing: 0.025em;
+  --text-label-sm--font-weight: 600;
+
+  --text-label-md: 0.875rem; /* 14px */
+  --text-label-md--line-height: 1.25rem; /* 20px */
+  --text-label-md--letter-spacing: 0.01em;
+  --text-label-md--font-weight: 600;
+
+  --text-body-sm: 0.875rem; /* 14px */
+  --text-body-sm--line-height: 1.25rem; /* 20px */
+  --text-body-sm--font-weight: 400;
+
+  --text-body-md: 1rem; /* 16px */
+  --text-body-md--line-height: 1.5rem; /* 24px */
+  --text-body-md--font-weight: 400;
+
+  --text-body-lg: 1.125rem; /* 18px */
+  --text-body-lg--line-height: 1.75rem; /* 28px */
+  --text-body-lg--font-weight: 400;
+
+  --text-tabular-mono: 0.9375rem; /* 15px */
+  --text-tabular-mono--line-height: 1.375rem; /* 22px */
+  --text-tabular-mono--font-weight: 500;
+
+  --text-headline-sm: 1.25rem; /* 20px */
+  --text-headline-sm--line-height: 1.75rem; /* 28px */
+  --text-headline-sm--font-weight: 600;
+
+  --text-headline-md: 1.5rem; /* 24px */
+  --text-headline-md--line-height: 2rem; /* 32px */
+  --text-headline-md--letter-spacing: -0.01em;
+  --text-headline-md--font-weight: 600;
+
+  --text-headline-lg: 1.875rem; /* 30px */
+  --text-headline-lg--line-height: 2.375rem; /* 38px */
+  --text-headline-lg--letter-spacing: -0.015em;
+  --text-headline-lg--font-weight: 700;
+
+  --text-headline-xl: 2.5rem; /* 40px */
+  --text-headline-xl--line-height: 3rem; /* 48px */
+  --text-headline-xl--letter-spacing: -0.02em;
+  --text-headline-xl--font-weight: 700;
+
+  --text-headline-2xl: 3.5rem; /* 56px */
+  --text-headline-2xl--line-height: 4rem; /* 64px */
+  --text-headline-2xl--letter-spacing: -0.03em;
+  --text-headline-2xl--font-weight: 800;
+
+  --text-display-stat: 2.75rem; /* 44px */
+  --text-display-stat--line-height: 3rem; /* 48px */
+  --text-display-stat--letter-spacing: -0.02em;
+  --text-display-stat--font-weight: 800;
+
+  --text-display-stat-mobile: 2rem; /* 32px */
+  --text-display-stat-mobile--line-height: 2.375rem; /* 38px */
+  --text-display-stat-mobile--letter-spacing: -0.02em;
+  --text-display-stat-mobile--font-weight: 800;
+}
+
+@layer base {
+  html {
+    /* 90% zoom density standard across the entire application */
+    font-size: 14.4px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 14px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    html {
+      font-size: 15px;
+    }
+  }
+
+  body {
+    font-family: 'Inter', 'Mukta', system-ui, sans-serif;
+    background-color: #f8fafc;
+    color: #0b1c30;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', 'Mukta', system-ui, sans-serif;
+    color: #0f172a;
+    letter-spacing: -0.015em;
+  }
+}
+
+/* ========================================================
+   EXPLICIT STITCH & UNIFORM TYPOGRAPHY UTILITIES
+   Ensures consistent font size and hierarchy across ALL pages
+   ======================================================== */
+
+/* Small labels, tags, badges, table headers */
+.text-label-sm,
+.font-label-sm {
+  font-size: 0.75rem !important; /* 12px */
+  line-height: 1rem !important;  /* 16px */
+  letter-spacing: 0.025em;
+  font-weight: 600;
+}
+
+/* Medium labels, button text, form labels */
+.text-label-md,
+.font-label-md {
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.25rem !important; /* 20px */
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+/* Secondary body text, table cells, descriptions */
+.text-body-sm,
+.font-body-sm {
+  font-size: 0.875rem !important; /* 14px */
+  line-height: 1.35rem !important;
+  font-weight: 400;
+}
+
+/* Standard body text, paragraphs */
+.text-body-md,
+.font-body-md {
+  font-size: 1rem !important; /* 16px */
+  line-height: 1.5rem !important;
+  font-weight: 400;
+}
+
+/* Lead paragraphs, hero descriptions */
+.text-body-lg,
+.font-body-lg {
+  font-size: 1.125rem !important; /* 18px */
+  line-height: 1.75rem !important;
+  font-weight: 400;
+}
+
+/* Tabular Financial Numbers (amounts, passbook lines, account numbers) */
+.text-tabular-mono,
+.font-tabular-mono {
+  font-size: 0.9375rem !important; /* 15px */
+  line-height: 1.375rem !important;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-family: 'Inter', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Small section titles & modal headers */
+.text-headline-sm,
+.font-headline-sm {
+  font-size: 1.25rem !important; /* 20px */
+  line-height: 1.75rem !important; /* 28px */
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+/* Medium section headers & card titles */
+.text-headline-md,
+.font-headline-md {
+  font-size: 1.5rem !important; /* 24px */
+  line-height: 2rem !important; /* 32px */
+  letter-spacing: -0.015em;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+}
+
+/* Page titles */
+.text-headline-lg,
+.font-headline-lg {
+  font-size: 1.875rem !important; /* 30px */
+  line-height: 2.375rem !important; /* 38px */
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+}
+
+/* Large display & banner headers */
+.text-headline-xl,
+.font-headline-xl {
+  font-size: 2.25rem !important; /* 36px on desktop */
+  line-height: 2.75rem !important;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+}
+
+@media (min-width: 1024px) {
+  .text-headline-xl,
+  .font-headline-xl {
+    font-size: 2.5rem !important; /* 40px */
+    line-height: 3rem !important;
+  }
+}
+
+/* Super hero titles */
+.text-headline-2xl,
+.font-headline-2xl {
+  font-size: 2.5rem !important; /* 40px mobile */
+  line-height: 3rem !important;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+}
+
+@media (min-width: 1024px) {
+  .text-headline-2xl,
+  .font-headline-2xl {
+    font-size: 3.5rem !important; /* 56px desktop */
+    line-height: 4rem !important;
+  }
+}
+
+/* Large KPI / Dashboard big numbers */
+.text-display-stat,
+.font-display-stat {
+  font-size: 2.25rem !important; /* 36px */
+  line-height: 2.5rem !important;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+}
+
+@media (min-width: 1024px) {
+  .text-display-stat,
+  .font-display-stat {
+    font-size: 2.75rem !important; /* 44px */
+    line-height: 3rem !important;
+  }
+}
+
+.text-display-stat-mobile {
+  font-size: 2rem !important; /* 32px */
+  line-height: 2.375rem !important;
+  letter-spacing: -0.02em;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', 'Mukta', sans-serif;
+}
+
+/* Global Font Family Helpers */
+.font-headline {
+  font-family: 'Plus Jakarta Sans', 'Mukta', system-ui, sans-serif !important;
+}
+
+.font-sans {
+  font-family: 'Inter', 'Mukta', system-ui, sans-serif !important;
+}
+
+/* Uniform Table Typography */
+table th {
+  font-size: 0.75rem !important; /* 12px */
+  line-height: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em;
+  color: #64748b;
+}
+
+table td {
+  font-size: 0.875rem !important; /* 14px */
+}
+
+/* Special Decorative Certificates & Patterns */
+.cert-border-double {
+  border: 3px double #006b47;
+}
+
+.cert-guilloche-pattern {
+  background-color: #fafdfb;
+  background-image: radial-gradient(#006b4712 1px, transparent 1px), radial-gradient(#006b4708 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  background-position: 0 0, 12px 12px;
+}
+
+@keyframes modalEnter {
+  0% { opacity: 0; transform: scale(0.96) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-modal-in {
+  animation: modalEnter 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  vertical-align: middle;
+}
+
+/* ========================================================
+   EXPLICIT DESIGN TOKENS & CONTRAST FIXES
+   ======================================================== */
+.text-surface-bright { color: #ffffff !important; }
+.text-tertiary-fixed-dim { color: #cbd5e1 !important; }
+.text-primary-fixed-dim { color: #a7f3d0 !important; }
+.text-brand-accent-lime { color: #22c55e !important; }
+.text-surface-dark { color: #0f172a !important; }
+.text-on-surface { color: #0b1c30 !important; }
+.text-on-surface-variant { color: #475569 !important; }
+.text-on-tertiary { color: #f8fafc !important; }
+
+.bg-surface-dark { background-color: #0f172a !important; }
+.bg-surface-dark-card { background-color: #1e293b !important; }
+.bg-surface-bright { background-color: #ffffff !important; }
+.bg-brand-accent-lime { background-color: #22c55e !important; }
+.bg-surface-canvas { background-color: #f8fafc !important; }
+.bg-surface-card { background-color: #ffffff !important; }
+
+/* In dark containers, guarantee headers and paragraphs are crisp and visible */
+.bg-surface-dark h1:not([class*='text-brand']),
+.bg-surface-dark h2:not([class*='text-brand']),
+.bg-surface-dark h3:not([class*='text-brand']),
+.bg-surface-dark h4:not([class*='text-brand']),
+.bg-surface-dark-card h1:not([class*='text-brand']),
+.bg-surface-dark-card h2:not([class*='text-brand']),
+.bg-surface-dark-card h3:not([class*='text-brand']),
+.bg-surface-dark-card h4:not([class*='text-brand']) {
+  color: #ffffff !important;
+}
+
+.bg-surface-dark,
+.bg-surface-dark-card {
+  color: #cbd5e1;
+}
+
+/* ========================================================
+   EXPLICIT RESPONSIVE GUTTER SYSTEM
+   Ensures spacious margins on all screen sizes like 90% zoom
+   ======================================================== */
+.px-gutter {
+  padding-left: 1.25rem !important;
+  padding-right: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+  .px-gutter {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .px-gutter {
+    padding-left: 2.75rem !important;
+    padding-right: 2.75rem !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .px-gutter {
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
+  }
+}
+
+
+/* ========================================================
+   DARK MODE TOKEN OVERRIDES & SURFACE SYSTEM
+   ======================================================== */
+.dark {
+  --color-surface-canvas: #09130d;
+  --color-surface-card: #112217;
+  --color-surface-container-low: #15271d;
+  --color-surface-container: #1a3024;
+  --color-surface-container-high: #213c2d;
+  --color-surface-container-highest: #294937;
+  --color-surface-dark: #050b07;
+  --color-surface-dark-card: #0d1a12;
+  --color-surface-bright: #ffffff;
+  --color-on-surface: #f8fafc;
+  --color-on-surface-variant: #94a3b8;
+  --color-outline: #475569;
+  --color-outline-variant: #1e3a29;
+}
+
+.dark body {
+  background-color: #09130d !important;
+  color: #f8fafc !important;
+}
+
+.dark .bg-surface-canvas {
+  background-color: #09130d !important;
+}
+
+.dark .bg-surface-card {
+  background-color: #112217 !important;
+}
+
+.dark .bg-surface-container-low {
+  background-color: #15271d !important;
+}
+
+.dark .bg-surface-container {
+  background-color: #1a3024 !important;
+}
+
+.dark .bg-surface-container-high {
+  background-color: #213c2d !important;
+}
+
+.dark .bg-surface-container-highest {
+  background-color: #294937 !important;
+}
+
+.dark .text-on-surface {
+  color: #f8fafc !important;
+}
+
+.dark .text-on-surface-variant {
+  color: #94a3b8 !important;
+}
+
+.dark h1:not([class*='text-brand']):not([class*='text-primary']),
+.dark h2:not([class*='text-brand']):not([class*='text-primary']),
+.dark h3:not([class*='text-brand']):not([class*='text-primary']),
+.dark h4:not([class*='text-brand']):not([class*='text-primary']),
+.dark h5:not([class*='text-brand']):not([class*='text-primary']),
+.dark h6:not([class*='text-brand']):not([class*='text-primary']) {
+  color: #f8fafc !important;
+}
+
+.dark table th {
+  color: #94a3b8 !important;
+  background-color: #15271d !important;
+}
+
+.dark table td {
+  color: #e2e8f0 !important;
+}
+
+.dark .border-outline-variant,
+.dark .border-outline-variant\/20,
+.dark .border-outline-variant\/30,
+.dark .border-outline-variant\/40 {
+  border-color: rgba(30, 58, 41, 0.7) !important;
+}
+
+.dark .cert-guilloche-pattern {
+  background-color: #0d1a12 !important;
+  background-image: radial-gradient(#10b98125 1px, transparent 1px), radial-gradient(#10b98115 1.5px, transparent 1.5px) !important;
+}
+
+/* Sleek custom scrollbars for fixed-sidebar and scrollable panels */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(71, 85, 105, 0.6) transparent;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.6);
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.8);
+}
+
+/* ==========================================================================
+   Comprehensive Print Isolation & Paper Stylesheet (ECC Standards)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 15mm;
+  }
+
+  .min-h-screen,
+  [class*='min-h-screen'] {
+    min-height: 0 !important;
+    height: auto !important;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Force exact color adjustment if background badges are printed */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* Universal chrome hiding */
+  header:not(.print-include),
+  footer:not(.print-include),
+  nav:not(.print-include),
+  aside:not(.print-include),
+  button:not(.print-include),
+  .print\:hidden,
+  [class*='print:hidden'],
+  .no-print,
+  .role-switcher,
+  .support-chat-popup {
+    display: none !important;
+  }
+
+  /* Neutralize dark mode in print */
+  .dark {
+    color-scheme: light !important;
+  }
+  .dark * {
+    background-color: transparent !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  /* Avoid page breaks inside key report blocks */
+  tr,
+  td,
+  th,
+  .print-avoid-break {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Reset main viewport containers */
+  main,
+  #root,
+  .flex-1 {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+}

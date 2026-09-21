@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" style="background:#0f172a; font-family:'Mukta', 'Noto Sans Devanagari', sans-serif;">
+  <defs>
+    <filter id="bshadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#059669" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+
+  <rect x="15" y="15" width="970" height="620" rx="12" fill="#0f172a" stroke="#1e293b" stroke-width="2" filter="url(#bshadow)"/>
+  <rect x="25" y="25" width="950" height="600" rx="8" fill="#1e293b" fill-opacity="0.5" stroke="#334155" stroke-width="1"/>
+
+  <!-- Header -->
+  <g transform="translate(60, 65)">
+    <circle cx="24" cy="20" r="20" fill="#059669" fill-opacity="0.2"/>
+    <text x="24" y="27" font-size="20" fill="#10b981" text-anchor="middle">◎</text>
+    <text x="60" y="18" font-size="20" font-weight="bold" fill="#ffffff">उनको बचत तथा ऋण सहकारी संस्था लि.</text>
+    <text x="60" y="40" font-size="14" font-weight="semibold" fill="#10b981">केन्द्रीय कोर बैंकिङ प्रणाली (Central CBS Live Biometric Vault)</text>
+  </g>
+
+  <g transform="translate(680, 65)">
+    <rect x="0" y="0" width="260" height="50" rx="8" fill="#022c22" stroke="#059669" stroke-width="1.5"/>
+    <text x="15" y="20" font-size="11" font-weight="bold" fill="#6ee7b7">MEMBER ID (सदस्य नं.):</text>
+    <text x="15" y="38" font-size="15" font-weight="bold" font-family="monospace" fill="#ffffff">UKO-2070-08842</text>
+  </g>
+
+  <!-- Member ID & Name Strip -->
+  <g transform="translate(60, 135)">
+    <rect x="0" y="0" width="880" height="65" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1.5"/>
+    <text x="25" y="25" font-size="12" font-weight="bold" fill="#94a3b8">सदस्यको नाम (Member Name):</text>
+    <text x="25" y="48" font-size="16" font-weight="bold" fill="#ffffff">हरिप्रसाद चौधरी (Hari Prasad Chaudhary)</text>
+
+    <text x="360" y="25" font-size="12" font-weight="bold" fill="#94a3b8">नागरिकता नं (Citizenship):</text>
+    <text x="360" y="48" font-size="15" font-weight="bold" font-family="monospace" fill="#ffffff">५२-०१-७२-०४२९१</text>
+
+    <text x="660" y="25" font-size="12" font-weight="bold" fill="#94a3b8">बायोमेट्रिक प्रमाणीकरण स्थिति:</text>
+    <text x="660" y="48" font-size="14" font-weight="bold" fill="#10b981">✓ १००% प्रमाणित (Tier-1)</text>
+  </g>
+
+  <!-- Biometric Fingerprints Side by Side -->
+  <g transform="translate(60, 225)">
+    <!-- Left Thumb -->
+    <rect x="0" y="0" width="260" height="280" rx="10" fill="#0f172a" stroke="#059669" stroke-width="1.5"/>
+    <text x="130" y="30" font-size="14" font-weight="bold" fill="#6ee7b7" text-anchor="middle">बायाँ औंठाछाप (LEFT THUMB)</text>
+
+    <!-- Fingerprint graphic -->
+    <g transform="translate(130, 140)">
+      <ellipse cx="0" cy="0" rx="55" ry="75" fill="none" stroke="#10b981" stroke-width="2" opacity="0.4" stroke-dasharray="4,2"/>
+      <ellipse cx="0" cy="0" rx="45" ry="62" fill="none" stroke="#10b981" stroke-width="2" opacity="0.6"/>
+      <ellipse cx="0" cy="0" rx="35" ry="48" fill="none" stroke="#10b981" stroke-width="2.2" opacity="0.8"/>
+      <ellipse cx="0" cy="0" rx="25" ry="34" fill="none" stroke="#10b981" stroke-width="2.5"/>
+      <ellipse cx="0" cy="0" rx="15" ry="20" fill="none" stroke="#10b981" stroke-width="2.8"/>
+    </g>
+    <text x="130" y="245" font-size="11" font-weight="bold" fill="#94a3b8" text-anchor="middle">Match Confidence: 99.4%</text>
+    <text x="130" y="262" font-size="10" font-mono font-weight="semibold" fill="#10b981" text-anchor="middle">ISO/IEC 19794-2 COMPLIANT</text>
+
+    <!-- Right Thumb -->
+    <rect x="310" y="0" width="260" height="280" rx="10" fill="#0f172a" stroke="#059669" stroke-width="1.5"/>
+    <text x="440" y="30" font-size="14" font-weight="bold" fill="#6ee7b7" text-anchor="middle">दायाँ औंठाछाप (RIGHT THUMB)</text>
+    <g transform="translate(440, 140)">
+      <ellipse cx="0" cy="0" rx="55" ry="75" fill="none" stroke="#10b981" stroke-width="2" opacity="0.4" stroke-dasharray="4,2"/>
+      <ellipse cx="0" cy="0" rx="45" ry="62" fill="none" stroke="#10b981" stroke-width="2" opacity="0.6"/>
+      <ellipse cx="0" cy="0" rx="35" ry="48" fill="none" stroke="#10b981" stroke-width="2.2" opacity="0.8"/>
+      <ellipse cx="0" cy="0" rx="25" ry="34" fill="none" stroke="#10b981" stroke-width="2.5"/>
+      <ellipse cx="0" cy="0" rx="15" ry="20" fill="none" stroke="#10b981" stroke-width="2.8"/>
+    </g>
+    <text x="440" y="245" font-size="11" font-weight="bold" fill="#94a3b8" text-anchor="middle">Match Confidence: 99.8%</text>
+    <text x="440" y="262" font-size="10" font-mono font-weight="semibold" fill="#10b981" text-anchor="middle">MINUTIAE COUNT: 64 POINTS</text>
+
+    <!-- Specimen Legal Signature -->
+    <rect x="620" y="0" width="260" height="280" rx="10" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5"/>
+    <text x="750" y="30" font-size="14" font-weight="bold" fill="#93c5fd" text-anchor="middle">कानूनी दस्तखत (LEGAL SIGNATURE)</text>
+    <!-- Signature Curve -->
+    <path d="M660,140 Q710,70 750,140 T840,120" fill="none" stroke="#ffffff" stroke-width="3"/>
+    <path d="M670,165 L830,165" fill="none" stroke="#3b82f6" stroke-width="2"/>
+    <text x="750" y="200" font-size="13" font-weight="bold" fill="#ffffff" text-anchor="middle">हरिप्रसाद चौधरी</text>
+    <text x="750" y="225" font-size="11" font-weight="semibold" fill="#94a3b8" text-anchor="middle">Authorized Signatory Specimen</text>
+    <text x="750" y="250" font-size="10" font-mono font-weight="bold" fill="#60a5fa" text-anchor="middle">DIGITALLY STAMPED &amp; SEALED</text>
+  </g>
+
+  <!-- Cryptographic Hash Verification Bar -->
+  <g transform="translate(60, 530)">
+    <rect x="0" y="0" width="880" height="70" rx="8" fill="#022c22" stroke="#059669" stroke-width="1"/>
+    <text x="20" y="26" font-size="12" font-weight="bold" fill="#6ee7b7">CBS BIOMETRIC CRYPTO-HASH (केन्द्रीय क्रिप्टोग्राफिक प्रमाणिकरण):</text>
+    <text x="20" y="48" font-size="13" font-family="monospace" font-weight="bold" fill="#ffffff">SHA256: 8F2A98C04412E7B152A901F0288E34D9761C8B44A3D29810</text>
+    <text x="720" y="40" font-size="12" font-weight="bold" fill="#10b981">✓ VERIFIED BY CBS</text>
+  </g>
+</svg>

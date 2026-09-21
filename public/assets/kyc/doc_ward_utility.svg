@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" style="background:#ffffff; font-family:'Mukta', 'Noto Sans Devanagari', sans-serif;">
+  <defs>
+    <filter id="wshadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="2" dy="4" stdDeviation="4" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <rect x="15" y="15" width="970" height="620" rx="8" fill="#fafafa" stroke="#cbd5e1" stroke-width="2" filter="url(#wshadow)"/>
+  <rect x="25" y="25" width="950" height="600" rx="4" fill="#ffffff" stroke="#e2e8f0" stroke-width="1"/>
+
+  <!-- Left: Ward Recommendation Document (60%) -->
+  <g transform="translate(45, 45)">
+    <!-- Ward Letterhead -->
+    <circle cx="25" cy="20" r="18" fill="#dc2626" opacity="0.15"/>
+    <text x="0" y="2" font-size="12" font-weight="bold" fill="#b91c1c">नेपाल सरकार</text>
+    <text x="0" y="20" font-size="18" font-weight="bold" fill="#0f172a">गढवा गाउँपालिका (Gadhwa Rural Municipality)</text>
+    <text x="0" y="38" font-size="16" font-weight="bold" fill="#047857">५ नं. वडा कार्यालय (Ward No. 5 Office)</text>
+    <text x="0" y="54" font-size="12" font-weight="semibold" fill="#64748b">चैनपुर, दाङ • लुम्बिनी प्रदेश, नेपाल</text>
+
+    <line x1="0" y1="65" x2="520" y2="65" stroke="#b91c1c" stroke-width="2"/>
+
+    <text x="0" y="85" font-size="12" font-weight="bold" fill="#475569">पत्र संख्या: २०८०/०८१</text>
+    <text x="0" y="102" font-size="12" font-weight="bold" fill="#475569">चलानी नं.: ५९९</text>
+    <text x="380" y="85" font-size="12" font-weight="bold" fill="#475569">मिति: <tspan fill="#0f172a">२०८१/०१/१५</tspan></text>
+
+    <!-- Subject & Addressee -->
+    <text x="260" y="135" font-size="15" font-weight="900" fill="#0f172a" text-anchor="middle" text-decoration="underline">विषय: स्थायी बसोबास तथा चारकिल्ला सिफारिस</text>
+
+    <text x="0" y="165" font-size="13" font-weight="bold" fill="#1e293b">श्री उनको बचत तथा ऋण सहकारी संस्था लि.</text>
+    <text x="0" y="182" font-size="12" font-weight="semibold" fill="#64748b">गढवा शाखा, देउखुरी, दाङ ।</text>
+
+    <!-- Body Text -->
+    <g transform="translate(0, 210)" font-size="13.5" fill="#1e293b" line-height="1.6">
+      <text x="0" y="0">प्रस्तुत विषयमा यस गढवा गाउँपालिका वडा नं. ५ निवासी श्री रामबहादुर</text>
+      <text x="0" y="24">चौधरीको छोरा वर्ष ३९ को <tspan font-weight="bold" fill="#047857">श्री हरिप्रसाद चौधरी</tspan> (ना.प्र.नं ५२-०१-७२-०४२९१)</text>
+      <text x="0" y="48">यस वडाको चैनपुर गाउँमा स्थायी बसोबास गरी आएको र निजको चालचलन</text>
+      <text x="0" y="72">तथा नैतिक आचरण असल रहेको व्यहोरा प्रमाणित साथ सिफारिस गरिन्छ ।</text>
+      <text x="0" y="105">साथै निजको नाममा दर्ता रहेको कित्ता नं. ४१२ को जग्गामा घर निर्माण भई</text>
+      <text x="0" y="129">विद्युत् तथा खानेपानी उपभोग गरिरहेको व्यहोरा समेत अनुरोध छ ।</text>
+    </g>
+
+    <!-- Ward Official Stamp & Chairman Signature -->
+    <g transform="translate(60, 420)">
+      <circle cx="45" cy="40" r="36" fill="#dc2626" fill-opacity="0.15" stroke="#dc2626" stroke-width="1.8"/>
+      <text x="45" y="32" font-size="9" font-weight="bold" fill="#b91c1c" text-anchor="middle">गढवा गाउँपालिका</text>
+      <text x="45" y="45" font-size="10" font-weight="900" fill="#b91c1c" text-anchor="middle">५ नं. वडा कार्यालय</text>
+      <text x="45" y="57" font-size="8" font-weight="bold" fill="#b91c1c" text-anchor="middle">दाङ, नेपाल</text>
+    </g>
+    <g transform="translate(320, 425)">
+      <path d="M20,30 Q60,5 100,25 T150,20" fill="none" stroke="#0f172a" stroke-width="2"/>
+      <line x1="0" y1="45" x2="170" y2="45" stroke="#94a3b8" stroke-width="1"/>
+      <text x="85" y="62" font-size="13" font-weight="bold" fill="#0f172a" text-anchor="middle">वडा अध्यक्ष (Ward Chairperson)</text>
+      <text x="85" y="77" font-size="11" font-weight="semibold" fill="#64748b" text-anchor="middle">गढवा गा.पा. वडा नं. ५</text>
+    </g>
+  </g>
+
+  <!-- Right: Attached NEA Electricity Bill (40%) -->
+  <g transform="translate(610, 45)">
+    <rect x="0" y="0" width="340" height="540" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="0" y="0" width="340" height="42" rx="8" fill="#0369a1"/>
+    <text x="170" y="26" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">नेपाल विद्युत प्राधिकरण (NEA)</text>
+    <text x="170" y="56" font-size="12" font-weight="semibold" fill="#0284c7" text-anchor="middle">लमही वितरण केन्द्र, देउखुरी, दाङ</text>
+
+    <!-- Bill Details -->
+    <g transform="translate(20, 80)" font-size="12" fill="#1e293b">
+      <text x="0" y="20" font-weight="bold" fill="#64748b">ग्राहक नं. (Consumer No):</text>
+      <text x="0" y="40" font-size="16" font-weight="bold" font-family="monospace" fill="#0f172a">०२३-११-४०८</text>
+
+      <text x="0" y="70" font-weight="bold" fill="#64748b">ग्राहकको नाम (Customer):</text>
+      <text x="0" y="90" font-size="14" font-weight="bold" fill="#0f172a">हरिप्रसाद चौधरी (HARI P. CHAUDHARY)</text>
+
+      <text x="0" y="120" font-weight="bold" fill="#64748b">ठेगाना (Premise):</text>
+      <text x="0" y="140" font-size="13" font-weight="semibold" fill="#0f172a">गढवा गा.पा.-५, चैनपुर, दाङ</text>
+
+      <text x="0" y="170" font-weight="bold" fill="#64748b">मिटर नं. (Meter No):</text>
+      <text x="0" y="190" font-size="14" font-family="monospace" font-weight="bold" fill="#0f172a">NEA-984210-DG</text>
+
+      <rect x="0" y="215" width="300" height="85" rx="6" fill="#ffffff" stroke="#94a3b8" stroke-width="1"/>
+      <text x="15" y="240" font-size="12" font-weight="bold" fill="#64748b">खपत महिना (Month):</text>
+      <text x="180" y="240" font-size="12" font-weight="bold" fill="#0f172a">चैत्र २०८०</text>
+
+      <text x="15" y="265" font-size="12" font-weight="bold" fill="#64748b">खपत युनिट (Units):</text>
+      <text x="180" y="265" font-size="12" font-weight="bold" fill="#0f172a">७४ Units</text>
+
+      <text x="15" y="290" font-size="13" font-weight="bold" fill="#64748b">कुल महसुल (Total Bill):</text>
+      <text x="180" y="290" font-size="15" font-weight="900" fill="#047857">रु. ६८०.००</text>
+
+      <!-- Paid Stamp -->
+      <g transform="translate(70, 325)">
+        <rect x="0" y="0" width="160" height="42" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+        <text x="80" y="26" font-size="15" font-weight="900" fill="#15803d" text-anchor="middle">✓ चुक्ता (PAID ONLINE)</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Bottom Stamped Footer -->
+  <g transform="translate(45, 595)">
+    <text x="0" y="0" font-size="11" font-weight="bold" fill="#065f46">UNAKO CBS KYC VERIFICATION ENGINE: RESIDENCE &amp; UTILITY CERTIFICATE AUTHENTICATED • WARD-05-VERIFIED</text>
+  </g>
+</svg>

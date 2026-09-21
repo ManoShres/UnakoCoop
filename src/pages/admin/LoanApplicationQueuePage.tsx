@@ -1,0 +1,389 @@
+import React, { useState } from 'react';
+import { useCoopStore } from '../../store/useCoopStore';
+import { LoanApplication } from '../../types';
+import { Badge } from '../../components/ui/Badge';
+import { useLanguageStore } from '../../store/useLanguageStore';
+import {
+  FileCheck,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Eye,
+  DollarSign,
+  ShieldCheck,
+  X,
+  Check,
+  FileText,
+  Landmark,
+  User,
+  Building,
+} from 'lucide-react';
+
+export const LoanApplicationQueuePage: React.FC = () => {
+  const { applications, updateApplicationStatus } = useCoopStore();
+  const { t } = useLanguageStore();
+  const [selectedApp, setSelectedApp] = useState<LoanApplication | null>(null);
+  const [decisionNotes, setDecisionNotes] = useState('');
+  const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
+
+  const handleDecision = (status: LoanApplication['status']) => {
+    if (!selectedApp) return;
+    updateApplicationStatus(selectedApp.id, status, decisionNotes);
+    setSelectedApp(null);
+    setDecisionNotes('');
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+          {t('ऋण उपसमिति कर्जा मूल्याङ्कन कतार', 'Credit Committee Loan Queue')}
+        </h1>
+        <p className="text-xs text-slate-500">
+          {t(
+            'कर्जा जोखिम मूल्याङ्कन, धितो निरीक्षण र ऋण स्वीकृति तथा वितरण व्यवस्थापन।',
+            'Review creditworthiness, evaluate collateral, and approve loan disbursements.'
+          )}
+        </p>
+      </div>
+
+      <div className="glass-panel rounded-2xl overflow-hidden shadow-xs">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-slate-400">
+              <tr>
+                <th className="p-4 font-semibold">{t('आवेदन नं.', 'App Number')}</th>
+                <th className="p-4 font-semibold">{t('आवेदक सदस्य', 'Applicant')}</th>
+                <th className="p-4 font-semibold">{t('कर्जा योजना', 'Loan Scheme')}</th>
+                <th className="p-4 font-semibold">{t('माग गरिएको रकम', 'Requested Principal')}</th>
+                <th className="p-4 font-semibold">{t('मासिक आय', 'Monthly Income')}</th>
+                <th className="p-4 font-semibold">{t('स्थिति', 'Status')}</th>
+                <th className="p-4 font-semibold text-right">{t('समिति मूल्याङ्कन', 'Committee Review')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {applications.map((app) => (
+                <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                  <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">{app.applicationNo}</td>
+                  <td className="p-4">
+                    <div className="font-bold text-slate-900 dark:text-white">{app.memberName}</div>
+                    <span className="font-mono text-slate-400 text-[10px]">{app.memberNo}</span>
+                  </td>
+                  <td className="p-4 font-medium text-slate-700 dark:text-slate-300">{app.loanType}</td>
+                  <td className="p-4 font-bold text-emerald-600 dark:text-[#13ec37]">रु. {app.requestedAmount.toLocaleString()}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-300">रु. {app.monthlyIncome.toLocaleString()}</td>
+                  <td className="p-4">
+                    <Badge status={app.status} size="sm" />
+                  </td>
+                  <td className="p-4 text-right">
+                    <button
+                      onClick={() => {
+                        setSelectedApp(app);
+                        setDecisionNotes(app.committeeNotes || '');
+                      }}
+                      className="flex items-center gap-1.5 ml-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs"
+                    >
+                      <Eye className="size-3.5" />
+                      <span>{t('जोखिम जाँच', 'Assess Risk')}</span>
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Main Loan Risk Assessment Modal */}
+      {selectedApp && (
+        <div 
+          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setSelectedApp(null)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/50">
+                    {selectedApp.applicationNo}
+                  </span>
+                  <Badge status={selectedApp.status} size="sm" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">
+                  {selectedApp.memberName} <span className="text-xs font-mono text-slate-400 font-normal">({selectedApp.memberNo})</span>
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {selectedApp.loanType} • {selectedApp.tenureMonths} Months Tenure
+                </p>
+              </div>
+
+              <button
+                onClick={() => setSelectedApp(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                type="button"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+              {/* Financial Metrics Summary */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+                <div>
+                  <span className="text-slate-400 block font-medium">Requested Principal</span>
+                  <p className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                    NPR {selectedApp.requestedAmount.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Monthly Net Income</span>
+                  <p className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    NPR {selectedApp.monthlyIncome.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Existing Debt</span>
+                  <p className="text-base font-black text-slate-700 dark:text-slate-300 mt-0.5">
+                    NPR {selectedApp.existingDebt ? selectedApp.existingDebt.toLocaleString() : '0'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-400 block font-medium">Applied Date</span>
+                  <p className="text-base font-bold text-slate-800 dark:text-slate-200 mt-0.5 font-mono">
+                    {selectedApp.appliedDate || '2026-03-15'}
+                  </p>
+                </div>
+
+                <div className="col-span-2 sm:col-span-4 pt-2.5 border-t border-slate-200/60 dark:border-slate-800">
+                  <span className="text-slate-400 block font-medium">Stated Loan Purpose</span>
+                  <p className="text-slate-700 dark:text-slate-300 mt-0.5 leading-relaxed">{selectedApp.purpose}</p>
+                </div>
+
+                <div className="col-span-2 sm:col-span-4 pt-2.5 border-t border-slate-200/60 dark:border-slate-800">
+                  <span className="text-slate-400 block font-medium">Collateral / Security Pledge</span>
+                  <p className="text-slate-800 dark:text-slate-200 font-semibold mt-0.5 leading-relaxed">{selectedApp.collateralDetails}</p>
+                </div>
+              </div>
+
+              {/* ─── MANDATORY LOAN VERIFICATION DOCUMENTS ─── */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Mandatory Collateral & Verification Documents</span>
+                  </h4>
+                  <span className="text-[11px] text-slate-400 font-medium">Click to inspect official deed</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* 1. Land Ownership (Lalpurja) Deed */}
+                  <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="size-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold">
+                          <Landmark className="size-4" />
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                          <Check className="size-3" /> Attached
+                        </span>
+                      </div>
+
+                      <div>
+                        <h5 className="font-bold text-xs text-slate-900 dark:text-white">Lalpurja Deed</h5>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Plot 412 • 4 Kattha Land</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDoc({
+                        title: 'जग्गाधनी प्रमाणपुर्जा (Land Ownership Deed - Lalpurja)',
+                        image: '/assets/kyc/doc_lalpurja.svg',
+                        meta: 'Malpot Karyalaya Lamahi, Dang • Plot No: 412 • Valuation: NPR 1,200,000'
+                      })}
+                      className="mt-3 w-full py-1.5 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Eye className="size-3.5" />
+                      <span>Inspect Deed</span>
+                    </button>
+                  </div>
+
+                  {/* 2. Citizenship Identity Proof */}
+                  <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="size-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold">
+                          <User className="size-4" />
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                          <Check className="size-3" /> Verified
+                        </span>
+                      </div>
+
+                      <div>
+                        <h5 className="font-bold text-xs text-slate-900 dark:text-white">Citizenship Proof</h5>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">DAO Dang • 52-01-72</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDoc({
+                        title: 'नेपाली नागरिकता प्रमाणपत्र (Citizenship Certificate)',
+                        image: '/assets/kyc/doc_citizenship.svg',
+                        meta: 'District Administration Office Dang • Descent • Member: Ram Bahadur Shrestha'
+                      })}
+                      className="mt-3 w-full py-1.5 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Eye className="size-3.5" />
+                      <span>Inspect Card</span>
+                    </button>
+                  </div>
+
+                  {/* 3. Ward Recommendation & Utility Slip */}
+                  <div className="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 transition group flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="size-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold">
+                          <Building className="size-4" />
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
+                          <Check className="size-3" /> Validated
+                        </span>
+                      </div>
+
+                      <div>
+                        <h5 className="font-bold text-xs text-slate-900 dark:text-white">Ward Sifaris & Bill</h5>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">NEA Meter Slip & Sifaris</p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDoc({
+                        title: 'वडा कार्यालय सिफारिस तथा विद्युत् महसुल (Ward Recommendation & NEA Bill)',
+                        image: '/assets/kyc/doc_ward_utility.svg',
+                        meta: 'Gadhwa Rural Municipality Ward-5 • NEA Consumer ID: 052-19821'
+                      })}
+                      className="mt-3 w-full py-1.5 px-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
+                    >
+                      <Eye className="size-3.5" />
+                      <span>Inspect Bill</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Committee Resolution & Sanction Notes */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                  {t('ऋण उपसमिति निर्णय तथा टिप्पणी', 'Credit Committee Sanction & Resolution Notes')}
+                </label>
+                <textarea
+                  rows={3}
+                  value={decisionNotes}
+                  onChange={(e) => setDecisionNotes(e.target.value)}
+                  placeholder={t(
+                    'धितो मूल्याङ्कन, ब्याज अनुदान वा कर्जा प्रवाह सर्तहरू सम्बन्धी समितिको टिप्पणी...',
+                    'Enter committee comments regarding collateral valuation, interest subsidy, or disbursement conditions...'
+                  )}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/70 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
+                />
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-slate-50/70 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2.5">
+              <button
+                type="button"
+                onClick={() => setSelectedApp(null)}
+                className="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition"
+              >
+                {t('रद्द गर्नुहोस्', 'Cancel')}
+              </button>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDecision('DOCUMENT_REQUIRED')}
+                  className="px-3.5 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-300 dark:border-amber-800 text-xs font-bold transition"
+                >
+                  {t('कागजात माग गर्नुहोस्', 'Request Documents')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDecision('REJECTED')}
+                  className="px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-300 dark:border-rose-800 text-xs font-bold transition"
+                >
+                  {t('कर्जा अस्वीकृत गर्नुहोस्', 'Decline Loan')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDecision('APPROVED')}
+                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm hover:shadow transition flex items-center gap-1.5"
+                >
+                  <Check className="size-4" />
+                  <span>{t('कर्जा स्वीकृत गर्नुहोस्', 'Sanction & Approve Loan')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── FULL DOCUMENT INSPECTION SUB-MODAL ─── */}
+      {previewDoc && (
+        <div 
+          className="fixed inset-0 z-60 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          onClick={() => setPreviewDoc(null)}
+        >
+          <div 
+            className="bg-white dark:bg-slate-900 w-full max-w-3xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">{previewDoc.title}</h4>
+                <p className="text-[11px] text-slate-500 font-mono mt-0.5">{previewDoc.meta}</p>
+              </div>
+              <button
+                onClick={() => setPreviewDoc(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            {/* Document Image Container */}
+            <div className="p-6 bg-slate-100 dark:bg-slate-950 flex items-center justify-center min-h-[360px] max-h-[65vh] overflow-auto">
+              <img 
+                src={previewDoc.image} 
+                alt={previewDoc.title} 
+                className="max-h-[500px] w-auto object-contain rounded-lg shadow-md border border-slate-200/80 dark:border-slate-800 bg-white" 
+              />
+            </div>
+
+            <div className="px-6 py-3 bg-slate-50 dark:bg-slate-900/90 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+              <span className="text-slate-500 flex items-center gap-1">
+                <ShieldCheck className="size-4 text-emerald-600" />
+                <span>{t('मालपोत तथा सम्बन्धित कार्यालयबाट आधिकारिक प्रमाणित', 'Verified against official Land Revenue & District Registry')}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setPreviewDoc(null)}
+                className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
+              >
+                {t('सकियो / बन्द गर्नुहोस्', 'Done Inspecting')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
