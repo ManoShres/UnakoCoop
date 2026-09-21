@@ -323,6 +323,194 @@ create table if not exists public.field_officers (
 );
 
 -- ---------------------------------------------------------------------------
+-- 5b. MOTHER GROUPS (parent SHG groups that collect & deposit monthly)
+--     Group names are NOT unique globally — the same name may exist in
+--     different places, so uniqueness is enforced on (name, location).
+-- ---------------------------------------------------------------------------
+create table if not exists public.mother_groups (
+  id                 uuid primary key default gen_random_uuid(),
+  name               text not null,
+  name_nepali        text,
+  location           text not null,
+  location_nepali    text,
+  contact_person     text not null default '',
+  contact_phone      text not null default '',
+  meeting_day        text not null default 'Monthly',
+  monthly_target_amount numeric(14, 2) not null default 0,
+  total_members      integer not null default 0,
+  notes              text,
+  created_at         timestamptz not null default now(),
+  is_active          boolean not null default true
+);
+
+create unique index if not exists mother_groups_name_location_uq
+  on public.mother_groups (name, location);
+create index if not exists mother_groups_location_idx on public.mother_groups (location);
+
+create table if not exists public.mother_group_members (
+  id                 uuid primary key default gen_random_uuid(),
+  mother_group_id    uuid not null references public.mother_groups (id) on delete cascade,
+  member_id          uuid references public.members (id) on delete set null,
+  member_name        text not null,
+  member_no          text not null default '',
+  joined_date        date not null default current_date,
+  monthly_contribution numeric(14, 2) not null default 0,
+  is_active          boolean not null default true,
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists mgm_group_idx on public.mother_group_members (mother_group_id);
+create index if not exists mgm_member_idx on public.mother_group_members (member_id);
+
+create table if not exists public.mother_group_meetings (
+  id                 uuid primary key default gen_random_uuid(),
+  mother_group_id    uuid not null references public.mother_groups (id) on delete cascade,
+  meeting_date       date not null default current_date,
+  scheduled_time     text,
+  conducted_by       text not null default '',
+  conducted_by_name  text,
+  total_collected    numeric(14, 2) not null default 0,
+  member_count       integer not null default 0,
+  status             text not null default 'SCHEDULED'
+                     check (status in ('SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED')),
+  notes              text,
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists mgmeeting_group_date_idx
+  on public.mother_group_meetings (mother_group_id, meeting_date desc);
+
+-- ---------------------------------------------------------------------------
+-- 5c. TRADING TRANSACTIONS (investment / FX / commodity P&L ledger)
+-- ---------------------------------------------------------------------------
+create table if not exists public.trading_transactions (
+  id                 uuid primary key default gen_random_uuid(),
+  date               date not null default current_date,
+  type               text not null
+                     check (type in ('PURCHASE', 'SALE', 'FX_GAIN', 'FX_LOSS',
+                                     'DIVIDEND_INCOME', 'INTEREST_INCOME',
+                                     'CAPITAL_GAIN', 'CAPITAL_LOSS',
+                                     'FEE_INCOME', 'EXPENSE')),
+  description        text not null default '',
+  category           text not null default 'INVESTMENT'
+                     check (category in ('INVESTMENT', 'FOREIGN_EXCHANGE',
+                                         'COMMODITY', 'SERVICE_FEE', 'OPERATING_EXPENSE')),
+  buy_amount         numeric(14, 2),
+  sell_amount        numeric(14, 2),
+  quantity           numeric(14, 4),
+  unit_price         numeric(14, 4),
+  currency           text not null default 'NPR',
+  exchange_rate      numeric(14, 6),
+  amount_in_npr      numeric(14, 2) not null default 0,
+  reference_no       text,
+  recorded_by        text not null default '',
+  recorded_by_name   text,
+  status             text not null default 'COMPLETED'
+                     check (status in ('PENDING', 'COMPLETED', 'VOID')),
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists trading_date_idx on public.trading_transactions (date desc);
+create index if not exists trading_type_idx on public.trading_transactions (type);
+create index if not exists trading_status_idx on public.trading_transactions (status);
+
+create table if not exists public.mother_group_deposits (
+  id                 uuid primary key default gen_random_uuid(),
+  meeting_id         uuid not null references public.mother_group_meetings (id) on delete cascade,
+  mother_group_id    uuid not null references public.mother_groups (id) on delete cascade,
+  member_id          uuid references public.members (id) on delete set null,
+  member_name        text not null,
+  member_no          text not null default '',
+  amount             numeric(14, 2) not null default 0,
+  deposit_date       date not null default current_date,
+  recorded_by        text not null default '',
+  recorded_by_name   text,
+  status             text not null default 'PENDING'
+                     check (status in ('PENDING', 'COMPLETED', 'RECONCILED', 'VOID')),
+  reference_no       text,
+  notes              text,
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists mgdeposit_meeting_idx on public.mother_group_deposits (meeting_id);
+create index if not exists mgdeposit_group_idx on public.mother_group_deposits (mother_group_id);
+create index if not exists mgdeposit_status_idx on public.mother_group_deposits (status);
+
+-- ---------------------------------------------------------------------------
+-- 5d. BANK RECONCILIATION (statement upload + entry mismatch tracking)
+-- ---------------------------------------------------------------------------
+create table if not exists public.bank_statements (
+  id                 uuid primary key default gen_random_uuid(),
+  statement_date     date not null default current_date,
+  description        text not null default '',
+  amount             numeric(14, 2) not null default 0,
+  reference_no       text,
+  debit_or_credit    text not null default 'CREDIT'
+                     check (debit_or_credit in ('DEBIT', 'CREDIT')),
+  uploaded_by        text not null default '',
+  uploaded_by_name   text,
+  file_path          text,
+  uploaded_at        timestamptz not null default now()
+);
+
+create index if not exists bankstmt_date_idx on public.bank_statements (statement_date desc);
+
+create table if not exists public.reconciliation_entries (
+  id                 uuid primary key default gen_random_uuid(),
+  transaction_id     uuid references public.transactions (id) on delete set null,
+  transaction_amount numeric(14, 2),
+  transaction_date   date,
+  transaction_ref    text,
+  statement_entry_id uuid references public.bank_statements (id) on delete set null,
+  statement_amount   numeric(14, 2),
+  statement_date     date,
+  statement_ref      text,
+  amount             numeric(14, 2) not null default 0,
+  date               date not null default current_date,
+  description        text not null default '',
+  reference_no       text,
+  status             text not null default 'PENDING'
+                     check (status in ('PENDING', 'MATCHED', 'MISMATCH', 'RESOLVED')),
+  mismatch_type      text
+                     check (mismatch_type is null or mismatch_type in
+                            ('AMOUNT_MISMATCH', 'MISSING_ENTRY', 'DUPLICATE_ENTRY',
+                             'WRONG_DATE', 'WRONG_REFERENCE')),
+  mismatch_details   text,
+  resolved_by        text,
+  resolved_by_name   text,
+  resolved_date      timestamptz,
+  resolution_notes   text,
+  flagged_at         timestamptz not null default now(),
+  created_at         timestamptz not null default now()
+);
+
+create index if not exists reconciliation_status_idx on public.reconciliation_entries (status);
+create index if not exists reconciliation_date_idx on public.reconciliation_entries (date desc);
+
+-- ---------------------------------------------------------------------------
+-- 5e. GENERATED REPORTS (dynamically computed audit / transparency registry)
+-- ---------------------------------------------------------------------------
+create table if not exists public.generated_reports (
+  id                 text primary key,
+  title              text not null,
+  title_nepali       text not null default '',
+  category           text not null default 'FINANCIAL'
+                     check (category in ('FINANCIAL', 'REGULATORY', 'GOVERNANCE',
+                                         'SUPERVISORY', 'OPERATIONAL')),
+  fiscal_year        text not null default '',
+  period             text not null default '',
+  generated_at       timestamptz not null default now(),
+  generated_by       text not null default '',
+  generated_by_name  text,
+  data               jsonb not null default '{}'::jsonb,
+  download_url       text,
+  status             text not null default 'READY'
+                     check (status in ('READY', 'GENERATING', 'ERROR'))
+);
+
+create index if not exists generated_reports_category_idx on public.generated_reports (category);
+
+-- ---------------------------------------------------------------------------
 -- 6. ROW LEVEL SECURITY
 --    • anon (public website)  → read-only access to directories & rate cards
 --    • authenticated (staff)  → read/write on all operational tables
@@ -343,7 +531,10 @@ declare
   staff_write text[] := array[
     'members', 'savings_accounts', 'loans', 'loan_applications', 'transactions',
     'inquiries', 'notifications', 'notices', 'coop_settings', 'share_pool',
-    'agm_details', 'loan_schemes', 'gateway_rails', 'field_officers'
+    'agm_details', 'loan_schemes', 'gateway_rails', 'field_officers',
+    'mother_groups', 'mother_group_members', 'mother_group_meetings',
+    'mother_group_deposits', 'trading_transactions', 'bank_statements',
+    'reconciliation_entries', 'generated_reports'
   ];
 begin
   -- HR registry: staff eyes only

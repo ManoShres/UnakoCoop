@@ -15,6 +15,14 @@ import {
   FieldOfficer,
   Employee,
   CoopSettings,
+  MotherGroup,
+  MotherGroupMember,
+  MotherGroupMeeting,
+  MotherGroupDeposit,
+  TradingTransaction,
+  BankStatementEntry,
+  ReconciliationEntry,
+  GeneratedReport,
 } from '../types';
 import {
   INITIAL_MEMBERS,
@@ -25,6 +33,14 @@ import {
   INITIAL_INQUIRIES,
   INITIAL_NOTIFICATIONS,
 } from '../data/mockData';
+import { INITIAL_MOTHER_GROUPS } from '../data/motherGroupMockData';
+import { INITIAL_MOTHER_GROUP_MEMBERS } from '../data/motherGroupMembersMockData';
+import { INITIAL_MOTHER_GROUP_MEETINGS } from '../data/motherGroupMeetingsMockData';
+import { INITIAL_MOTHER_GROUP_DEPOSITS } from '../data/motherGroupDepositsMockData';
+import { INITIAL_TRADING_TRANSACTIONS } from '../data/tradingMockData';
+import { INITIAL_BANK_STATEMENTS } from '../data/bankStatementsMockData';
+import { INITIAL_RECONCILIATION_ENTRIES } from '../data/reconciliationMockData';
+import { INITIAL_GENERATED_REPORTS } from '../data/generatedReportsMockData';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
   fetchEmployeesFromSupabase,
@@ -367,6 +383,22 @@ interface CoopState {
   employees: Employee[];
   coopSettings: CoopSettings;
 
+  // Mother Group state
+  motherGroups: MotherGroup[];
+  motherGroupMembers: MotherGroupMember[];
+  motherGroupMeetings: MotherGroupMeeting[];
+  motherGroupDeposits: MotherGroupDeposit[];
+
+  // Trading state
+  tradingTransactions: TradingTransaction[];
+
+  // Reconciliation state
+  bankStatements: BankStatementEntry[];
+  reconciliationEntries: ReconciliationEntry[];
+
+  // Generated Reports state
+  generatedReports: GeneratedReport[];
+
   // Member actions
   updateMemberDetails: (memberId: string, updates: Partial<Member>) => void;
   addMember: (memberData: Omit<Member, 'id'>) => Member;
@@ -418,6 +450,55 @@ interface CoopState {
   // Settings actions
   updateCoopSettings: (updates: Partial<CoopSettings>) => void;
   searchMember: (query: string) => Member | undefined;
+
+  // Mother Group actions
+  addMotherGroup: (groupData: Omit<MotherGroup, 'id' | 'createdAt'>) => MotherGroup;
+  updateMotherGroup: (id: string, updates: Partial<MotherGroup>) => void;
+  deleteMotherGroup: (id: string) => void;
+  getMotherGroupMembers: (motherGroupId: string) => MotherGroupMember[];
+  getMotherGroupById: (id: string) => MotherGroup | undefined;
+
+  addMotherGroupMember: (data: Omit<MotherGroupMember, 'id' | 'joinedDate' | 'createdAt'>) => MotherGroupMember;
+  updateMotherGroupMember: (id: string, updates: Partial<MotherGroupMember>) => void;
+  removeMotherGroupMember: (id: string) => void;
+
+  recordMeeting: (data: Omit<MotherGroupMeeting, 'id' | 'createdAt'>) => MotherGroupMeeting;
+  updateMeeting: (id: string, updates: Partial<MotherGroupMeeting>) => void;
+
+  recordDeposit: (data: Omit<MotherGroupDeposit, 'id' | 'depositDate' | 'createdAt'>) => MotherGroupDeposit;
+  updateDepositStatus: (id: string, status: MotherGroupDeposit['status'], notes?: string) => void;
+  getDepositsByMeeting: (meetingId: string) => MotherGroupDeposit[];
+  getDepositsByGroup: (motherGroupId: string) => MotherGroupDeposit[];
+  getPendingDeposits: () => MotherGroupDeposit[];
+
+  // Trading actions
+  addTradingTransaction: (
+    tx: Omit<TradingTransaction, 'id' | 'date' | 'createdAt' | 'status'> & {
+      date?: string;
+      status?: TradingTransaction['status'];
+    }
+  ) => TradingTransaction;
+  updateTradingTransaction: (id: string, updates: Partial<TradingTransaction>) => void;
+  voidTradingTransaction: (id: string) => void;
+  getTradingByDateRange: (startDate: string, endDate: string) => TradingTransaction[];
+
+  // Reconciliation actions
+  addBankStatement: (entry: Omit<BankStatementEntry, 'id' | 'uploadedAt'>) => BankStatementEntry;
+  updateBankStatement: (id: string, updates: Partial<BankStatementEntry>) => void;
+  addReconciliationEntry: (entry: Omit<ReconciliationEntry, 'id' | 'flaggedAt' | 'createdAt'>) => ReconciliationEntry;
+  updateReconciliationStatus: (id: string, status: ReconciliationEntry['status'], notes?: string) => void;
+  getReconciliationByStatus: (status: ReconciliationEntry['status']) => ReconciliationEntry[];
+  getReconciliationSummary: () => {
+    total: number;
+    matched: number;
+    mismatch: number;
+    pending: number;
+    resolved: number;
+  };
+
+  // Generated report actions
+  addGeneratedReport: (report: Omit<GeneratedReport, 'id' | 'generatedAt'>) => GeneratedReport;
+  removeGeneratedReport: (id: string) => void;
 }
 
 export const useCoopStore = create<CoopState>((set, get) => ({
@@ -437,6 +518,22 @@ export const useCoopStore = create<CoopState>((set, get) => ({
   employees: getStoredEmployees(),
   employeeSync: { source: isSupabaseConfigured() ? 'supabase' : 'local', state: 'idle' },
   coopSettings: getStoredCoopSettings(),
+
+  // Mother Group initial state
+  motherGroups: INITIAL_MOTHER_GROUPS,
+  motherGroupMembers: INITIAL_MOTHER_GROUP_MEMBERS,
+  motherGroupMeetings: INITIAL_MOTHER_GROUP_MEETINGS,
+  motherGroupDeposits: INITIAL_MOTHER_GROUP_DEPOSITS,
+
+  // Trading initial state
+  tradingTransactions: INITIAL_TRADING_TRANSACTIONS,
+
+  // Reconciliation initial state
+  bankStatements: INITIAL_BANK_STATEMENTS,
+  reconciliationEntries: INITIAL_RECONCILIATION_ENTRIES,
+
+  // Generated Reports initial state
+  generatedReports: INITIAL_GENERATED_REPORTS,
 
   // Member methods (Immutability enforced per project rules)
   updateMemberDetails: (memberId, updates) => {
@@ -831,5 +928,260 @@ export const useCoopStore = create<CoopState>((set, get) => ({
         m.email.toLowerCase() === q ||
         m.name.toLowerCase().includes(q)
     );
+  },
+
+  // ============================================================================
+  // MOTHER GROUP METHODS
+  // ============================================================================
+
+  addMotherGroup: (groupData) => {
+    const newGroup: MotherGroup = {
+      ...groupData,
+      id: 'mg-' + Date.now(),
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    set((state) => ({
+      motherGroups: [newGroup, ...state.motherGroups],
+    }));
+    return newGroup;
+  },
+
+  updateMotherGroup: (id, updates) => {
+    set((state) => ({
+      motherGroups: state.motherGroups.map((g) =>
+        g.id === id ? { ...g, ...updates } : g
+      ),
+    }));
+  },
+
+  deleteMotherGroup: (id) => {
+    set((state) => ({
+      motherGroups: state.motherGroups.filter((g) => g.id !== id),
+      motherGroupMembers: state.motherGroupMembers.filter((m) => m.motherGroupId !== id),
+      motherGroupMeetings: state.motherGroupMeetings.filter((m) => m.motherGroupId !== id),
+      motherGroupDeposits: state.motherGroupDeposits.filter((d) => d.motherGroupId !== id),
+    }));
+  },
+
+  getMotherGroupMembers: (motherGroupId) => {
+    return get().motherGroupMembers.filter((m) => m.motherGroupId === motherGroupId && m.isActive);
+  },
+
+  getMotherGroupById: (id) => {
+    return get().motherGroups.find((g) => g.id === id);
+  },
+
+  addMotherGroupMember: (data) => {
+    const newMember: MotherGroupMember = {
+      ...data,
+      id: 'mgm-' + Date.now(),
+      joinedDate: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    set((state) => ({
+      motherGroupMembers: [newMember, ...state.motherGroupMembers],
+    }));
+    return newMember;
+  },
+
+  updateMotherGroupMember: (id, updates) => {
+    set((state) => ({
+      motherGroupMembers: state.motherGroupMembers.map((m) =>
+        m.id === id ? { ...m, ...updates } : m
+      ),
+    }));
+  },
+
+  removeMotherGroupMember: (id) => {
+    set((state) => ({
+      motherGroupMembers: state.motherGroupMembers.filter((m) => m.id !== id),
+    }));
+  },
+
+  recordMeeting: (data) => {
+    const newMeeting: MotherGroupMeeting = {
+      ...data,
+      id: 'mgmt-' + Date.now(),
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    set((state) => ({
+      motherGroupMeetings: [newMeeting, ...state.motherGroupMeetings],
+    }));
+    return newMeeting;
+  },
+
+  updateMeeting: (id, updates) => {
+    set((state) => ({
+      motherGroupMeetings: state.motherGroupMeetings.map((m) =>
+        m.id === id ? { ...m, ...updates } : m
+      ),
+    }));
+  },
+
+  recordDeposit: (data) => {
+    const newDeposit: MotherGroupDeposit = {
+      ...data,
+      id: 'mgd-' + Date.now(),
+      depositDate: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    set((state) => ({
+      motherGroupDeposits: [newDeposit, ...state.motherGroupDeposits],
+    }));
+    return newDeposit;
+  },
+
+  updateDepositStatus: (id, status, notes) => {
+    set((state) => ({
+      motherGroupDeposits: state.motherGroupDeposits.map((d) =>
+        d.id === id ? { ...d, status, notes } : d
+      ),
+    }));
+  },
+
+  getDepositsByMeeting: (meetingId) => {
+    return get().motherGroupDeposits.filter((d) => d.meetingId === meetingId);
+  },
+
+  getDepositsByGroup: (motherGroupId) => {
+    return get().motherGroupDeposits.filter((d) => d.motherGroupId === motherGroupId);
+  },
+
+  getPendingDeposits: () => {
+    return get().motherGroupDeposits.filter((d) => d.status === 'PENDING');
+  },
+
+  // ============================================================================
+  // TRADING METHODS
+  // ============================================================================
+
+  addTradingTransaction: (tx) => {
+    const today = new Date().toISOString().split('T')[0];
+    const newTx: TradingTransaction = {
+      ...tx,
+      id: 'trd-' + Date.now(),
+      date: tx.date || today,
+      status: tx.status || 'COMPLETED',
+      createdAt: today,
+    };
+    set((state) => ({
+      tradingTransactions: [newTx, ...state.tradingTransactions],
+    }));
+    return newTx;
+  },
+
+  updateTradingTransaction: (id, updates) => {
+    set((state) => ({
+      tradingTransactions: state.tradingTransactions.map((t) =>
+        t.id === id ? { ...t, ...updates } : t
+      ),
+    }));
+  },
+
+  voidTradingTransaction: (id) => {
+    set((state) => ({
+      tradingTransactions: state.tradingTransactions.map((t) =>
+        t.id === id ? { ...t, status: 'VOID' } : t
+      ),
+    }));
+  },
+
+  getTradingByDateRange: (startDate, endDate) => {
+    return get().tradingTransactions.filter(
+      (t) => t.date >= startDate && t.date <= endDate
+    );
+  },
+
+  // ============================================================================
+  // RECONCILIATION METHODS
+  // ============================================================================
+
+  addBankStatement: (entry) => {
+    const newStatement: BankStatementEntry = {
+      ...entry,
+      id: 'bs-' + Date.now(),
+      uploadedAt: new Date().toISOString(),
+    };
+    set((state) => ({
+      bankStatements: [newStatement, ...state.bankStatements],
+    }));
+    return newStatement;
+  },
+
+  updateBankStatement: (id, updates) => {
+    set((state) => ({
+      bankStatements: state.bankStatements.map((b) =>
+        b.id === id ? { ...b, ...updates } : b
+      ),
+    }));
+  },
+
+  addReconciliationEntry: (entry) => {
+    const now = new Date().toISOString();
+    const newEntry: ReconciliationEntry = {
+      ...entry,
+      id: 'recon-' + Date.now(),
+      flaggedAt: now,
+      createdAt: now,
+    };
+    set((state) => ({
+      reconciliationEntries: [newEntry, ...state.reconciliationEntries],
+    }));
+    return newEntry;
+  },
+
+  updateReconciliationStatus: (id, status, notes) => {
+    set((state) => ({
+      reconciliationEntries: state.reconciliationEntries.map((r) =>
+        r.id === id
+          ? {
+              ...r,
+              status,
+              resolutionNotes: notes ?? r.resolutionNotes,
+              resolvedDate:
+                status === 'RESOLVED' || status === 'MATCHED'
+                  ? new Date().toISOString()
+                  : r.resolvedDate,
+            }
+          : r
+      ),
+    }));
+  },
+
+  getReconciliationByStatus: (status) => {
+    return get().reconciliationEntries.filter((r) => r.status === status);
+  },
+
+  getReconciliationSummary: () => {
+    const entries = get().reconciliationEntries;
+    return {
+      total: entries.length,
+      matched: entries.filter((r) => r.status === 'MATCHED').length,
+      mismatch: entries.filter((r) => r.status === 'MISMATCH').length,
+      pending: entries.filter((r) => r.status === 'PENDING').length,
+      resolved: entries.filter((r) => r.status === 'RESOLVED').length,
+    };
+  },
+
+  // ============================================================================
+  // GENERATED REPORT METHODS
+  // ============================================================================
+
+  addGeneratedReport: (report) => {
+    const newReport: GeneratedReport = {
+      ...report,
+      id: 'rep-' + Date.now(),
+      generatedAt: new Date().toISOString(),
+    };
+    set((state) => ({
+      generatedReports: [newReport, ...state.generatedReports],
+    }));
+    return newReport;
+  },
+
+  removeGeneratedReport: (id) => {
+    set((state) => ({
+      generatedReports: state.generatedReports.filter((r) => r.id !== id),
+    }));
   },
 }));

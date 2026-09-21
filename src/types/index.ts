@@ -38,6 +38,8 @@ export interface Member {
 
 export interface SavingsAccount {
   id: string;
+  /** Owning member id (nullable when the account has no linked member yet). */
+  memberId?: string;
   accountNo: string;
   accountType: 'Regular Savings' | 'Fixed Deposit (1 Year)' | 'Women Empowerment Fund' | 'Child Education Savings';
   balance: number;
@@ -87,6 +89,8 @@ export interface LoanApplication {
 
 export interface Transaction {
   id: string;
+  /** Owning member id (nullable for counter/cash-office transactions). */
+  memberId?: string;
   date: string;
   type: 'DEPOSIT' | 'WITHDRAWAL' | 'LOAN_EMI' | 'DIVIDEND' | 'SHARE_PURCHASE';
   description: string;
@@ -291,5 +295,224 @@ export interface DesignSettings {
   chatColors: ChatColors;
   customLogoUrl: string | null;
   features: FeatureFlags;
+}
+
+// ---------------------------------------------------------------------------
+// Mother Group types (parent SHG groups that collect & deposit monthly)
+// ---------------------------------------------------------------------------
+
+export type MeetingDay = 'Daily' | 'Weekly' | 'Bi-Weekly' | 'Monthly' | 'Custom';
+
+export interface MotherGroup {
+  id: string;
+  name: string;
+  nameNepali?: string;
+  location: string;
+  locationNepali?: string;
+  contactPerson: string;
+  contactPhone: string;
+  meetingDay: string;
+  meetingDayNepali?: string;
+  monthlyTargetAmount: number;
+  totalMembers: number;
+  createdAt: string;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface MotherGroupMember {
+  id: string;
+  motherGroupId: string;
+  /** Linked cooperative member id. Optional: groups also hold unregistered savers. */
+  memberId?: string;
+  memberName: string;
+  memberNo: string;
+  joinedDate: string;
+  monthlyContribution: number;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export type MeetingStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+
+export interface MotherGroupMeeting {
+  id: string;
+  motherGroupId: string;
+  meetingDate: string;
+  scheduledTime?: string;
+  conductedBy: string;
+  conductedByName?: string;
+  totalCollected: number;
+  memberCount: number;
+  status: MeetingStatus;
+  notes?: string;
+  createdAt: string;
+}
+
+export type DepositStatus = 'PENDING' | 'COMPLETED' | 'RECONCILED' | 'VOID';
+
+export interface MotherGroupDeposit {
+  id: string;
+  meetingId: string;
+  motherGroupId: string;
+  /** Linked cooperative member id. Optional: groups also hold unregistered savers. */
+  memberId?: string;
+  memberName: string;
+  memberNo: string;
+  amount: number;
+  depositDate: string;
+  recordedBy: string;
+  recordedByName?: string;
+  status: DepositStatus;
+  referenceNo?: string;
+  /** Free-text note used when a teller updates/voids a deposit. */
+  notes?: string;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Trading types (investment, FX, commodity transactions)
+// ---------------------------------------------------------------------------
+
+export type TradingType =
+  | 'PURCHASE'
+  | 'SALE'
+  | 'FX_GAIN'
+  | 'FX_LOSS'
+  | 'DIVIDEND_INCOME'
+  | 'INTEREST_INCOME'
+  | 'CAPITAL_GAIN'
+  | 'CAPITAL_LOSS'
+  | 'FEE_INCOME'
+  | 'EXPENSE';
+
+export type TradingCategory = 'INVESTMENT' | 'FOREIGN_EXCHANGE' | 'COMMODITY' | 'SERVICE_FEE' | 'OPERATING_EXPENSE';
+
+export interface TradingTransaction {
+  id: string;
+  date: string;
+  type: TradingType;
+  description: string;
+  category: TradingCategory;
+  buyAmount?: number;
+  sellAmount?: number;
+  quantity?: number;
+  unitPrice?: number;
+  currency?: string;
+  exchangeRate?: number;
+  amountInNPR: number;
+  referenceNo?: string;
+  recordedBy: string;
+  recordedByName?: string;
+  status: 'PENDING' | 'COMPLETED' | 'VOID';
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Reconciliation types (bank statement matching)
+// ---------------------------------------------------------------------------
+
+export type ReconciliationStatus = 'PENDING' | 'MATCHED' | 'MISMATCH' | 'RESOLVED';
+export type MismatchType = 'AMOUNT_MISMATCH' | 'MISSING_ENTRY' | 'DUPLICATE_ENTRY' | 'WRONG_DATE' | 'WRONG_REFERENCE';
+
+export interface BankStatementEntry {
+  id: string;
+  statementDate: string;
+  description: string;
+  amount: number;
+  referenceNo?: string;
+  debitOrCredit: 'DEBIT' | 'CREDIT';
+  uploadedBy: string;
+  uploadedByName?: string;
+  filePath?: string;
+  uploadedAt: string;
+}
+
+export interface ReconciliationEntry {
+  id: string;
+  transactionId?: string;
+  transactionAmount?: number;
+  transactionDate?: string;
+  transactionRef?: string;
+  statementEntryId?: string;
+  statementAmount?: number;
+  statementDate?: string;
+  statementRef?: string;
+  amount: number;
+  date: string;
+  description: string;
+  referenceNo?: string;
+  status: ReconciliationStatus;
+  mismatchType?: MismatchType;
+  mismatchDetails?: string;
+  resolvedBy?: string;
+  resolvedByName?: string;
+  resolvedDate?: string;
+  resolutionNotes?: string;
+  flaggedAt: string;
+  createdAt: string;
+}
+
+// ---------------------------------------------------------------------------
+// Report types (dynamic generated reports)
+// ---------------------------------------------------------------------------
+
+export interface GeneratedReport {
+  id: string;
+  title: string;
+  titleNepali: string;
+  category: 'FINANCIAL' | 'REGULATORY' | 'GOVERNANCE' | 'SUPERVISORY' | 'OPERATIONAL';
+  fiscalYear: string;
+  period: string;
+  generatedAt: string;
+  generatedBy: string;
+  generatedByName?: string;
+  data: Record<string, unknown>;
+  downloadUrl?: string;
+  status: 'READY' | 'GENERATING' | 'ERROR';
+}
+
+// ---------------------------------------------------------------------------
+// PEARLS analysis types
+// ---------------------------------------------------------------------------
+
+export interface PearlsBreakdownItem {
+  category: string;
+  categoryNepali: string;
+  amount: number;
+  percentage: number;
+  color: string;
+  changePercent?: number;
+}
+
+export interface PearlsRiskMetrics {
+  portfolioAtRisk: number;
+  portfolioAtRiskPercent: number;
+  repaymentRate: number;
+  averageLoanSize: number;
+  savingsToLoanRatio: number;
+  totalActiveLoans: number;
+  totalDelinquentLoans: number;
+}
+
+export interface PearlsTrendPoint {
+  label: string;
+  labelNepali?: string;
+  savings: number;
+  loans: number;
+  shares: number;
+  deposits: number;
+  total: number;
+}
+
+export interface PearlsAnalysis {
+  period: string;
+  periodNepali?: string;
+  totalAssets: number;
+  totalAssetsNepali?: string;
+  breakdown: PearlsBreakdownItem[];
+  riskMetrics: PearlsRiskMetrics;
+  trends: PearlsTrendPoint[];
+  generatedAt: string;
 }
 

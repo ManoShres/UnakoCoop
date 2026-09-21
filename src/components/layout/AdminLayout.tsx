@@ -21,6 +21,10 @@ import {
   MessageSquareQuote,
   BookOpen,
   Globe,
+  UsersRound,
+  TrendingUp,
+  ScanSearch,
+  Landmark,
 } from 'lucide-react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -33,6 +37,12 @@ export const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { members, applications, inquiries } = useCoopStore();
+  const openMismatches = useCoopStore((s) =>
+    s.reconciliationEntries.filter((entry) => entry.status === 'MISMATCH').length
+  );
+  const pendingDeposits = useCoopStore((s) =>
+    s.motherGroupDeposits.filter((deposit) => deposit.status === 'PENDING').length
+  );
   const { switchToPreset, theme: storedTheme } = useAuthStore();
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', storedTheme === 'dark');
@@ -69,6 +79,20 @@ export const AdminLayout: React.FC = () => {
     },
     { to: '/admin/transfers', label: t('कारोबार तथा गेटवे', 'Transfers & Gateways'), icon: ArrowLeftRight },
     { to: '/admin/shares', label: t('शेयर पूँजी तथा मुद्दती', 'Shares Capital & FD'), icon: PieChart },
+    {
+      to: '/admin/mother-groups',
+      label: t('आमा समूह तथा संकलन', 'Mother Groups & Collection'),
+      icon: UsersRound,
+      badge: pendingDeposits > 0 ? pendingDeposits : undefined,
+    },
+    { to: '/admin/trading-pl', label: t('ट्रेडिङ नाफा नोक्सान', 'Trading Profit & Loss'), icon: TrendingUp },
+    { to: '/admin/pearls-analysis', label: t('पर्ल्स विश्लेषण', 'PEARLS Analysis'), icon: Landmark },
+    {
+      to: '/admin/reconciliation',
+      label: t('बैंक मिलान तथा भिन्नता', 'Reconciliation & Mismatch'),
+      icon: ScanSearch,
+      badge: openMismatches > 0 ? openMismatches : undefined,
+    },
     { to: '/admin/announcements', label: t('सूचना तथा साधारण सभा', 'Announcements & AGM'), icon: Megaphone },
     {
       to: '/admin/inquiries',

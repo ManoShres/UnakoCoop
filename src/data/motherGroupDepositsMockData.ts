@@ -1,0 +1,83 @@
+// ---------------------------------------------------------------------------
+// Mother Group Deposits mock data
+// ---------------------------------------------------------------------------
+
+import { MotherGroupDeposit } from '../types';
+
+export const INITIAL_MOTHER_GROUP_DEPOSITS: MotherGroupDeposit[] = [
+  // Meeting mgmt-001 deposits
+  {
+    id: 'mgd-001',
+    meetingId: 'mgmt-001',
+    motherGroupId: 'mg-001',
+    memberId: 'm1',
+    memberName: 'Ram Bahadur Shrestha',
+    memberNo: 'UK-88219',
+    amount: 2000,
+    depositDate: '2026-09-13',
+    recordedBy: 'EMP-2080-0032',
+    recordedByName: 'Kamala Devi Sharma',
+    status: 'COMPLETED',
+    referenceNo: 'DEP-2026-0913-001',
+    createdAt: '2026-09-13',
+  },
+  {
+    id: 'mgd-002',
+    meetingId: 'mgmt-001',
+    motherGroupId: 'mg-001',
+    memberId: 'm3',
+    memberName: 'Gopal Krishna Thapa',
+    memberNo: 'UK-76102',
+    amount: 2500,
+    depositDate: '2026-09-13',
+    recordedBy: 'EMP-2080-0032',
+    recordedByName: 'Kamala Devi Sharma',
+    status: 'COMPLETED',
+    referenceNo: 'DEP-2026-0913-002',
+    createdAt: '2026-09-13',
+  },
+  {
+    id: 'mgd-003',
+    meetingId: 'mgmt-001',
+    motherGroupId: 'mg-001',
+    memberName: 'Anita Devi Magar',
+    memberNo: 'UK-99102',
+    amount: 1500,
+    depositDate: '2026-09-13',
+    recordedBy: 'EMP-2080-0032',
+    recordedByName: 'Kamala Devi Sharma',
+    status: 'PENDING',
+    createdAt: '2026-09-13',
+  },
+  // Meeting mgmt-002 deposits
+  {
+    id: 'mgd-004',
+    meetingId: 'mgmt-002',
+    motherGroupId: 'mg-001',
+    memberId: 'm1',
+    memberName: 'Ram Bahadur Shrestha',
+    memberNo: 'UK-88219',
+    amount: 2000,
+    depositDate: '2026-08-10',
+    recordedBy: 'EMP-2080-0032',
+    recordedByName: 'Kamala Devi Sharma',
+    status: 'RECONCILED',
+    referenceNo: 'DEP-2026-0810-001',
+    createdAt: '2026-08-10',
+  },
+  {
+    id: 'mgd-005',
+    meetingId: 'mgmt-002',
+    motherGroupId: 'mg-001',
+    memberId: 'm3',
+    memberName: 'Gopal Krishna Thapa',
+    memberNo: 'UK-76102',
+    amount: 2500,
+    depositDate: '2026-08-10',
+    recordedBy: 'EMP-2080-0032',
+    recordedByName: 'Kamala Devi Sharma',
+    status: 'RECONCILED',
+    referenceNo: 'DEP-2026-0810-002',
+    createdAt: '2026-08-10',
+  },
+];

@@ -247,7 +247,7 @@ export const deleteMemberInSupabase = async (
 export interface SavingsAccountRow {
   id: string;
   account_no: string;
-  member_id: string;
+  member_id: string | null;
   account_type: SavingsAccount['accountType'];
   balance: number;
   interest_rate: number;
@@ -258,6 +258,7 @@ export interface SavingsAccountRow {
 
 export const rowToSavingsAccount = (row: SavingsAccountRow): SavingsAccount => ({
   id: row.id,
+  memberId: row.member_id || undefined,
   accountNo: row.account_no,
   accountType: row.account_type,
   balance: row.balance,
@@ -271,7 +272,7 @@ export const savingsAccountToRow = (
   a: Omit<SavingsAccount, 'id'>
 ): Omit<SavingsAccountRow, 'id'> => ({
   account_no: a.accountNo,
-  member_id: a.memberId,
+  member_id: a.memberId || null,
   account_type: a.accountType,
   balance: a.balance,
   interest_rate: a.interestRate,
@@ -349,6 +350,56 @@ export const loanApplicationToRow = (
   committee_notes: a.committeeNotes || null,
 });
 
+
+// ==================== LOANS ====================
+
+export interface LoanRow {
+  id: string;
+  member_id: string | null;
+  loan_no: string;
+  loan_type: Loan['loanType'];
+  principal_amount: number;
+  remaining_balance: number;
+  interest_rate: number;
+  tenure_months: number;
+  monthly_emi: number;
+  disbursed_date: string;
+  next_due_date: string;
+  status: Loan['status'];
+  collateral_description: string;
+}
+
+export const rowToLoan = (row: LoanRow): Loan => ({
+  id: row.id,
+  loanNo: row.loan_no,
+  loanType: row.loan_type,
+  principalAmount: row.principal_amount,
+  remainingBalance: row.remaining_balance,
+  interestRate: row.interest_rate,
+  tenureMonths: row.tenure_months,
+  monthlyEmi: row.monthly_emi,
+  disbursedDate: row.disbursed_date,
+  nextDueDate: row.next_due_date,
+  status: row.status,
+  collateralDescription: row.collateral_description,
+});
+
+export const loanToRow = (
+  l: Omit<Loan, 'id'>
+): Omit<LoanRow, 'id'> => ({
+  member_id: null,
+  loan_no: l.loanNo,
+  loan_type: l.loanType,
+  principal_amount: l.principalAmount,
+  remaining_balance: l.remainingBalance,
+  interest_rate: l.interestRate,
+  tenure_months: l.tenureMonths,
+  monthly_emi: l.monthlyEmi,
+  disbursed_date: l.disbursedDate,
+  next_due_date: l.nextDueDate,
+  status: l.status,
+  collateral_description: l.collateralDescription,
+});
 
 export const fetchLoansFromSupabase = async (): Promise<
   ServiceResult<Loan[]>
@@ -500,7 +551,7 @@ export const updateLoanApplicationInSupabase = async (
 
 export interface TransactionRow {
   id: string;
-  member_id: string;
+  member_id: string | null;
   date: string;
   type: Transaction['type'];
   description: string;
@@ -513,6 +564,7 @@ export interface TransactionRow {
 
 export const rowToTransaction = (row: any): Transaction => ({
   id: row.id,
+  memberId: row.member_id || undefined,
   date: row.date,
   type: row.type,
   description: row.description,
@@ -522,7 +574,7 @@ export const rowToTransaction = (row: any): Transaction => ({
 });
 
 export const transactionToRow = (t: Omit<Transaction, 'id'>): any => ({
-  member_id: t.memberId,
+  member_id: t.memberId || null,
   date: t.date,
   type: t.type,
   description: t.description,
@@ -667,6 +719,41 @@ export const markNotificationReadInSupabase = async (id: string): Promise<Servic
     return { data: null, error: err instanceof Error ? err.message : 'Unknown network error.' };
   }
 };
+
+// ==================== NOTICES ====================
+
+export interface NoticeRow {
+  id: string;
+  title: string;
+  title_nepali: string;
+  category: Notice['category'];
+  content: string;
+  published_date: string;
+  is_urgent: boolean;
+  is_active: boolean;
+}
+
+export const rowToNotice = (row: NoticeRow): Notice => ({
+  id: row.id,
+  title: row.title,
+  titleNepali: row.title_nepali,
+  category: row.category,
+  content: row.content,
+  publishedDate: row.published_date,
+  isUrgent: row.is_urgent,
+  isActive: row.is_active,
+});
+
+export const noticeToRow = (
+  n: Omit<Notice, 'id' | 'publishedDate'>
+): Omit<NoticeRow, 'id' | 'published_date'> => ({
+  title: n.title,
+  title_nepali: n.titleNepali,
+  category: n.category,
+  content: n.content,
+  is_urgent: n.isUrgent,
+  is_active: n.isActive,
+});
 
 export const fetchNoticesFromSupabase = async (): Promise<ServiceResult<Notice[]>> => {
   if (!supabase) return { data: null, error: NOT_CONFIGURED };

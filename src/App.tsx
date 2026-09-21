@@ -41,6 +41,10 @@ import { SharesManagementPage } from './pages/admin/SharesManagementPage';
 import { AnnouncementsGovernancePage } from './pages/admin/AnnouncementsGovernancePage';
 import { CoopSettingsPage } from './pages/admin/CoopSettingsPage';
 import { AdminAuditReportsPage } from './pages/admin/AdminAuditReportsPage';
+import { MotherGroupsPage } from './pages/admin/MotherGroupsPage';
+import { TradingPLPage } from './pages/admin/TradingPLPage';
+import { PearlsAnalysisPage } from './pages/admin/PearlsAnalysisPage';
+import { ReconciliationPage } from './pages/admin/ReconciliationPage';
 import { SupportChatPopup } from './components/ui/SupportChatPopup';
 import { SystemTutorialModal } from './components/ui/SystemTutorialModal';
 
@@ -147,6 +151,10 @@ export function App() {
           <Route path="announcements" element={<AnnouncementsGovernancePage />} />
           <Route path="inquiries" element={<InquiryManagementPage />} />
           <Route path="settings" element={<CoopSettingsPage />} />
+          <Route path="mother-groups" element={<MotherGroupsPage />} />
+          <Route path="trading-pl" element={<TradingPLPage />} />
+          <Route path="pearls-analysis" element={<PearlsAnalysisPage />} />
+          <Route path="reconciliation" element={<ReconciliationPage />} />
           <Route path="audit-reports" element={<AdminAuditReportsPage />} />
         </Route>
 

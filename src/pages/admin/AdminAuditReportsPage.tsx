@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+﻿import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
 import { generateCopomisXml, generateCopomisCsv, triggerBrowserDownload } from '../../utils/copomisExport';
+import { generateReportsForPeriod, summariseReport, generateReportCsv } from '../../services/reportService';
 import {
   ShieldCheck,
   FileText,
@@ -20,7 +21,7 @@ interface AuditReport {
   id: string;
   title: string;
   titleNepali: string;
-  category: 'FINANCIAL' | 'REGULATORY' | 'GOVERNANCE' | 'SUPERVISORY';
+  category: 'FINANCIAL' | 'REGULATORY' | 'GOVERNANCE' | 'SUPERVISORY' | 'OPERATIONAL';
   fiscalYear: string;
   period: string;
   auditor: string;
@@ -28,7 +29,7 @@ interface AuditReport {
   size: string;
   publishDate: string;
   status: 'PUBLISHED' | 'INTERNAL_REVIEW' | 'DRAFT';
-  downloads: number;
+  metrics: number;
 }
 
 interface AuditLogEntry {
@@ -43,8 +44,21 @@ interface AuditLogEntry {
 }
 
 export const AdminAuditReportsPage: React.FC = () => {
-  const { t } = useLanguageStore();
-  const { members, savings, loans, coopSettings } = useCoopStore();
+  const {
+    members,
+    savings,
+    loans,
+    transactions,
+    motherGroups,
+    motherGroupMembers,
+    motherGroupMeetings,
+    motherGroupDeposits,
+    tradingTransactions,
+    bankStatements,
+    reconciliationEntries,
+    coopSettings,
+  } = useCoopStore();
+  const { t, lang } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<'REPORTS' | 'LOGS' | 'COMPLIANCE'>('REPORTS');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -73,78 +87,85 @@ export const AdminAuditReportsPage: React.FC = () => {
     );
   };
 
-  const [reports] = useState<AuditReport[]>([
-    {
-      id: 'REP-2081-01',
-      title: 'Annual Audited Statutory Financial Statement FY 2081/82',
-      titleNepali: 'वार्षिक लेखापरीक्षण वित्तीय विवरण आ.व. २०८१/८२',
-      category: 'FINANCIAL',
-      fiscalYear: '2081/82 (2024-2025)',
-      period: 'Full Fiscal Year',
-      auditor: 'Regmi & Associates, Chartered Accountants (ICAN Reg. 421)',
-      rating: 'Unqualified Clean Audit Opinion',
-      size: '3.4 MB PDF',
-      publishDate: '2026-02-14',
-      status: 'PUBLISHED',
-      downloads: 482,
-    },
-    {
-      id: 'REP-2081-02',
-      title: 'Quarterly Risk Assessment & Capital Adequacy (CAR) Report Q3',
-      titleNepali: 'त्रैमासिक जोखिम विश्लेषण तथा पुँजी पर्याप्तता प्रतिवेदन',
-      category: 'REGULATORY',
-      fiscalYear: '2081/82',
-      period: 'Poush End 2081',
-      auditor: 'Internal Supervisory & Audit Committee',
-      rating: 'Capital Adequacy 18.4% (Min Required 10%)',
-      size: '1.8 MB PDF',
-      publishDate: '2026-01-20',
-      status: 'PUBLISHED',
-      downloads: 215,
-    },
-    {
-      id: 'REP-2081-03',
-      title: '31st AGM Governance & Patronage Dividend Resolution Dossier',
-      titleNepali: '३१औं वार्षिक साधारण सभा निर्णय पुस्तिका तथा लाभांश घोषणा',
-      category: 'GOVERNANCE',
-      fiscalYear: '2080/81',
-      period: 'AGM Sanctioned',
-      auditor: 'Cooperative Registrar Office, Dang Lumbini',
-      rating: '14.5% Dividend + 2.5% Patronage Sanctioned',
-      size: '4.2 MB PDF',
-      publishDate: '2025-11-28',
-      status: 'PUBLISHED',
-      downloads: 690,
-    },
-    {
-      id: 'REP-2081-04',
-      title: 'AML/CFT & GoAML Transaction Compliance Inspection Report',
-      titleNepali: 'सम्पत्ति शुद्धीकरण तथा गोएएमएल अनुपालन निरीक्षण प्रतिवेदन',
-      category: 'REGULATORY',
-      fiscalYear: '2081/82',
-      period: 'Semi-Annual Audit',
-      auditor: 'Financial Information Unit (FIU) Compliance Desk',
-      rating: '100% STR/TTR Tier 1 Screened',
-      size: '1.5 MB PDF',
-      publishDate: '2026-02-01',
-      status: 'PUBLISHED',
-      downloads: 130,
-    },
-    {
-      id: 'REP-2081-05',
-      title: 'PEARLS Liquidity & Portfolio at Risk (PAR) Monitoring Dossier',
-      titleNepali: 'पर्ल्स अनुगमन तथा जोखिमयुक्त कर्जा विश्लेषण',
-      category: 'SUPERVISORY',
-      fiscalYear: '2081/82',
-      period: 'Magh 2081',
-      auditor: 'Central Credit & Recovery Division',
-      rating: 'PAR > 30 Days: 0.82% (Safe Threshold < 5%)',
-      size: '2.1 MB PDF',
-      publishDate: '2026-02-18',
-      status: 'PUBLISHED',
-      downloads: 310,
-    },
+  // ---------------------------------------------------------------------------
+  // Dynamic report generation — computed live from cooperative store data
+  // (members, savings, loans, mother groups, trading ledger, reconciliation).
+  // ---------------------------------------------------------------------------
+  const reports: AuditReport[] = useMemo(() => {
+    const generated = generateReportsForPeriod({
+      members,
+      savings,
+      loans,
+      transactions,
+      motherGroups,
+      motherGroupMembers,
+      motherGroupMeetings,
+      motherGroupDeposits,
+      tradingTransactions,
+      bankStatements,
+      reconciliationEntries,
+      fiscalYear: '2082/83',
+      period: 'FY 2082/83 (Live)',
+      generatedBy: 'SYSTEM-AUTO',
+      generatedByName: 'CBS Report Engine',
+    });
+
+    return generated.map((g) => ({
+      id: g.id.toUpperCase(),
+      title: g.title,
+      titleNepali: g.titleNepali,
+      category: g.category,
+      fiscalYear: g.fiscalYear,
+      period: g.period,
+      auditor: g.generatedByName ?? 'CBS Report Engine (Auto)',
+      rating: summariseReport(g, lang),
+      size: `${(JSON.stringify(g.data).length / 1024).toFixed(1)} KB JSON`,
+      publishDate: g.generatedAt.slice(0, 10),
+      status: 'PUBLISHED' as const,
+      metrics: Object.keys(g.data).length,
+    }));
+  }, [
+    members,
+    savings,
+    loans,
+    transactions,
+    motherGroups,
+    motherGroupMembers,
+    motherGroupMeetings,
+    motherGroupDeposits,
+    tradingTransactions,
+    bankStatements,
+    reconciliationEntries,
+    lang,
   ]);
+
+  const handleDownloadReportCsv = (report: AuditReport) => {
+    const generated = generateReportsForPeriod({
+      members,
+      savings,
+      loans,
+      transactions,
+      motherGroups,
+      motherGroupMembers,
+      motherGroupMeetings,
+      motherGroupDeposits,
+      tradingTransactions,
+      bankStatements,
+      reconciliationEntries,
+      fiscalYear: '2082/83',
+      period: 'FY 2082/83 (Live)',
+      generatedBy: 'SYSTEM-AUTO',
+      generatedByName: 'CBS Report Engine',
+    });
+    const match = generated.find((g) => g.id.toUpperCase() === report.id);
+    if (match) {
+      triggerBrowserDownload(
+        generateReportCsv(match),
+        `${report.id}.csv`,
+        'text/csv'
+      );
+    }
+  };
 
   const auditLogs: AuditLogEntry[] = [
     {
@@ -363,6 +384,7 @@ export const AdminAuditReportsPage: React.FC = () => {
                 { key: 'REGULATORY', label: t('नियामक', 'REGULATORY') },
                 { key: 'GOVERNANCE', label: t('सुशासन', 'GOVERNANCE') },
                 { key: 'SUPERVISORY', label: t('सुपरिवेक्षण', 'SUPERVISORY') },
+                { key: 'OPERATIONAL', label: t('सञ्चालन', 'OPERATIONAL') },
               ] as const).map(({ key, label }) => (
                 <button
                   key={key}
@@ -407,7 +429,7 @@ export const AdminAuditReportsPage: React.FC = () => {
                             </h4>
                             <p className="text-[11px] text-slate-500 font-serif mt-0.5">{r.titleNepali}</p>
                             <span className="text-[10px] font-mono text-slate-400 mt-1 block">
-                              {r.id} • {r.size} • {r.downloads} {t('प्रमाणित डाउनलोड', 'verified downloads')}
+                              {r.id} • {r.size} • {r.metrics} {t('मापदण्डहरू', 'data metrics')}
                             </span>
                           </div>
                         </div>
@@ -439,7 +461,7 @@ export const AdminAuditReportsPage: React.FC = () => {
                       <td className="p-4 text-right">
                         <button
                           type="button"
-                          onClick={() => alert(`Downloading official certified report: ${r.title}`)}
+                          onClick={() => handleDownloadReportCsv(r)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 text-xs font-bold border border-slate-200 dark:border-slate-700 transition"
                         >
                           <Download className="size-3.5" />
