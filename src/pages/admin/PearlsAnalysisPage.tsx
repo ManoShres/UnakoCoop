@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { calculatePearlsAnalysis } from '../../utils/pearlsAnalysis';
-import { formatNPR, toNepaliDigits } from '../../utils/nepaliDate';
+import { toNepaliDigits } from '../../utils/nepaliDate';
 import {
   Landmark,
   Percent,
@@ -97,9 +97,9 @@ export const PearlsAnalysisPage: React.FC = () => {
             <Layers className="size-4" />
             <span>{t('कुल व्यवस्थित सम्पत्ति', 'TOTAL MANAGED ASSETS')}</span>
           </div>
-          <div className="text-2xl font-black tracking-tight">{formatNPR(totalAssets)}</div>
+          <div className="text-2xl font-black tracking-tight">{fmtCurrency(totalAssets, true)}</div>
           <div className="text-xs text-blue-100 mt-1">
-            {t('नेपालीमा', 'In Devanagari')}: {formatNPR(totalAssets, true)}
+            {t('नेपालीमा', 'In Devanagari')}: {fmtCurrency(totalAssets, true)}
           </div>
         </div>
 
@@ -112,7 +112,7 @@ export const PearlsAnalysisPage: React.FC = () => {
             {riskMetrics.portfolioAtRiskPercent.toFixed(2)}%
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {formatNPR(riskMetrics.portfolioAtRisk)} · {riskMetrics.totalDelinquentLoans}{' '}
+            {fmtCurrency(riskMetrics.portfolioAtRisk, true)} · {riskMetrics.totalDelinquentLoans}{' '}
             {t('ऋण', 'loans')}
           </div>
         </div>
@@ -138,7 +138,7 @@ export const PearlsAnalysisPage: React.FC = () => {
             {riskMetrics.savingsToLoanRatio.toFixed(2)}%
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {t('औसत ऋण आकार', 'Average loan size')}: {formatNPR(riskMetrics.averageLoanSize)}
+            {t('औसत ऋण आकार', 'Average loan size')}: {fmtCurrency(riskMetrics.averageLoanSize, true)}
           </div>
         </div>
       </div>
@@ -153,7 +153,7 @@ export const PearlsAnalysisPage: React.FC = () => {
           <div className="text-center mt-4">
             <div className="text-[11px] text-slate-400">{t('कुल सम्पत्ति', 'Total assets')}</div>
             <div className="text-sm font-black text-slate-900 dark:text-white">
-              {formatNPR(totalAssets)}
+              {fmtCurrency(totalAssets, true)}
             </div>
           </div>
         </div>
@@ -179,7 +179,7 @@ export const PearlsAnalysisPage: React.FC = () => {
                   </div>
                   <div className="flex items-center gap-3 font-mono">
                     <span className="text-slate-500 dark:text-slate-400">
-                      {formatNPR(item.amount)}
+                      {fmtCurrency(item.amount, true)}
                     </span>
                     <span className="font-black text-slate-900 dark:text-white w-16 text-right">
                       {item.percentage.toFixed(2)}%
@@ -236,22 +236,22 @@ export const PearlsAnalysisPage: React.FC = () => {
                 <div
                   className="w-full bg-pink-600"
                   style={{ height: `${(point.deposits / maxTrend) * 100}%` }}
-                  title={`${t('समूह संकलन', 'Group collections')}: ${formatNPR(point.deposits)}`}
+                  title={`${t('समूह संकलन', 'Group collections')}: ${fmtCurrency(point.deposits, true)}`}
                 />
                 <div
                   className="w-full bg-amber-600"
                   style={{ height: `${(point.shares / maxTrend) * 100}%` }}
-                  title={`${t('सेयर', 'Shares')}: ${formatNPR(point.shares)}`}
+                  title={`${t('सेयर', 'Shares')}: ${fmtCurrency(point.shares, true)}`}
                 />
                 <div
                   className="w-full bg-blue-600"
                   style={{ height: `${(point.loans / maxTrend) * 100}%` }}
-                  title={`${t('ऋण', 'Loans')}: ${formatNPR(point.loans)}`}
+                  title={`${t('ऋण', 'Loans')}: ${fmtCurrency(point.loans, true)}`}
                 />
                 <div
                   className="w-full bg-emerald-600"
                   style={{ height: `${(point.savings / maxTrend) * 100}%` }}
-                  title={`${t('बचत', 'Savings')}: ${formatNPR(point.savings)}`}
+                  title={`${t('बचत', 'Savings')}: ${fmtCurrency(point.savings, true)}`}
                 />
               </div>
               <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 text-center leading-tight">

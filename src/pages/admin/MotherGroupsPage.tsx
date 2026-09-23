@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Users,
   CalendarDays,
@@ -16,8 +17,8 @@ import {
 } from 'lucide-react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
-import { formatNPR } from '../../utils/nepaliDate';
 import { triggerBrowserDownload } from '../../utils/copomisExport';
+import { isDuplicateCollection } from '../../utils/collectionPosting';
 import type { MotherGroup } from '../../types';
 
 type Tab = 'DIRECTORY' | 'MEMBERS' | 'MEETINGS' | 'DEPOSITS';
@@ -39,6 +40,7 @@ export function MotherGroupsPage() {
     recordMeeting,
     recordDeposit,
     updateDepositStatus,
+    postDepositToMemberAccount,
   } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<Tab>('DIRECTORY');
@@ -70,9 +72,11 @@ export function MotherGroupsPage() {
   // Deposit form
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [dGroupId, setDGroupId] = useState(motherGroups[0]?.id ?? '');
+  const [dRosterId, setDRosterId] = useState('');
   const [dMemberName, setDMemberName] = useState('');
   const [dMemberNo, setDMemberNo] = useState('');
   const [dAmount, setDAmount] = useState(0);
+  const [dSlipNo, setDSlipNo] = useState('');
 
   const showToastMsg = (msg: string) => {
     setToast(msg);
@@ -154,22 +158,92 @@ export function MotherGroupsPage() {
     showToastMsg(t('सभा रेकर्ड भयो!', 'Meeting recorded!'));
   };
 
+  const handleSelectRosterMember = (rosterId: string) => {
+    setDRosterId(rosterId);
+    if (!rosterId) {
+      setDMemberName('');
+      setDMemberNo('');
+      return;
+    }
+    const rosterMember = motherGroupMembers.find((m) => m.id === rosterId);
+    if (rosterMember) {
+      setDMemberName(rosterMember.memberName);
+      setDMemberNo(rosterMember.memberNo);
+      if (rosterMember.monthlyContribution > 0) setDAmount(rosterMember.monthlyContribution);
+    }
+  };
+
   const handleRecordDeposit = (e: React.FormEvent) => {
     e.preventDefault();
-    const meeting = groupMeetings(dGroupId)[0];
+    // Ensure the group has a meeting to hold this collection.
+    let meeting = groupMeetings(dGroupId)[0];
+    if (!meeting) {
+      meeting = recordMeeting({
+        motherGroupId: dGroupId,
+        meetingDate: today(),
+        conductedBy: employees[0]?.employeeNo ?? 'EMP-2080-0032',
+        conductedByName: employees[0]?.name ?? 'Staff',
+        totalCollected: 0,
+        memberCount: 0,
+        status: 'IN_PROGRESS',
+      });
+    }
+
+    const rosterMember = motherGroupMembers.find((m) => m.id === dRosterId);
+    if (
+      isDuplicateCollection(
+        {
+          motherGroupId: dGroupId,
+          meetingId: meeting.id,
+          memberNo: dMemberNo.trim(),
+          amount: dAmount,
+        },
+        motherGroupDeposits
+      )
+    ) {
+      showToastMsg(
+        t(
+          'यही सदस्यको यही रकम पहिले नै दर्ता भइसकेको छ।',
+          'This member already has a collection of the same amount for this meeting.'
+        )
+      );
+      return;
+    }
+
     recordDeposit({
-      meetingId: meeting?.id ?? '',
+      meetingId: meeting.id,
       motherGroupId: dGroupId,
+      memberId: rosterMember?.memberId,
       memberName: dMemberName.trim(),
       memberNo: dMemberNo.trim(),
       amount: dAmount,
       recordedBy: employees[0]?.employeeNo ?? 'EMP-2080-0032',
       recordedByName: employees[0]?.name ?? 'Staff',
-      status: 'COMPLETED',
+      status: 'PENDING',
+      bankDepositSlipNo: dSlipNo.trim() || undefined,
     });
     setShowDepositModal(false);
-    setDMemberName(''); setDMemberNo(''); setDAmount(0);
-    showToastMsg(t('किश्ती दर्ता भयो!', 'Deposit recorded!'));
+    setDRosterId(''); setDMemberName(''); setDMemberNo(''); setDAmount(0); setDSlipNo('');
+    showToastMsg(
+      t(
+        'किश्ती पेन्डिङका रूपमा दर्ता भयो — टेलर कलेक्सन कन्सोलबाट सदस्य खातामा पोस्ट गर्नुहोस्।',
+        'Collection saved as PENDING — post it to the member passbook from the Teller Collection Console.'
+      )
+    );
+  };
+
+  const handlePostDeposit = (depositId: string) => {
+    const result = postDepositToMemberAccount(depositId);
+    if (result.ok) {
+      showToastMsg(
+        t(
+          `सदस्य खातामा पोस्ट भयो (${result.transactionRef})।`,
+          `Posted to member passbook (${result.transactionRef}).`
+        )
+      );
+    } else {
+      showToastMsg(t(`पोस्ट गर्न सकिएन: ${result.error}`, `Could not post: ${result.error}`));
+    }
   };
 
   const handleExportDeposits = () => {
@@ -249,6 +323,13 @@ export function MotherGroupsPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Link
+            to="/admin/collection-entry"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition"
+          >
+            <Wallet className="size-4" />
+            {t('टेलर कलेक्सन कन्सोल', 'Teller Collection Console')}
+          </Link>
           <button
             onClick={() => setShowGroupModal(true)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition"
@@ -282,7 +363,7 @@ export function MotherGroupsPage() {
             {t('यस महिनाको संकलन', 'COLLECTED THIS MONTH')}
           </div>
           <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
-            {formatNPR(
+            {fmtCurrency(
               motherGroupDeposits
                 .filter((d) => d.status !== 'VOID' && d.depositDate.startsWith(today().slice(0, 7)))
                 .reduce((sum, d) => sum + d.amount, 0)
@@ -375,7 +456,7 @@ export function MotherGroupsPage() {
                       {t('मासिक लक्ष्य', 'MONTHLY TARGET')}
                     </div>
                     <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                      {formatNPR(g.monthlyTargetAmount)}
+                      {fmtCurrency(g.monthlyTargetAmount, true)}
                     </div>
                   </div>
                   <div className="text-right">
@@ -383,7 +464,7 @@ export function MotherGroupsPage() {
                       {t('संकलित', 'COLLECTED')}
                     </div>
                     <div className="text-sm font-black text-slate-900 dark:text-white">
-                      {formatNPR(groupDeposits(g.id).reduce((s, d) => s + d.amount, 0))}
+                      {fmtCurrency(groupDeposits(g.id, true).reduce((s, d) => s + d.amount, 0))}
                     </div>
                   </div>
                 </div>
@@ -433,7 +514,7 @@ export function MotherGroupsPage() {
                     </td>
                     <td className="px-4 py-3 font-mono text-xs">{m.memberNo}</td>
                     <td className="px-4 py-3">{m.memberName}</td>
-                    <td className="px-4 py-3 font-bold text-emerald-600">{formatNPR(m.monthlyContribution)}</td>
+                    <td className="px-4 py-3 font-bold text-emerald-600">{fmtCurrency(m.monthlyContribution, true)}</td>
                     <td className="px-4 py-3 text-right">
                       <button
                         onClick={() => removeMotherGroupMember(m.id)}
@@ -487,7 +568,7 @@ export function MotherGroupsPage() {
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{mt.meetingDate}</td>
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{mt.conductedByName ?? mt.conductedBy}</td>
                       <td className="px-4 py-3 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                        {formatNPR(mt.totalCollected)}
+                        {fmtCurrency(mt.totalCollected, true)}
                       </td>
                       <td className="px-4 py-3 text-right text-slate-600 dark:text-slate-300">{mt.memberCount}</td>
                       <td className="px-4 py-3 text-center">
@@ -544,10 +625,15 @@ export function MotherGroupsPage() {
                         <td className="px-4 py-3">
                           <div className="font-bold text-slate-900 dark:text-white">{d.memberName}</div>
                           <div className="text-xs text-slate-500">{d.memberNo}</div>
+                          {d.transactionRef && (
+                            <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">
+                              {d.transactionRef} · {d.savingsAccountNo}
+                            </div>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{grp?.name ?? '—'}</td>
                         <td className="px-4 py-3 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                          {formatNPR(d.amount)}
+                          {fmtCurrency(d.amount, true)}
                         </td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{d.depositDate}</td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{d.recordedByName ?? d.recordedBy}</td>
@@ -569,12 +655,9 @@ export function MotherGroupsPage() {
                           <div className="flex justify-end gap-1">
                             {d.status === 'PENDING' && (
                               <button
-                                onClick={() => {
-                                  updateDepositStatus(d.id, 'COMPLETED');
-                                  showToastMsg(t('जम्मा पूरा भयो।', 'Deposit completed.'));
-                                }}
+                                onClick={() => handlePostDeposit(d.id)}
                                 className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-600 transition"
-                                title={t('पूरा गर्नुहोस्', 'Mark completed')}
+                                title={t('सदस्य खातामा पोस्ट गर्नुहोस्', 'Post to member passbook')}
                               >
                                 <CheckCircle2 className="size-4" />
                               </button>
@@ -887,6 +970,25 @@ export function MotherGroupsPage() {
                   ))}
                 </select>
               </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  {t('समूह सदस्य छान्नुहोस्', 'Select Group Member')}
+                </label>
+                <select
+                  value={dRosterId}
+                  onChange={(e) => handleSelectRosterMember(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-bold"
+                >
+                  <option value="">{t('— दर्ता नभएको बचतकर्ता (म्यानुअल) —', '— Unregistered saver (manual entry) —')}</option>
+                  {motherGroupMembers
+                    .filter((m) => m.motherGroupId === dGroupId && m.isActive)
+                    .map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.memberName} ({m.memberNo}){m.memberId ? '' : ' — no passbook'}
+                      </option>
+                    ))}
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
@@ -925,6 +1027,23 @@ export function MotherGroupsPage() {
                   required
                 />
               </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                  {t('बैंक जम्मा स्लिप नं.', 'Bank Deposit Slip No.')}
+                </label>
+                <input
+                  value={dSlipNo}
+                  onChange={(e) => setDSlipNo(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm font-mono"
+                  placeholder="SLIP-GDH-0000"
+                />
+                <p className="text-[10px] text-slate-400 mt-1">
+                  {t(
+                    'पेन्डिङ रूपमा सुरक्षित हुन्छ; सदस्य खातामा पोस्ट गरेपछि मात्र पासबुकमा देखिन्छ।',
+                    'Saved as PENDING — it appears in the passbook only after posting to the member account.'
+                  )}
+                </p>
+              </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -937,7 +1056,7 @@ export function MotherGroupsPage() {
                   type="submit"
                   className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition"
                 >
-                  {t('दर्ता गर्नुहोस्', 'Record Deposit')}
+                  {t('पेन्डिङ रूपमा सुरक्षित गर्नुहोस्', 'Save as Pending')}
                 </button>
               </div>
             </form>

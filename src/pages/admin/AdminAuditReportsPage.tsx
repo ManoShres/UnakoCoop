@@ -658,13 +658,13 @@ export const AdminAuditReportsPage: React.FC = () => {
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase">{t('कुल सेयर पुँजी', 'Total Share Capital')}</span>
                 <strong className="text-white text-sm">
-                  {t('रु.', 'NPR')} {members.reduce((s, m) => s + m.shareCapital, 0).toLocaleString()}
+                  {t('रु.', 'NPR')} {fmtCurrency(members.reduce((s, m) => s + m.shareCapital, 0), true)}
                 </strong>
               </div>
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase">{t('कुल सक्रिय बचत', 'Total Active Savings')}</span>
                 <strong className="text-white text-sm">
-                  {t('रु.', 'NPR')} {members.reduce((s, m) => s + m.totalSavings, 0).toLocaleString()}
+                  {t('रु.', 'NPR')} {fmtCurrency(members.reduce((s, m) => s + m.totalSavings, 0), true)}
                 </strong>
               </div>
               <div>

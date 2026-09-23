@@ -27,7 +27,7 @@ import { Member } from '../../types';
 export const MemberVerificationPage: React.FC = () => {
   const navigate = useNavigate();
   const { members, addMember } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
 
   // Mode: 'APPLY' or 'TRACK'
   const [activeTab, setActiveTab] = useState<'APPLY' | 'TRACK'>('APPLY');
@@ -156,7 +156,7 @@ export const MemberVerificationPage: React.FC = () => {
           signature: !!docSignature,
           utilityBill: true,
         },
-        notes: `Online Applicant via Portal. Preferred: ${preferredScheme}. Nominee: ${nomineeName} (${nomineeRelation}). Initial Pledge: NPR ${(shareKitta * 100).toLocaleString()}.`,
+        notes: `Online Applicant via Portal. Preferred: ${preferredScheme}. Nominee: ${nomineeName} (${nomineeRelation}). Initial Pledge: NPR {fmtCurrency(shareKitta * 100, true)}.`,
       };
 
       const added = addMember(newMember);
@@ -304,7 +304,7 @@ export const MemberVerificationPage: React.FC = () => {
                     </div>
                     <div>
                       <span className="text-slate-400 block">Share Pledge:</span>
-                      <span className="font-bold text-emerald-600">NPR {submittedData.member.shareCapital.toLocaleString()}</span>
+                      <span className="font-bold text-emerald-600">NPR {fmtCurrency(submittedData.member.shareCapital, true)}</span>
                     </div>
                   </div>
                 </div>
@@ -1124,7 +1124,7 @@ export const MemberVerificationPage: React.FC = () => {
                         <div className="flex-1">
                           <p className="font-bold text-slate-900 dark:text-white">{t('शेयर पुँजी बाँडफाँड', 'Share Capital Allocation')}</p>
                           <p className="text-[11px] text-slate-400">
-                            {t('जम्मा पुँजी', 'Pledged')}: रु. {trackedResult.shareCapital.toLocaleString()}
+                            {t('जम्मा पुँजी', 'Pledged')}: रु. {fmtCurrency(trackedResult.shareCapital, true)}
                           </p>
                         </div>
                       </div>

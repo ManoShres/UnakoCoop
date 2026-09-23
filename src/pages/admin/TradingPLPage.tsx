@@ -8,7 +8,6 @@ import {
   TRADING_TYPE_LABELS,
   TRADING_TYPE_GROUP,
 } from '../../utils/tradingPL';
-import { formatNPR } from '../../utils/nepaliDate';
 import { triggerBrowserDownload } from '../../utils/copomisExport';
 import { TrendingUp, Download, X, Plus, Ban, CheckCircle2 } from 'lucide-react';
 import type { TradingCategory, TradingType } from '../../types';
@@ -175,7 +174,7 @@ export const TradingPLPage: React.FC = () => {
             {t('कुल आय', 'TOTAL INCOME')}
           </div>
           <div className="text-2xl font-black text-emerald-600 tracking-tight">
-            {formatNPR(summary.totalIncome)}
+            {fmtCurrency(summary.totalIncome, true)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {t('नाफा, लाभांश, ब्याज तथा शुल्क', 'Gains, dividend, interest & fees')}
@@ -187,7 +186,7 @@ export const TradingPLPage: React.FC = () => {
             {t('कुल खर्च', 'TOTAL COST')}
           </div>
           <div className="text-2xl font-black text-rose-600 tracking-tight">
-            {formatNPR(summary.totalCost)}
+            {fmtCurrency(summary.totalCost, true)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {t('घाटा तथा सञ्चालन खर्च', 'Losses & operating expenses')}
@@ -203,7 +202,7 @@ export const TradingPLPage: React.FC = () => {
               summary.netPL >= 0 ? 'text-blue-600 dark:text-blue-400' : 'text-rose-600'
             }`}
           >
-            {formatNPR(summary.netPL)}
+            {fmtCurrency(summary.netPL, true)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {t('लागतमा प्रतिफल', 'Return on cost base')}: {summary.plPercent.toFixed(2)}%
@@ -215,7 +214,7 @@ export const TradingPLPage: React.FC = () => {
             {t('कारोबार (खरिद + बिक्री)', 'TURNOVER (BUY + SELL)')}
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            {formatNPR(summary.totalPurchases + summary.totalSales)}
+            {fmtCurrency(summary.totalPurchases + summary.totalSales, true)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {summary.transactionCount} {t('प्रविष्टि', 'ledger entries')}
@@ -304,19 +303,19 @@ export const TradingPLPage: React.FC = () => {
                       item.net >= 0 ? 'text-emerald-600' : 'text-rose-600'
                     }`}
                   >
-                    {formatNPR(item.net)} · {item.percentage.toFixed(1)}%
+                    {fmtCurrency(item.net, true)} · {item.percentage.toFixed(1)}%
                   </span>
                 </div>
                 <div className="h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden flex">
                   <div
                     className="bg-emerald-500"
                     style={{ width: `${(item.income / maxCategory) * 100}%` }}
-                    title={`${t('आय', 'Income')}: ${formatNPR(item.income)}`}
+                    title={`${t('आय', 'Income')}: ${fmtCurrency(item.income, true)}`}
                   />
                   <div
                     className="bg-rose-500"
                     style={{ width: `${(item.cost / maxCategory) * 100}%` }}
-                    title={`${t('खर्च', 'Cost')}: ${formatNPR(item.cost)}`}
+                    title={`${t('खर्च', 'Cost')}: ${fmtCurrency(item.cost, true)}`}
                   />
                 </div>
               </div>
@@ -381,7 +380,7 @@ export const TradingPLPage: React.FC = () => {
                         )}
                       </td>
                       <td className={`px-4 py-3 text-right font-mono font-bold ${amountClass}`}>
-                        {formatNPR(tx.amountInNPR)}
+                        {fmtCurrency(tx.amountInNPR, true)}
                       </td>
                       <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                         {tx.recordedByName ?? tx.recordedBy}
@@ -544,7 +543,7 @@ export const TradingPLPage: React.FC = () => {
 
               <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-xs font-bold text-emerald-700 dark:text-emerald-400">
                 {t('कुल रकम (NPR)', 'Total in NPR')}:{' '}
-                {formatNPR(Math.round(formAmount * formRate * 100) / 100)}
+                {fmtCurrency(Math.round(formAmount * formRate * 100, true) / 100)}
               </div>
 
               <div className="grid grid-cols-2 gap-3">

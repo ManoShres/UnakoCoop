@@ -21,7 +21,7 @@ import {
 
 export const LoanApplicationQueuePage: React.FC = () => {
   const { applications, updateApplicationStatus } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
   const [selectedApp, setSelectedApp] = useState<LoanApplication | null>(null);
   const [decisionNotes, setDecisionNotes] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
@@ -70,8 +70,8 @@ export const LoanApplicationQueuePage: React.FC = () => {
                     <span className="font-mono text-slate-400 text-[10px]">{app.memberNo}</span>
                   </td>
                   <td className="p-4 font-medium text-slate-700 dark:text-slate-300">{app.loanType}</td>
-                  <td className="p-4 font-bold text-emerald-600 dark:text-[#13ec37]">रु. {app.requestedAmount.toLocaleString()}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-300">रु. {app.monthlyIncome.toLocaleString()}</td>
+                  <td className="p-4 font-bold text-emerald-600 dark:text-[#13ec37]">रु. {fmtCurrency(app.requestedAmount, true)}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-300">रु. {fmtCurrency(app.monthlyIncome, true)}</td>
                   <td className="p-4">
                     <Badge status={app.status} size="sm" />
                   </td>
@@ -137,19 +137,19 @@ export const LoanApplicationQueuePage: React.FC = () => {
                 <div>
                   <span className="text-slate-400 block font-medium">Requested Principal</span>
                   <p className="text-base font-black text-slate-900 dark:text-white mt-0.5">
-                    NPR {selectedApp.requestedAmount.toLocaleString()}
+                    NPR {fmtCurrency(selectedApp.requestedAmount, true)}
                   </p>
                 </div>
                 <div>
                   <span className="text-slate-400 block font-medium">Monthly Net Income</span>
                   <p className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    NPR {selectedApp.monthlyIncome.toLocaleString()}
+                    NPR {fmtCurrency(selectedApp.monthlyIncome, true)}
                   </p>
                 </div>
                 <div>
                   <span className="text-slate-400 block font-medium">Existing Debt</span>
                   <p className="text-base font-black text-slate-700 dark:text-slate-300 mt-0.5">
-                    NPR {selectedApp.existingDebt ? selectedApp.existingDebt.toLocaleString() : '0'}
+                    NPR {selectedApp.existingDebt ? fmtCurrency(selectedApp.existingDebt, true) : '0'}
                   </p>
                 </div>
                 <div>

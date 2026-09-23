@@ -216,3 +216,126 @@ describe('Employee (HR) Registry State Transitions', () => {
     expect(afterRemove.length).toBe(initialEmployees.length);
   });
 });
+
+describe('Mother Group Collection Posting', () => {
+  const buildDeposit = (overrides: Partial<Parameters<ReturnType<typeof useCoopStore.getState>['recordDeposit']>[0]> = {}) => ({
+    meetingId: 'mgmt-test-01',
+    motherGroupId: 'mg-001',
+    memberId: 'm1',
+    memberName: 'Ram Bahadur Shrestha',
+    memberNo: 'UK-88219',
+    amount: 2500,
+    recordedBy: 'EMP-TEST-01',
+    recordedByName: 'Test Teller',
+    status: 'PENDING' as const,
+    ...overrides,
+  });
+
+  const balanceOf = (accountNo: string) =>
+    useCoopStore.getState().savings.find((s) => s.accountNo === accountNo)?.balance ?? 0;
+
+  it('records PENDING collection drafts with MGCOL references without touching passbooks', () => {
+    const before = balanceOf('SAV-001-88219');
+
+    const deposit = useCoopStore.getState().recordDeposit(buildDeposit());
+
+    expect(deposit.status).toBe('PENDING');
+    expect(deposit.referenceNo).toMatch(/^MGCOL-\d{4}-\d{6}$/);
+    expect(deposit.transactionRef).toBeUndefined();
+    expect(balanceOf('SAV-001-88219')).toBe(before);
+  });
+
+  it('posts a collection into the member savings account exactly once', () => {
+    const created = useCoopStore.getState().recordDeposit(buildDeposit({ amount: 1200 }));
+    const before = balanceOf('SAV-001-88219');
+
+    const result = useCoopStore.getState().postDepositToMemberAccount(created.id);
+
+    expect(result.ok).toBe(true);
+    expect(result.transactionRef).toMatch(/^MGCOL-\d{4}-\d{6}$/);
+
+    const posted = useCoopStore.getState().motherGroupDeposits.find((d) => d.id === created.id);
+    expect(posted?.status).toBe('COMPLETED');
+    expect(posted?.savingsAccountNo).toBe('SAV-001-88219');
+    expect(posted?.postedAt).toBeTruthy();
+    expect(balanceOf('SAV-001-88219')).toBe(before + 1200);
+
+    const tx = useCoopStore.getState().transactions[0];
+    expect(tx.type).toBe('DEPOSIT');
+    expect(tx.memberId).toBe('m1');
+    expect(tx.referenceNo).toBe(result.transactionRef);
+
+    // Idempotent: posting again must not credit the account twice.
+    const second = useCoopStore.getState().postDepositToMemberAccount(created.id);
+    expect(second.ok).toBe(true);
+    expect(second.transactionRef).toBe(result.transactionRef);
+    expect(balanceOf('SAV-001-88219')).toBe(before + 1200);
+  });
+
+  it('refuses to post collections for unregistered group savers', () => {
+    const created = useCoopStore.getState().recordDeposit(
+      buildDeposit({ memberId: undefined, memberName: 'Anita Devi Magar', memberNo: 'UK-99102' })
+    );
+
+    const result = useCoopStore.getState().postDepositToMemberAccount(created.id);
+
+    expect(result.ok).toBe(false);
+    expect(result.error).toMatch(/no matching cooperative member/i);
+    const still = useCoopStore.getState().motherGroupDeposits.find((d) => d.id === created.id);
+    expect(still?.status).toBe('PENDING');
+  });
+
+  it('bulk-posts pending collections and recomputes meeting totals', () => {
+    const meeting = useCoopStore.getState().recordMeeting({
+      motherGroupId: 'mg-001',
+      meetingDate: '2026-09-20',
+      conductedBy: 'EMP-TEST-01',
+      conductedByName: 'Test Teller',
+      totalCollected: 0,
+      memberCount: 0,
+      status: 'COMPLETED',
+    });
+    useCoopStore.getState().recordDeposit(buildDeposit({ meetingId: meeting.id, amount: 1000 }));
+    useCoopStore.getState().recordDeposit(
+      buildDeposit({
+        meetingId: meeting.id,
+        amount: 2000,
+        memberId: 'm3',
+        memberName: 'Gopal Krishna Thapa',
+        memberNo: 'UK-76102',
+      })
+    );
+
+    const result = useCoopStore.getState().postMeetingCollections(meeting.id);
+
+    expect(result.posted).toBe(2);
+    expect(result.failed).toBe(0);
+    const updated = useCoopStore.getState().motherGroupMeetings.find((m) => m.id === meeting.id);
+    expect(updated?.totalCollected).toBe(3000);
+    expect(updated?.memberCount).toBe(2);
+  });
+
+  it('voids a posted collection with a compensating withdrawal', () => {
+    const created = useCoopStore.getState().recordDeposit(buildDeposit({ amount: 800 }));
+    useCoopStore.getState().postDepositToMemberAccount(created.id);
+    const before = balanceOf('SAV-001-88219');
+
+    useCoopStore.getState().voidMotherGroupDeposit(created.id, 'Bank deposit bounced');
+
+    expect(balanceOf('SAV-001-88219')).toBe(before - 800);
+    const voided = useCoopStore.getState().motherGroupDeposits.find((d) => d.id === created.id);
+    expect(voided?.status).toBe('VOID');
+    expect(voided?.notes).toBe('Bank deposit bounced');
+
+    const reversal = useCoopStore.getState().transactions[0];
+    expect(reversal.type).toBe('WITHDRAWAL');
+    expect(reversal.referenceNo.startsWith('MGVOID-')).toBe(true);
+  });
+
+  it('lists member deposit history via linked group memberships', () => {
+    const history = useCoopStore.getState().getMemberDepositHistory('m1');
+
+    expect(history.length).toBeGreaterThan(0);
+    expect(history.every((d) => d.memberNo === 'UK-88219')).toBe(true);
+  });
+});

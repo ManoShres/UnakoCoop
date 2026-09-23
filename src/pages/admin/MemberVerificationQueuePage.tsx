@@ -22,7 +22,7 @@ import {
 
 export const MemberVerificationQueuePage: React.FC = () => {
   const { members, updateMemberStatus } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount } = useLanguageStore();
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'VERIFIED' | 'ACTION_REQUIRED'>('ALL');
   const [reviewNotes, setReviewNotes] = useState('');
@@ -105,7 +105,7 @@ export const MemberVerificationQueuePage: React.FC = () => {
                     <span className="text-[10px] text-slate-400">{m.address}</span>
                   </td>
                   <td className="p-4 font-bold text-slate-900 dark:text-white">
-                    {t('रु.', 'NPR')} {m.shareCapital.toLocaleString()}
+                    {t('रु.', 'NPR')} {fmtCurrency(m.shareCapital, true)}
                   </td>
                   <td className="p-4">
                     <Badge status={m.status} size="sm" />
@@ -182,7 +182,7 @@ export const MemberVerificationQueuePage: React.FC = () => {
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">{t('सेयर पुँजी', 'Share Capital')}</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {t('रु.', 'NPR')} {selectedMember.shareCapital.toLocaleString()}
+                    {t('रु.', 'NPR')} {fmtCurrency(selectedMember.shareCapital, true)}
                   </span>
                 </div>
                 <div>

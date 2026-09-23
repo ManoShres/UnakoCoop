@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useDesignStore } from './store/useDesignStore';
+import { useAuthStore } from './store/useAuthStore';
 
 // Layouts
 import { PublicLayout } from './components/layout/PublicLayout';
@@ -42,6 +43,7 @@ import { AnnouncementsGovernancePage } from './pages/admin/AnnouncementsGovernan
 import { CoopSettingsPage } from './pages/admin/CoopSettingsPage';
 import { AdminAuditReportsPage } from './pages/admin/AdminAuditReportsPage';
 import { MotherGroupsPage } from './pages/admin/MotherGroupsPage';
+import { CollectionEntryPage } from './pages/admin/CollectionEntryPage';
 import { TradingPLPage } from './pages/admin/TradingPLPage';
 import { PearlsAnalysisPage } from './pages/admin/PearlsAnalysisPage';
 import { ReconciliationPage } from './pages/admin/ReconciliationPage';
@@ -50,12 +52,33 @@ import { SystemTutorialModal } from './components/ui/SystemTutorialModal';
 
 export function App() {
   const { settings, initTheme } = useDesignStore();
+  const { authLoading, initAuth } = useAuthStore();
 
   useEffect(() => {
     initTheme();
   }, [initTheme]);
 
+  // Resolve any persisted Supabase session (member / staff) before routing.
+  useEffect(() => {
+    void initAuth();
+  }, [initAuth]);
+
   const { features } = settings;
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-surface-canvas text-on-surface flex flex-col items-center justify-center gap-3">
+        <img
+          src="/unako-logo.png"
+          alt="Unako SACCOS"
+          className="h-14 w-auto object-contain animate-pulse"
+        />
+        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant animate-pulse">
+          Unako SACCOS Portal
+        </span>
+      </div>
+    );
+  }
 
   return (
     <BrowserRouter>
@@ -152,6 +175,7 @@ export function App() {
           <Route path="inquiries" element={<InquiryManagementPage />} />
           <Route path="settings" element={<CoopSettingsPage />} />
           <Route path="mother-groups" element={<MotherGroupsPage />} />
+          <Route path="collection-entry" element={<CollectionEntryPage />} />
           <Route path="trading-pl" element={<TradingPLPage />} />
           <Route path="pearls-analysis" element={<PearlsAnalysisPage />} />
           <Route path="reconciliation" element={<ReconciliationPage />} />

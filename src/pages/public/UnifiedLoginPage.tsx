@@ -19,6 +19,7 @@ import { LanguageToggle } from '../../components/ui/LanguageToggle';
 import { useCoopStore } from '../../store/useCoopStore';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { signInStaffWithSupabase } from '../../services/employeeService';
+import { signInMemberWithSupabase } from '../../services/memberAuthService';
 
 export const UnifiedLoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -42,11 +43,32 @@ export const UnifiedLoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleMemberLogin = (e: React.FormEvent) => {
+  const handleMemberLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
 
+    // Live mode: real Supabase Auth sign-in; RLS then scopes the session to
+    // the member's own rows (members.auth_user_id = auth.uid()).
+    if (isSupabaseConfigured()) {
+      const { data, error } = await signInMemberWithSupabase(memberIdentifier.trim(), memberPassword);
+      setIsLoading(false);
+      if (error || !data) {
+        setErrorMessage(
+          t(
+            `सदस्य लगइन असफल: ${error || 'अज्ञात त्रुटि'}`,
+            `Member sign-in failed: ${error || 'unknown error'}`
+          )
+        );
+        return;
+      }
+      setRole('MEMBER');
+      setCurrentMember(data);
+      navigate('/member');
+      return;
+    }
+
+    // Offline demo: match against the local demo roster (original behaviour).
     setTimeout(() => {
       setIsLoading(false);
       const cleanId = memberIdentifier.trim().toLowerCase();
@@ -210,8 +232,8 @@ export const UnifiedLoginPage: React.FC = () => {
                 <form onSubmit={handleMemberLogin} className="space-y-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                      <span>{t('सदस्य नं. वा दर्ता भएको मोबाइल', 'Member ID or Registered Mobile')}</span>
-                      <span className="text-[10px] text-slate-400 font-normal">{t('जस्तै: UK-88219', 'e.g. UK-88219')}</span>
+                      <span>{t('दर्ता भएको इमेल', 'Registered Member Email')}</span>
+                      <span className="text-[10px] text-slate-400 font-normal">{t('जस्तै: ram.shrestha@unako.coop.np', 'e.g. ram.shrestha@unako.coop.np')}</span>
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -220,7 +242,7 @@ export const UnifiedLoginPage: React.FC = () => {
                         required
                         value={memberIdentifier}
                         onChange={(e) => setMemberIdentifier(e.target.value)}
-                        placeholder={t('युके-८८२१९ वा ९८५१०२३४५६', 'UK-88219 or 9851023456')}
+                        placeholder={t('ram.shrestha@unako.coop.np', 'ram.shrestha@unako.coop.np')}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                       />
                     </div>

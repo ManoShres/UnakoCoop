@@ -19,7 +19,7 @@ import { useLanguageStore } from '../../store/useLanguageStore';
 
 export function MemberManagementPage() {
   const { members, updateMemberDetails, addMember } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | VerificationStatus>('ALL');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
@@ -239,14 +239,14 @@ export function MemberManagementPage() {
                   {/* Financials */}
                   <td className="py-3.5 px-4">
                     <div className="font-bold text-slate-900 dark:text-white">
-                      {t('बचत: रु. ', 'Savings: NPR ')}{m.totalSavings.toLocaleString()}
+                      {t('बचत: रु. ', 'Savings: NPR ')}{fmtCurrency(m.totalSavings, true)}
                     </div>
                     <div className="text-[11px] text-emerald-600 font-semibold">
-                      {t('सेयर: रु. ', 'Shares: NPR ')}{m.shareCapital.toLocaleString()}
+                      {t('सेयर: रु. ', 'Shares: NPR ')}{fmtCurrency(m.shareCapital, true)}
                     </div>
                     {m.activeLoanBalance > 0 && (
                       <div className="text-[10px] text-amber-600 font-medium">
-                        {t('कर्जा: रु. ', 'Loan: NPR ')}{m.activeLoanBalance.toLocaleString()}
+                        {t('कर्जा: रु. ', 'Loan: NPR ')}{fmtCurrency(m.activeLoanBalance, true)}
                       </div>
                     )}
                   </td>

@@ -5,7 +5,7 @@ import { useLanguageStore } from '../../store/useLanguageStore';
 
 export function HomePage() {
   const { coopSettings } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
 
   // Interactive Calculator State
   const [activeTab, setActiveTab] = useState<'savings' | 'loans'>('savings');
@@ -199,7 +199,7 @@ export function HomePage() {
                             {t('मासिक बचत रकम', 'Monthly Deposit Amount')}
                           </span>
                           <span className="text-base sm:text-lg font-bold text-brand-accent-lime tabular-nums" id="savings-amount-label">
-                            NPR {savingAmount.toLocaleString()}
+                            NPR {fmtCurrency(savingAmount, true)}
                           </span>
                         </div>
                         <input
@@ -251,7 +251,7 @@ export function HomePage() {
                           {t('अनुमानित परिपक्वता रकम', 'PROJECTED MATURITY')}
                         </span>
                         <div className="text-2xl sm:text-3xl font-extrabold text-surface-bright tracking-tight" id="savings-maturity-total">
-                          NPR {maturityTotal.toLocaleString()}
+                          NPR {fmtCurrency(maturityTotal, true)}
                         </div>
                         <p className="text-[11px] text-brand-accent-lime" id="savings-rate-sub">
                           {t(`*${savingRate}% वार्षिक चक्रवृद्धिका आधारमा`, `*Based on ${savingRate}% annual compounded return`)}
@@ -259,11 +259,11 @@ export function HomePage() {
                         <div className="grid grid-cols-2 gap-2 pt-1.5 text-left text-xs">
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-tertiary-fixed-dim block">{t('कुल जम्मा साँवा:', 'Total Principal:')}</span>
-                            <span className="text-surface-bright font-semibold" id="savings-principal">NPR {totalPrincipal.toLocaleString()}</span>
+                            <span className="text-surface-bright font-semibold" id="savings-principal">NPR {fmtCurrency(totalPrincipal, true)}</span>
                           </div>
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-brand-accent-lime block">{t('आर्जित ब्याज:', 'Earned Interest:')}</span>
-                            <span className="text-brand-accent-lime font-semibold" id="savings-interest">NPR {earnedInterest.toLocaleString()}</span>
+                            <span className="text-brand-accent-lime font-semibold" id="savings-interest">NPR {fmtCurrency(earnedInterest, true)}</span>
                           </div>
                         </div>
                       </div>
@@ -300,7 +300,7 @@ export function HomePage() {
                             {t('आवश्यक कर्जा रकम', 'Loan Needed')}
                           </span>
                           <span className="text-base sm:text-lg font-bold text-brand-accent-lime tabular-nums" id="loan-amount-label">
-                            NPR {loanPrincipal.toLocaleString()}
+                            NPR {fmtCurrency(loanPrincipal, true)}
                           </span>
                         </div>
                         <input
@@ -352,7 +352,7 @@ export function HomePage() {
                           {t('अनुमानित मासिक किस्ता', 'ESTIMATED MONTHLY EMI')}
                         </span>
                         <div className="text-2xl sm:text-3xl font-extrabold text-brand-accent-lime tracking-tight" id="loan-emi-total">
-                          NPR {emi.toLocaleString()}
+                          NPR {fmtCurrency(emi, true)}
                         </div>
                         <p className="text-[11px] text-surface-bright" id="loan-rate-sub">
                           {t(`*${loanRate}% घट्दो ब्याजदर प्रणालीमा आधारित`, `*Based on ${loanRate}% reducing balance rate`)}
@@ -360,11 +360,11 @@ export function HomePage() {
                         <div className="grid grid-cols-2 gap-2 pt-1.5 text-left text-xs">
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-tertiary-fixed-dim block">{t('कुल ब्याज:', 'Total Interest:')}</span>
-                            <span className="text-surface-bright font-semibold" id="loan-total-interest">NPR {totalLoanInterest.toLocaleString()}</span>
+                            <span className="text-surface-bright font-semibold" id="loan-total-interest">NPR {fmtCurrency(totalLoanInterest, true)}</span>
                           </div>
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-tertiary-fixed-dim block">{t('कुल भुक्तानी:', 'Gross Payment:')}</span>
-                            <span className="text-surface-bright font-semibold" id="loan-total-payment">NPR {grossPayment.toLocaleString()}</span>
+                            <span className="text-surface-bright font-semibold" id="loan-total-payment">NPR {fmtCurrency(grossPayment, true)}</span>
                           </div>
                         </div>
                       </div>

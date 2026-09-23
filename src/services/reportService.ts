@@ -339,8 +339,14 @@ export function generateReportsForPeriod(inputs: ReportInputs): GeneratedReport[
   ];
 }
 
-const npr = (value: number | undefined): string =>
-  `NPR ${Math.round(value ?? 0).toLocaleString('en-IN')}`;
+import { formatNPR } from '../utils/nepaliDate';
+
+const npr = (value: number | undefined, nepali?: boolean): string => {
+  if (nepali) {
+    return formatNPR(value ?? 0, true);
+  }
+  return `NPR ${Math.round(value ?? 0).toLocaleString('en-IN')}`;
+};
 
 const pct = (value: number | undefined): string => `${(value ?? 0).toFixed(2)}%`;
 
@@ -354,17 +360,17 @@ export function summariseReport(report: GeneratedReport, lang: 'ne' | 'en' = 'en
     case 'FINANCIAL':
       if (data.netPL !== undefined) {
         return nepali
-          ? `शुद्ध नाफा ${npr(data.netPL)} (${pct(data.plPercent)})`
-          : `Net P/L ${npr(data.netPL)} at ${pct(data.plPercent)}`;
+          ? `शुद्ध नाफा ${npr(data.netPL, true)} (${pct(data.plPercent)})`
+          : `Net P/L ${npr(data.netPL, false)} at ${pct(data.plPercent)}`;
       }
       if (data.totalSavingsBalance !== undefined) {
         return nepali
-          ? `कुल बचत ${npr(data.totalSavingsBalance)} · ${data.totalAccounts ?? 0} खाता`
-          : `Savings ${npr(data.totalSavingsBalance)} across ${data.totalAccounts ?? 0} accounts`;
+          ? `कुल बचत ${npr(data.totalSavingsBalance, true)} · ${data.totalAccounts ?? 0} खाता`
+          : `Savings ${npr(data.totalSavingsBalance, false)} across ${data.totalAccounts ?? 0} accounts`;
       }
       return nepali
-        ? `कुल सम्पत्ति ${npr(data.totalAssets)} · ${data.memberCount ?? 0} सदस्य`
-        : `Assets ${npr(data.totalAssets)} · ${data.memberCount ?? 0} members`;
+        ? `कुल सम्पत्ति ${npr(data.totalAssets, true)} · ${data.memberCount ?? 0} सदस्य`
+        : `Assets ${npr(data.totalAssets, false)} · ${data.memberCount ?? 0} members`;
     case 'SUPERVISORY':
       if (data.portfolioAtRiskPercent !== undefined) {
         return nepali
@@ -372,12 +378,12 @@ export function summariseReport(report: GeneratedReport, lang: 'ne' | 'en' = 'en
           : `PAR ${pct(data.portfolioAtRiskPercent)} · repayment ${pct(data.repaymentRate)}`;
       }
       return nepali
-        ? `कुल सम्पत्ति ${npr(data.totalAssets)} को विश्लेषण`
-        : `Composition of ${npr(data.totalAssets)}`;
+        ? `कुल सम्पत्ति ${npr(data.totalAssets, true)} को विश्लेषण`
+        : `Composition of ${npr(data.totalAssets, false)}`;
     case 'OPERATIONAL':
       return nepali
-        ? `${data.activeGroups ?? 0} सक्रिय समूह · संकलन ${npr(data.totalCollected)}`
-        : `${data.activeGroups ?? 0} active groups · collected ${npr(data.totalCollected)}`;
+        ? `${data.activeGroups ?? 0} सक्रिय समूह · संकलन ${npr(data.totalCollected, true)}`
+        : `${data.activeGroups ?? 0} active groups · collected ${npr(data.totalCollected, false)}`;
     case 'REGULATORY':
       return nepali
         ? `मिलान दर ${pct(data.reconciliationRate)} · ${data.openMismatches ?? 0} खुला भिन्नता`

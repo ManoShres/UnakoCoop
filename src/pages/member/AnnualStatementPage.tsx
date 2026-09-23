@@ -6,7 +6,7 @@ import { Landmark, Printer, Award, ShieldCheck } from 'lucide-react';
 
 export const AnnualStatementPage: React.FC = () => {
   const { currentMember } = useAuthStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
   const { coopSettings } = useCoopStore();
 
   const handlePrint = () => {
@@ -84,7 +84,7 @@ export const AnnualStatementPage: React.FC = () => {
           <div>
             <span className="text-slate-400 block">{t('शेयर पूँजी लगानी', 'Share Capital')}:</span>
             <p className="font-bold text-emerald-600 dark:text-[#13ec37] mt-0.5">
-              NPR {(currentMember?.shareCapital || 50000).toLocaleString()}
+              NPR {fmtCurrency(currentMember?.shareCapital || 50000, true)}
             </p>
           </div>
         </div>
@@ -138,9 +138,9 @@ export const AnnualStatementPage: React.FC = () => {
                     {t('कृषि तथा पशुपालन कर्जा', 'Agro & Livestock Loan')}
                   </td>
                   <td className="py-3 font-mono text-slate-400">LN-AGRO-0941</td>
-                  <td className="py-3 text-right text-slate-500">NPR 1,03,680 (Repaid)</td>
+                  <td className="py-3 text-right text-slate-500">NPR {fmtCurrency(103680, true)} (Repaid)</td>
                   <td className="py-3 text-right text-slate-500">-</td>
-                  <td className="py-3 text-right font-bold text-rose-600 dark:text-rose-400">NPR 1,46,320 (Remaining)</td>
+                  <td className="py-3 text-right font-bold text-rose-600 dark:text-rose-400">NPR {fmtCurrency(146320, true)} (Remaining)</td>
                 </tr>
               </tbody>
             </table>
@@ -161,15 +161,15 @@ export const AnnualStatementPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <div className="bg-white/80 dark:bg-slate-900/80 p-3 rounded-lg">
               <span className="text-slate-400 block">{t('कुल आर्जित लाभांश', 'Gross Dividend Earned')}:</span>
-              <span className="font-bold text-slate-900 dark:text-white">NPR 7,100</span>
+              <span className="font-bold text-slate-900 dark:text-white">NPR {fmtCurrency(7100, true)}</span>
             </div>
             <div className="bg-white/80 dark:bg-slate-900/80 p-3 rounded-lg">
               <span className="text-slate-400 block">{t('स्रोतमा कर कट्टी (५%)', 'Statutory TDS (5%)')}:</span>
-              <span className="font-bold text-rose-600">- NPR 355</span>
+              <span className="font-bold text-rose-600">- NPR {fmtCurrency(355, true)}</span>
             </div>
             <div className="bg-white/80 dark:bg-slate-900/80 p-3 rounded-lg">
               <span className="text-slate-400 block">{t('खातामा जम्मा हुने खुद लाभांश', 'Net Dividend Credit')}:</span>
-              <span className="font-bold text-emerald-600 dark:text-[#13ec37]">+ NPR 6,745</span>
+              <span className="font-bold text-emerald-600 dark:text-[#13ec37]">+ NPR {fmtCurrency(6745, true)}</span>
             </div>
           </div>
         </div>

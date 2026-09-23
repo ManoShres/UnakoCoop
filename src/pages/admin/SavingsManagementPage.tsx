@@ -18,7 +18,7 @@ import {
 
 export function SavingsManagementPage() {
   const { savings, adjustSavingsBalance, updateSavingsRate } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAcct, setSelectedAcct] = useState<SavingsAccount | null>(null);
   const [adjustType, setAdjustType] = useState<'DEPOSIT' | 'WITHDRAWAL'>('DEPOSIT');
@@ -54,8 +54,8 @@ export function SavingsManagementPage() {
     adjustSavingsBalance(selectedAcct.accountNo, adjustAmount, adjustType, adjustNote);
     showToastMsg(
       t(
-        `${adjustType === 'DEPOSIT' ? 'जम्मा' : 'डेबिट'} रु. ${adjustAmount.toLocaleString()} खाता नं. ${selectedAcct.accountNo} मा सफलतापूर्वक प्रविष्टि भयो!`,
-        `${adjustType === 'DEPOSIT' ? 'Deposit of' : 'Debit of'} NPR ${adjustAmount.toLocaleString()} applied to ${selectedAcct.accountNo}!`
+        `${adjustType === 'DEPOSIT' ? 'जम्मा' : 'डेबिट'} रु. ${fmtCurrency(adjustAmount, true)} खाता नं. ${selectedAcct.accountNo} मा सफलतापूर्वक प्रविष्टि भयो!`,
+        `${adjustType === 'DEPOSIT' ? 'Deposit of' : 'Debit of'} NPR ${fmtCurrency(adjustAmount, true)} applied to ${selectedAcct.accountNo}!`
       )
     );
     setSelectedAcct(null);
@@ -115,7 +115,7 @@ export function SavingsManagementPage() {
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
           <div className="text-xs text-slate-500 font-bold uppercase">{t('कुल सदस्य तरलता', 'Total Member Liquidity')}</div>
           <div className="text-xl sm:text-2xl font-black font-mono text-blue-600 dark:text-blue-400 mt-1">
-            रु. {totalDeposits.toLocaleString()}
+            रु. {fmtCurrency(totalDeposits, true)}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">{t('सबै सक्रिय पासबुक खाताहरूमा', 'Across all active passbook ledgers')}</div>
         </div>
@@ -171,7 +171,7 @@ export function SavingsManagementPage() {
                     {s.accountType}
                   </td>
                   <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
-                    रु. {s.balance.toLocaleString()}
+                    रु. {fmtCurrency(s.balance, true)}
                   </td>
                   <td className="py-3.5 px-4">
                     <span className="inline-flex items-center gap-1 font-bold text-emerald-600">
@@ -222,7 +222,7 @@ export function SavingsManagementPage() {
               <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
                 <div className="text-[11px] text-slate-500">{t('हालको मौज्दात:', 'Current Balance:')}</div>
                 <div className="text-base font-black font-mono text-slate-900 dark:text-white">
-                  रु. {selectedAcct.balance.toLocaleString()}
+                  रु. {fmtCurrency(selectedAcct.balance, true)}
                 </div>
               </div>
 

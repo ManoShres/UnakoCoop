@@ -16,6 +16,7 @@ import {
   Search,
   ShieldCheck,
 } from 'lucide-react';
+import { formatNPR } from '../../utils/nepaliDate';
 import type {
   BankStatementEntry,
   MismatchType,
@@ -39,7 +40,7 @@ const MISMATCH_LABELS: Record<MismatchType, { ne: string; en: string }> = {
 };
 
 export function ReconciliationPage() {
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
   const {
     bankStatements,
     reconciliationEntries,
@@ -221,7 +222,8 @@ export function ReconciliationPage() {
         (entry.referenceNo ?? '').toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-  const npr = (value: number) => `NPR ${value.toLocaleString('en-IN')}`;
+  const npr = (value: number) => formatNPR(value, useNepali);
+  const useNepali = useLanguageStore.getState().lang === 'ne';
 
   return (
     <div className="space-y-6">
@@ -383,7 +385,7 @@ export function ReconciliationPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-right font-mono font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                      {npr(entry.amount)}
+                      {fmtCurrency(entry.amount, true)}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${STATUS_STYLES[entry.status]}`}>
@@ -548,7 +550,7 @@ export function ReconciliationPage() {
                       </td>
                       <td className="px-4 py-3 text-slate-700 dark:text-slate-200">{s.description}</td>
                       <td className="px-4 py-3 text-right font-mono font-bold text-slate-900 dark:text-white whitespace-nowrap">
-                        {npr(s.amount)}
+                        {fmtCurrency(s.amount, true)}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -579,7 +581,7 @@ export function ReconciliationPage() {
               {t('भिन्नता समाधान', 'Resolve Mismatch')}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-              {resolving.description} · {npr(resolving.amount)} · {resolving.date}
+              {resolving.description} · {fmtCurrency(resolving.amount, true)} · {resolving.date}
             </p>
             <textarea
               value={resolveNotes}

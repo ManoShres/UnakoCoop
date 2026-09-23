@@ -44,15 +44,9 @@ export interface MemberRow {
   active_loan_balance: number;
   accrued_dividend: number;
   credit_score: number;
-  bank_name: string;
-  bank_account_no: string;
-  bank_branch: string;
-  bank_holder_name: string;
-  kyc_citizenship_front: boolean;
-  kyc_citizenship_back: boolean;
-  kyc_photo: boolean;
-  kyc_signature: boolean;
-  kyc_utility_bill: boolean;
+  bank_details: Member['bankDetails'] | null;
+  kyc_documents: Member['kycDocuments'] | null;
+  auth_user_id: string | null;
   notes: string | null;
 }
 
@@ -74,19 +68,20 @@ export const rowToMember = (row: MemberRow): Member => ({
   activeLoanBalance: row.active_loan_balance,
   accruedDividend: row.accrued_dividend,
   creditScore: row.credit_score,
-  bankDetails: {
-    bankName: row.bank_name,
-    accountNo: row.bank_account_no,
-    branch: row.bank_branch,
-    holderName: row.bank_holder_name,
+  bankDetails: row.bank_details ?? {
+    bankName: '',
+    accountNo: '',
+    branch: '',
+    holderName: '',
   },
-  kycDocuments: {
-    citizenshipFront: row.kyc_citizenship_front,
-    citizenshipBack: row.kyc_citizenship_back,
-    photo: row.kyc_photo,
-    signature: row.kyc_signature,
-    utilityBill: row.kyc_utility_bill,
+  kycDocuments: row.kyc_documents ?? {
+    citizenshipFront: false,
+    citizenshipBack: false,
+    photo: false,
+    signature: false,
+    utilityBill: false,
   },
+  authUserId: row.auth_user_id,
   notes: row.notes || undefined,
 });
 
@@ -110,15 +105,9 @@ export const memberToRow = (
   active_loan_balance: m.activeLoanBalance,
   accrued_dividend: m.accruedDividend,
   credit_score: m.creditScore,
-  bank_name: m.bankDetails.bankName,
-  bank_account_no: m.bankDetails.accountNo,
-  bank_branch: m.bankDetails.branch,
-  bank_holder_name: m.bankDetails.holderName,
-  kyc_citizenship_front: m.kycDocuments.citizenshipFront,
-  kyc_citizenship_back: m.kycDocuments.citizenshipBack,
-  kyc_photo: m.kycDocuments.photo,
-  kyc_signature: m.kycDocuments.signature,
-  kyc_utility_bill: m.kycDocuments.utilityBill,
+  bank_details: m.bankDetails,
+  kyc_documents: m.kycDocuments,
+  auth_user_id: m.authUserId ?? null,
   notes: m.notes || null,
 });
 
@@ -143,19 +132,9 @@ export const memberPatchToRow = (
     r.active_loan_balance = u.activeLoanBalance;
   if (u.accruedDividend !== undefined) r.accrued_dividend = u.accruedDividend;
   if (u.creditScore !== undefined) r.credit_score = u.creditScore;
-  if (u.bankDetails !== undefined) {
-    r.bank_name = u.bankDetails.bankName;
-    r.bank_account_no = u.bankDetails.accountNo;
-    r.bank_branch = u.bankDetails.branch;
-    r.bank_holder_name = u.bankDetails.holderName;
-  }
-  if (u.kycDocuments !== undefined) {
-    r.kyc_citizenship_front = u.kycDocuments.citizenshipFront;
-    r.kyc_citizenship_back = u.kycDocuments.citizenshipBack;
-    r.kyc_photo = u.kycDocuments.photo;
-    r.kyc_signature = u.kycDocuments.signature;
-    r.kyc_utility_bill = u.kycDocuments.utilityBill;
-  }
+  if (u.bankDetails !== undefined) r.bank_details = u.bankDetails;
+  if (u.kycDocuments !== undefined) r.kyc_documents = u.kycDocuments;
+  if (u.authUserId !== undefined) r.auth_user_id = u.authUserId;
   if (u.notes !== undefined) r.notes = u.notes || null;
   return r;
 };
@@ -241,6 +220,58 @@ export const deleteMemberInSupabase = async (
 };
 
 
+
+// ==================== MEMBER AUTH LINKAGE ====================
+
+/**
+ * Resolves the members row linked to a Supabase Auth user id.
+ * Returns `data: null` (no error) when the auth user has no linked member yet.
+ */
+export const fetchMemberByAuthUserId = async (
+  authUserId: string
+): Promise<ServiceResult<Member | null>> => {
+  if (!supabase) return { data: null, error: NOT_CONFIGURED };
+  try {
+    const { data, error } = await supabase
+      .from('members')
+      .select('*')
+      .eq('auth_user_id', authUserId)
+      .maybeSingle();
+    if (error) return { data: null, error: error.message };
+    return { data: data ? rowToMember(data as MemberRow) : null, error: null };
+  } catch (err) {
+    return {
+      data: null,
+      error: err instanceof Error ? err.message : 'Unknown network error.',
+    };
+  }
+};
+
+/**
+ * Staff helper: binds (or un-binds) a Supabase Auth account to a member.
+ * Also useful manually: update members set auth_user_id = '<uuid>' ...
+ */
+export const linkMemberAuthUser = async (
+  memberNo: string,
+  authUserId: string | null
+): Promise<ServiceResult<Member>> => {
+  if (!supabase) return { data: null, error: NOT_CONFIGURED };
+  try {
+    const { data, error } = await supabase
+      .from('members')
+      .update({ auth_user_id: authUserId })
+      .eq('member_no', memberNo)
+      .select()
+      .single();
+    if (error) return { data: null, error: error.message };
+    return { data: rowToMember(data as MemberRow), error: null };
+  } catch (err) {
+    return {
+      data: null,
+      error: err instanceof Error ? err.message : 'Unknown network error.',
+    };
+  }
+};
 
 // ==================== SAVINGS ACCOUNTS ====================
 
@@ -371,6 +402,7 @@ export interface LoanRow {
 
 export const rowToLoan = (row: LoanRow): Loan => ({
   id: row.id,
+  memberId: row.member_id || undefined,
   loanNo: row.loan_no,
   loanType: row.loan_type,
   principalAmount: row.principal_amount,
@@ -387,7 +419,7 @@ export const rowToLoan = (row: LoanRow): Loan => ({
 export const loanToRow = (
   l: Omit<Loan, 'id'>
 ): Omit<LoanRow, 'id'> => ({
-  member_id: null,
+  member_id: l.memberId ?? null,
   loan_no: l.loanNo,
   loan_type: l.loanType,
   principal_amount: l.principalAmount,

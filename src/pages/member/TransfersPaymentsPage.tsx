@@ -48,7 +48,7 @@ const RECENT_PAYMENTS: PaymentRecord[] = [
 ];
 
 export function TransfersPaymentsPage() {
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
   const [mode, setMode] = useState<'transfer' | 'wallet'>('transfer');
   const [memberId, setMemberId] = useState('UKO-2072-04419');
   const [amount, setAmount] = useState('10000');
@@ -280,7 +280,7 @@ export function TransfersPaymentsPage() {
                   <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
                     <div className="font-display-stat text-xl font-bold font-headline text-on-surface">
                       <span className="text-primary mr-1 text-base">NPR</span>
-                      {parseInt(amount || '0').toLocaleString()}
+                      {fmtCurrency(parseInt(amount || '0'), true)}
                     </div>
                     <input
                       type="number"
@@ -301,7 +301,7 @@ export function TransfersPaymentsPage() {
                         }`}
                         type="button"
                       >
-                        +{t('रु.', 'NPR')} {parseInt(a).toLocaleString()}
+                        +{t('रु.', 'NPR')} {fmtCurrency(parseInt(a), true)}
                       </button>
                     ))}
                   </div>
@@ -411,7 +411,7 @@ export function TransfersPaymentsPage() {
                   <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
                     <div className="font-display-stat text-xl font-bold font-headline text-on-surface">
                       <span className="text-primary mr-1 text-base">{t('रु.', 'NPR')}</span>
-                      {parseInt(walletAmount || '0').toLocaleString()}
+                      {fmtCurrency(parseInt(walletAmount || '0'), true)}
                     </div>
                     <input
                       type="number"
@@ -431,7 +431,7 @@ export function TransfersPaymentsPage() {
                         }`}
                         type="button"
                       >
-                        +NPR {parseInt(a).toLocaleString()}
+                        +NPR {fmtCurrency(parseInt(a), true)}
                       </button>
                     ))}
                   </div>
@@ -447,12 +447,12 @@ export function TransfersPaymentsPage() {
               {/* Action Footer */}
               <div className="p-6 pt-0">
                 <button
-                  onClick={() => alert(`Redirecting to ${selectedGateway.toUpperCase()} secure payment gateway for NPR ${parseInt(walletAmount).toLocaleString()}...`)}
+                  onClick={() => alert(`Redirecting to ${selectedGateway.toUpperCase()} secure payment gateway for NPR ${fmtCurrency(parseInt(walletAmount), true)}...`)}
                   className="w-full py-3.5 rounded-xl bg-primary text-on-primary font-bold text-xs sm:text-sm hover:bg-primary-container transition-all flex items-center justify-center gap-2 shadow-sm"
                   type="button"
                 >
                   <MI n="open_in_new" cls="text-[18px]" />
-                  <span>{t(`गेटवे मार्फत जम्मा गर्नुहोस् (रु. ${parseInt(walletAmount || '0').toLocaleString()})`, `Load via Gateway (NPR ${parseInt(walletAmount || '0').toLocaleString()})`)}</span>
+                  <span>{t(`गेटवे मार्फत जम्मा गर्नुहोस् (रु. ${fmtCurrency(parseInt(walletAmount || '0'), true)})`, `Load via Gateway (NPR ${fmtCurrency(parseInt(walletAmount || '0'), true)})`)}</span>
                 </button>
               </div>
             </div>
@@ -750,7 +750,7 @@ export function TransfersPaymentsPage() {
 
             <div className="space-y-2 mb-5 text-xs">
               {[
-                { l: t('स्थानान्तरण रकम', 'Transfer Amount'), v: `NPR ${parseInt(amount || '0').toLocaleString()}.00` },
+                { l: t('स्थानान्तरण रकम', 'Transfer Amount'), v: `NPR ${fmtCurrency(parseInt(amount || '0'), true)}.00` },
                 { l: t('निकासी शुल्क', 'Clearing Fee'), v: t('रु. ०.०० (०% अधिभार)', 'NPR 0.00 (0% Surcharge)'), green: true },
                 { l: t('स्रोत खाता', 'Debit Account'), v: t('साधारण बचत - १०४-००२९-६४', 'Regular Savings - 104-0029-64') },
                 { l: t('प्राप्तकर्ता', 'Recipient'), v: `${verifiedMember?.name || 'Cooperative Member'} (${memberId})` },
@@ -799,10 +799,10 @@ export function TransfersPaymentsPage() {
                 type="button"
                 onClick={() => {
                   setReviewModal(false);
-                  alert(`Transfer of NPR ${parseInt(amount).toLocaleString()} to ${verifiedMember?.name} successfully cleared on CBS ledger!`);
+                  alert(`Transfer of NPR ${fmtCurrency(parseInt(amount), true)} to ${verifiedMember?.name} successfully cleared on CBS ledger!`);
                 }}
               >
-                <span>{t('रकम पठाउनुहोस्', 'Send Funds')} ({t('रु.', 'NPR')} {parseInt(amount || '0').toLocaleString()})</span>
+                <span>{t('रकम पठाउनुहोस्', 'Send Funds')} ({t('रु.', 'NPR')} {fmtCurrency(parseInt(amount || '0'), true)})</span>
                 <MI n="arrow_forward" cls="text-[16px]" />
               </button>
             </div>

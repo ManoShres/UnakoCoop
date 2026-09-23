@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useDesignStore } from '../../store/useDesignStore';
 import {
   Users,
@@ -29,6 +29,7 @@ import {
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { signOutOfSupabase } from '../../services/employeeService';
+import { isSupabaseConfigured } from '../../lib/supabase';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { ThemeToggle } from '../ui/ThemeToggle';
@@ -43,7 +44,7 @@ export const AdminLayout: React.FC = () => {
   const pendingDeposits = useCoopStore((s) =>
     s.motherGroupDeposits.filter((deposit) => deposit.status === 'PENDING').length
   );
-  const { switchToPreset, theme: storedTheme } = useAuthStore();
+  const { role, authLoading, switchToPreset, theme: storedTheme } = useAuthStore();
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', storedTheme === 'dark');
   }, [storedTheme]);
@@ -54,6 +55,23 @@ export const AdminLayout: React.FC = () => {
   const customLogoUrl = useDesignStore((s) => s.settings.customLogoUrl);
   const logoUrl = customLogoUrl || '/unako-logo.png';
   const newInquiriesCount = inquiries.filter((i) => i.status === 'NEW').length;
+
+  // Live (Supabase) mode: the admin console requires an authenticated staff
+  // session. Offline demo keeps the original open-access behaviour.
+  if (isSupabaseConfigured()) {
+    if (authLoading) {
+      return (
+        <div className="min-h-screen bg-surface-canvas flex items-center justify-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant animate-pulse">
+            {t('सत्र जाँच गर्दै…', 'Checking session…')}
+          </span>
+        </div>
+      );
+    }
+    if (role !== 'ADMIN') {
+      return <Navigate to="/login" replace />;
+    }
+  }
 
   const handleLogout = () => {
     void signOutOfSupabase();
@@ -85,6 +103,7 @@ export const AdminLayout: React.FC = () => {
       icon: UsersRound,
       badge: pendingDeposits > 0 ? pendingDeposits : undefined,
     },
+    { to: '/admin/collection-entry', label: t('कलेक्सन प्रवेश', 'Collection Entry'), icon: TrendingUp, badge: pendingDeposits > 0 ? pendingDeposits : undefined },
     { to: '/admin/trading-pl', label: t('ट्रेडिङ नाफा नोक्सान', 'Trading Profit & Loss'), icon: TrendingUp },
     { to: '/admin/pearls-analysis', label: t('पर्ल्स विश्लेषण', 'PEARLS Analysis'), icon: Landmark },
     {

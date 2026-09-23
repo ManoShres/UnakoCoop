@@ -16,7 +16,7 @@ import {
 
 export function TransfersManagementPage() {
   const { transactions, gatewayRails, toggleGatewayRail, updateGatewayLimit } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGateway, setSelectedGateway] = useState<GatewayRail | null>(null);
   const [newLimit, setNewLimit] = useState<number>(100000);
@@ -40,8 +40,8 @@ export function TransfersManagementPage() {
     updateGatewayLimit(selectedGateway.id, newLimit);
     showToastMsg(
       t(
-        `गेटवे ${selectedGateway.name} को दैनिक सीमा रु. ${newLimit.toLocaleString()} मा अद्यावधिक भयो!`,
-        `Gateway ${selectedGateway.name} limit updated to NPR ${newLimit.toLocaleString()}!`
+        `गेटवे ${selectedGateway.name} को दैनिक सीमा रु. ${fmtCurrency(newLimit, true)} मा अद्यावधिक भयो!`,
+        `Gateway ${selectedGateway.name} limit updated to NPR ${fmtCurrency(newLimit, true)}!`
       )
     );
     setSelectedGateway(null);
@@ -142,7 +142,7 @@ export function TransfersManagementPage() {
                 <div>
                   <span className="text-[10px] text-slate-400 block">{t('दैनिक सीमा:', 'Daily Limit:')}</span>
                   <span className="font-mono font-bold text-slate-900 dark:text-white">
-                    रु. {gw.dailyLimit.toLocaleString()}
+                    रु. {fmtCurrency(gw.dailyLimit, true)}
                   </span>
                 </div>
                 <button
@@ -210,7 +210,7 @@ export function TransfersManagementPage() {
                     {tx.description}
                   </td>
                   <td className="py-3 px-3 text-right font-mono font-bold text-slate-900 dark:text-white">
-                    रु. {tx.amount.toLocaleString()}
+                    रु. {fmtCurrency(tx.amount, true)}
                   </td>
                   <td className="py-3 px-3 text-center">
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400">

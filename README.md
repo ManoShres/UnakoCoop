@@ -84,13 +84,35 @@ npm run dev           # /admin/employees shows a green "Supabase live - connecte
 
 ## Security model (RLS)
 
-- `anon` → read-only on directory/config tables (notices, loan schemes, settings,
-  share pool, AGM, field officers, members, savings, loans, transactions, inquiries)
-- `authenticated` (staff) → full read/write on every table
+- `anon` → read-only on public website tables (notices, loan schemes, coop
+  settings, share pool, AGM details, field officers, generated reports); may
+  only insert a `PENDING` membership application row and public inquiries
+- `authenticated` member (row linked via `members.auth_user_id`) → reads/updates
+  **only their own** members row, savings, loans, transactions, notifications
+  and loan applications; a trigger freezes financial/KYC columns on self-updates
+- `authenticated` staff (no members row linked) → full read/write on every table
 - `public.employees` → staff only
 
-To harden further, add `members.auth_user_id uuid references auth.users(id)` and scope
-member rows with `using (auth_user_id = auth.uid())`.
+`public.is_staff()` = signed in **and** not linked to a members row;
+`public.current_member_id()` = the member id bound to `auth.uid()`.
+
+## Member self-service login
+
+1. Run the updated `supabase/schema.sql` (idempotent - it adds
+   `members.auth_user_id`, the auto-link trigger and the member RLS policies).
+2. **Authentication → Users → Add user** with the member's email (must match the
+   `members.email` row, e.g. `ram.shrestha@unako.coop.np`), a password, and
+   *Auto Confirm User* enabled. The `trg_auth_user_member_link` trigger binds
+   the login to the member automatically (or link manually:
+   `update members set auth_user_id = '<auth-uuid>' where member_no = 'UK-88219';`).
+3. The member signs in through the portal's **Member** tab with that email.
+   Session restore on refresh, `/member` + `/admin` route guards, and logout are
+   all wired through `src/services/memberAuthService.ts`.
+4. Verify with `npm run db:check`.
+
+Note: in live mode the member identity comes from Supabase, while the member
+portal's transaction lists still read the local demo store until those services
+are wired (see "Data flow today" below).
 
 ## Data flow today
 

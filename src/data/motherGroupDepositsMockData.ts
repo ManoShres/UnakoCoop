@@ -19,6 +19,10 @@ export const INITIAL_MOTHER_GROUP_DEPOSITS: MotherGroupDeposit[] = [
     recordedByName: 'Kamala Devi Sharma',
     status: 'COMPLETED',
     referenceNo: 'DEP-2026-0913-001',
+    savingsAccountNo: 'SAV-001-88219',
+    transactionRef: 'MGCOL-2081-000101',
+    bankDepositSlipNo: 'SLIP-GDH-0913',
+    postedAt: '2026-09-13T10:45:00.000Z',
     createdAt: '2026-09-13',
   },
   {
@@ -34,6 +38,10 @@ export const INITIAL_MOTHER_GROUP_DEPOSITS: MotherGroupDeposit[] = [
     recordedByName: 'Kamala Devi Sharma',
     status: 'COMPLETED',
     referenceNo: 'DEP-2026-0913-002',
+    savingsAccountNo: 'SAV-003-76102',
+    transactionRef: 'MGCOL-2081-000102',
+    bankDepositSlipNo: 'SLIP-GDH-0913',
+    postedAt: '2026-09-13T10:45:00.000Z',
     createdAt: '2026-09-13',
   },
   {
@@ -63,6 +71,9 @@ export const INITIAL_MOTHER_GROUP_DEPOSITS: MotherGroupDeposit[] = [
     recordedByName: 'Kamala Devi Sharma',
     status: 'RECONCILED',
     referenceNo: 'DEP-2026-0810-001',
+    savingsAccountNo: 'SAV-001-88219',
+    transactionRef: 'MGCOL-2081-000089',
+    postedAt: '2026-08-10T11:05:00.000Z',
     createdAt: '2026-08-10',
   },
   {
@@ -78,6 +89,9 @@ export const INITIAL_MOTHER_GROUP_DEPOSITS: MotherGroupDeposit[] = [
     recordedByName: 'Kamala Devi Sharma',
     status: 'RECONCILED',
     referenceNo: 'DEP-2026-0810-002',
+    savingsAccountNo: 'SAV-003-76102',
+    transactionRef: 'MGCOL-2081-000090',
+    postedAt: '2026-08-10T11:05:00.000Z',
     createdAt: '2026-08-10',
   },
 ];

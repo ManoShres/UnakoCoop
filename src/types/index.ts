@@ -34,6 +34,8 @@ export interface Member {
     utilityBill: boolean;
   };
   notes?: string;
+  /** Supabase Auth user id linked to this member (live mode only). */
+  authUserId?: string | null;
 }
 
 export interface SavingsAccount {
@@ -49,9 +51,25 @@ export interface SavingsAccount {
   status: 'ACTIVE' | 'DORMANT' | 'MATURED';
 }
 
+export type CollateralType =
+  | 'LAND_LALPURJA'
+  | 'BUILDING'
+  | 'CASH_FD_PLEDGE'
+  | 'SHARE_PLEDGE'
+  | 'LIVESTOCK'
+  | 'GOLD_JEWELLERY'
+  | 'VEHICLE'
+  | 'GUARANTOR'
+  | 'GROUP_GUARANTEE'
+  | 'OTHER';
+
+export type CollateralCoverStatus = 'PLEDGED' | 'INSURED' | 'RELEASED' | 'UNDER_REVIEW';
+
 export interface Loan {
   id: string;
   loanNo: string;
+  /** Owning member id (nullable for legacy rows without a linked member). */
+  memberId?: string;
   loanType: 'Agricultural & Livestock' | 'Small Business Enterprise' | 'Education & Career' | 'Emergency Relieve' | 'Home & Land';
   principalAmount: number;
   remainingBalance: number;
@@ -62,6 +80,15 @@ export interface Loan {
   nextDueDate: string;
   status: 'ACTIVE' | 'UNDER_REVIEW' | 'PAID_OFF' | 'OVERDUE';
   collateralDescription: string;
+  /** Collateral register classification (see CollateralRegisterPage). */
+  collateralType?: CollateralType;
+  /** Assessed market value of the collateral in NPR. */
+  collateralValue?: number;
+  /** Registered owner / guarantor of the collateral. */
+  collateralOwner?: string;
+  /** Livestock / agriculture / asset insurance policy number. */
+  insurancePolicyNo?: string;
+  collateralStatus?: CollateralCoverStatus;
 }
 
 export interface LoanApplication {
@@ -346,6 +373,10 @@ export interface MotherGroupMeeting {
   memberCount: number;
   status: MeetingStatus;
   notes?: string;
+  /** Free-text minutes / agenda outcome captured by the conductor. */
+  minutes?: string;
+  /** Expected members from the group roster at meeting-open time. */
+  expectedMembers?: number;
   createdAt: string;
 }
 
@@ -365,6 +396,14 @@ export interface MotherGroupDeposit {
   recordedByName?: string;
   status: DepositStatus;
   referenceNo?: string;
+  /** Member savings account number the collection was posted into (set on posting). */
+  savingsAccountNo?: string;
+  /** Teller-ledger transaction reference created when posted (e.g. MGCOL-2081-000142). */
+  transactionRef?: string;
+  /** Bank deposit slip / voucher number entered by the teller for the group deposit. */
+  bankDepositSlipNo?: string;
+  /** ISO timestamp when the deposit was posted to the member passbook. */
+  postedAt?: string;
   /** Free-text note used when a teller updates/voids a deposit. */
   notes?: string;
   createdAt: string;
@@ -515,4 +554,61 @@ export interface PearlsAnalysis {
   trends: PearlsTrendPoint[];
   generatedAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// Profit distribution types (AGM dividend + patronage appropriation)
+// ---------------------------------------------------------------------------
+
+export type ProfitDistributionStatus = 'DRAFT' | 'APPROVED' | 'DISTRIBUTED';
+
+/** One statutory/appropriation line of the profit distribution plan. */
+export interface ProfitAllocationLine {
+  key:
+    | 'GENERAL_RESERVE'
+    | 'RISK_FUND'
+    | 'MEMBER_DIVIDEND'
+    | 'PATRONAGE_BONUS'
+    | 'STAFF_BONUS'
+    | 'WELFARE_FUND'
+    | 'RETAINED_SURPLUS';
+  label: string;
+  labelNepali: string;
+  /** Allocation basis in percent of net distributable profit. */
+  percent: number;
+  amount: number;
+}
+
+/** Per-member payout row (dividend + patronage − dividend tax). */
+export interface ProfitPayoutLine {
+  memberId?: string;
+  memberNo: string;
+  memberName: string;
+  shareCapital: number;
+  dividendAmount: number;
+  patronageAmount: number;
+  /** Dividend tax withheld (5% per prevailing Nepal practice). */
+  taxDeduction: number;
+  netPayable: number;
+  /** Teller-ledger reference once distributed (DIVIDEND transaction). */
+  transactionRef?: string;
+}
+
+export interface ProfitDistribution {
+  id: string;
+  fiscalYear: string; // e.g. '2081/82'
+  periodLabel: string; // e.g. 'FY 2081/82 (Shrawan–Asar)'
+  netProfit: number; // computed surplus before appropriation
+  allocations: ProfitAllocationLine[];
+  payouts: ProfitPayoutLine[];
+  status: ProfitDistributionStatus;
+  createdBy: string;
+  createdByName?: string;
+  approvedBy?: string;
+  approvedByName?: string;
+  approvedAt?: string;
+  distributedAt?: string;
+  createdAt: string;
+  notes?: string;
+}
+
 

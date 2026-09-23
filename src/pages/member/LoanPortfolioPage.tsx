@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatNPR } from "../../utils/nepaliDate";
 import { useLanguageStore } from '../../store/useLanguageStore';
 
 export function LoanPortfolioPage() {
@@ -23,7 +24,7 @@ export function LoanPortfolioPage() {
 
   const handleEmiPayment = () => {
     setShowEmiModal(false);
-    showToast(t(`किस्ता भुक्तानी सफल भयो! (रु. ${paymentAmount.toLocaleString('en-IN')})`, `EMI Payment of NPR ${paymentAmount.toLocaleString('en-IN')} Successful!`));
+    showToast(t(`किस्ता भुक्तानी सफल भयो! (रु. ${formatNPR(paymentAmount, true)})`, `EMI Payment of NPR ${formatNPR(paymentAmount, true)} Successful!`));
   };
 
   const handleApplySubmit = () => {
@@ -748,7 +749,7 @@ export function LoanPortfolioPage() {
                 <div className="flex justify-between text-xs text-on-surface-variant">
                   <span>Estimated EMI</span>
                   <span className="font-bold text-on-surface font-tabular-mono">
-                    NPR {Math.round((loanRequested * 1.095) / loanTenure).toLocaleString('en-IN')} / mo
+                    NPR {formatNPR(Math.round((loanRequested * 1.095) / loanTenure), true)} / mo
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-on-surface-variant">

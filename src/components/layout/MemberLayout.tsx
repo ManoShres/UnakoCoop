@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { NavLink, Outlet, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Outlet, Link, useNavigate, Navigate } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDesignStore } from '../../store/useDesignStore';
+import { isSupabaseConfigured } from '../../lib/supabase';
+import { signOutOfSupabase } from '../../services/employeeService';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
@@ -10,15 +12,33 @@ export function MemberLayout() {
   const { lang, t } = useLanguageStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
-  const { switchToPreset, currentMember } = useAuthStore();
+  const { role, currentMember, authLoading, switchToPreset } = useAuthStore();
   const customLogoUrl = useDesignStore((s) => s.settings.customLogoUrl);
   const features = useDesignStore((s) => s.settings.features);
   const logoUrl = customLogoUrl || '/unako-logo.png';
 
   const handleLogout = () => {
+    void signOutOfSupabase();
     switchToPreset('guest');
     navigate('/login');
   };
+
+  // Live (Supabase) mode: the member portal requires an authenticated member
+  // session. Offline demo keeps the original open-access behaviour.
+  if (isSupabaseConfigured()) {
+    if (authLoading) {
+      return (
+        <div className="min-h-screen bg-surface-canvas flex items-center justify-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant animate-pulse">
+            {t('सत्र जाँच गर्दै…', 'Checking session…')}
+          </span>
+        </div>
+      );
+    }
+    if (role !== 'MEMBER' || !currentMember) {
+      return <Navigate to="/login" replace />;
+    }
+  }
 
   const navItems = [
     {

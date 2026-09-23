@@ -11,7 +11,7 @@ import {
 
 export function SharesManagementPage() {
   const { sharePool, updateSharePool } = useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount } = useLanguageStore();
   const [showShareModal, setShowShareModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -90,10 +90,10 @@ export function SharesManagementPage() {
         <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
           <div className="text-xs text-slate-500 font-bold uppercase">{t('कुल सेयर पुँजी', 'Total Equity Capital')}</div>
           <div className="text-xl sm:text-2xl font-black font-mono text-slate-900 dark:text-white mt-1">
-            रु. {(sharePool.parValue * sharePool.totalAllottedKitta).toLocaleString()}
+            रु. {fmtCurrency(sharePool.parValue * sharePool.totalAllottedKitta, true)}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">
-            {sharePool.totalAllottedKitta.toLocaleString()} {t('कत्ता @ रु. ', 'Kitta @ NPR ')}{sharePool.parValue}
+            {fmtCurrency(sharePool.totalAllottedKitta, true)} {t('कत्ता @ रु. ', 'Kitta @ NPR ')}{sharePool.parValue}
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export function SharesManagementPage() {
                 <div className="text-[10px] text-slate-400 uppercase font-semibold">{t('वार्षिक प्रतिफल', 'Annual Yield APY')}</div>
               </div>
               <div className="pt-2 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 space-y-1">
-                <div>{t('न्यूनतम: रु. ', 'Min: NPR ')}{plan.min.toLocaleString()}</div>
+                <div>{t('न्यूनतम: रु. ', 'Min: NPR ')}{fmtCurrency(plan.min, true)}</div>
                 <div>{t('फिर्ता जरिवाना: ', 'Penalty: ')}{plan.penalty}</div>
               </div>
             </div>

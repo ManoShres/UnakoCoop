@@ -55,6 +55,51 @@ export function formatNPR(amount: number, useNepaliDigits = false, prefix = 'NPR
   return `${prefix} ${finalNumber}`;
 }
 
+/**
+ * Locale-aware currency formatter.
+ *
+ * Usage in components:
+ *   const { lang } = useLanguageStore();
+ *   // ...
+ *   <span>{formatCurrency(total, lang === 'ne')}</span>
+ *
+ * Returns e.g. "NPR 1,84,500.00" in English mode and
+ * "रु १,८४,५००.००" in Nepali mode (western-comma grouping
+ * preserved so totals stay readable). Pass `compact = true` to
+ * drop the two-decimal portion for round figures.
+ */
+export function formatCurrency(
+  amount: number,
+  useNepali: boolean,
+  prefix = 'NPR',
+  compact = false,
+): string {
+  if (compact) {
+    const rounded = Math.round(amount);
+    return formatNPR(rounded, useNepali, prefix);
+  }
+  return formatNPR(amount, useNepali, prefix);
+}
+
+/**
+ * Formats a plain integer count (e.g. member counts, deposit counts)
+ * using South Asian grouping and optionally Nepali digits.
+ */
+export function formatCount(value: number, useNepali: boolean): string {
+  const str = String(Math.round(value));
+  // lightweight grouping: first 3 from right, then pairs
+  let formatted = '';
+  if (str.length <= 3) {
+    formatted = str;
+  } else {
+    const lastThree = str.slice(-3);
+    const rest = str.slice(0, -3);
+    const groups = rest.match(/\d{1,2}(?=(\d{2})*$)/g);
+    formatted = (groups ? groups.join(',') + ',' : '') + lastThree;
+  }
+  return useNepali ? toNepaliDigits(formatted) : formatted;
+}
+
 export const NEPALI_MONTHS_BS = [
   { id: 1, np: 'बैशाख', en: 'Baisakh' },
   { id: 2, np: 'जेठ', en: 'Jestha' },
