@@ -5,6 +5,9 @@ import { useLanguageStore } from '../../store/useLanguageStore';
 import { Badge } from '../../components/ui/Badge';
 
 export const AdminDashboardPage: React.FC = () => {
+  const { members, applications } = useCoopStore();
+  const { t, fmtCurrency, fmtCount, fmtPhone } = useLanguageStore();
+
   const pendingMembers = members.filter((m) => m.status === 'PENDING' || m.status === 'ACTION_REQUIRED');
   const pendingLoans = applications.filter((a) => a.status === 'SUBMITTED' || a.status === 'UNDER_COMMITTEE_REVIEW');
   const totalSavings = members.reduce((acc, m) => acc + m.totalSavings, 0);
@@ -35,7 +38,7 @@ export const AdminDashboardPage: React.FC = () => {
               to="/admin/verifications"
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition-colors shadow-sm"
             >
-              {t('केवाईसी प्रमाणीकरण सूची', 'Verify KYC Queue')} ({pendingMembers.length})
+              {t('केवाईसी प्रमाणीकरण सूची', 'Verify KYC Queue')} ({fmtCount(pendingMembers.length)})
             </Link>
           </div>
         </div>
@@ -48,7 +51,7 @@ export const AdminDashboardPage: React.FC = () => {
             {t('कुल सदस्य बचत मौज्दात', 'Total Member Savings')}
           </span>
           <div className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-            {t('रु.', 'NPR')} {fmtCurrency(totalSavings, true)}
+            {fmtCurrency(totalSavings, true)}
           </div>
           <p className="text-xs text-emerald-500 font-semibold">
             {t('४ वटा सेवा केन्द्रहरूमा परिचालन', 'Mobilized Across 4 Branches')}
@@ -60,7 +63,7 @@ export const AdminDashboardPage: React.FC = () => {
             {t('सक्रिय कर्जा लगानी', 'Active Loan Portfolio')}
           </span>
           <div className="text-2xl sm:text-3xl font-black text-blue-500">
-            {t('रु.', 'NPR')} {fmtCurrency(totalLoans, true)}
+            {fmtCurrency(totalLoans, true)}
           </div>
           <p className="text-xs text-slate-500">{t('जोखिममा रहेको कर्जा: ०.८२%', 'Portfolio at Risk (PAR): 0.82%')}</p>
         </div>
@@ -70,7 +73,7 @@ export const AdminDashboardPage: React.FC = () => {
             {t('बाँकी केवाईसी प्रमाणीकरण', 'Pending KYC Verifications')}
           </span>
           <div className="text-2xl sm:text-3xl font-black text-amber-500">
-            {pendingMembers.length}
+            {fmtCount(pendingMembers.length)}
           </div>
           <p className="text-xs text-slate-500">{t('कागजात प्रमाणीकरण पर्खाइमा', 'Awaiting document validation')}</p>
         </div>
@@ -109,7 +112,7 @@ export const AdminDashboardPage: React.FC = () => {
                   <img src={m.avatarUrl} alt={m.name} className="size-9 rounded-full object-cover" />
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 dark:text-white">{m.name}</h4>
-                    <p className="text-[10px] text-slate-400 font-mono">{m.memberNo} • {m.phone}</p>
+                    <p className="text-[10px] text-slate-400 font-mono">{m.memberNo} • {fmtPhone(m.phone)}</p>
                   </div>
                 </div>
                 <Badge status={m.status} size="sm" />
@@ -138,7 +141,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <div>
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white">{app.memberName}</h4>
                   <p className="text-[10px] text-slate-400">
-                    {app.loanType} • {t('रु.', 'NPR')} {fmtCurrency(app.requestedAmount, true)}
+                    {app.loanType} • {fmtCurrency(app.requestedAmount, true)}
                   </p>
                 </div>
                 <Badge status={app.status} size="sm" />

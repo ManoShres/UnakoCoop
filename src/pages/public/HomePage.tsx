@@ -5,7 +5,7 @@ import { useLanguageStore } from '../../store/useLanguageStore';
 
 export function HomePage() {
   const { coopSettings } = useCoopStore();
-  const { t, fmtCurrency } = useLanguageStore();
+  const { t, fmtCurrency, fmtDigits, fmtPercent, fmtCount } = useLanguageStore();
 
   // Interactive Calculator State
   const [activeTab, setActiveTab] = useState<'savings' | 'loans'>('savings');
@@ -199,7 +199,7 @@ export function HomePage() {
                             {t('मासिक बचत रकम', 'Monthly Deposit Amount')}
                           </span>
                           <span className="text-base sm:text-lg font-bold text-brand-accent-lime tabular-nums" id="savings-amount-label">
-                            NPR {fmtCurrency(savingAmount, true)}
+                            {fmtCurrency(savingAmount, true)}
                           </span>
                         </div>
                         <input
@@ -213,9 +213,9 @@ export function HomePage() {
                           onChange={(e) => setSavingAmount(Number(e.target.value))}
                         />
                         <div className="flex justify-between text-[11px] text-tertiary-fixed-dim mt-0.5">
-                          <span>NPR 500</span>
-                          <span>NPR 25,000</span>
-                          <span>NPR 50,000</span>
+                          <span>{fmtCurrency(500, true)}</span>
+                          <span>{fmtCurrency(25000, true)}</span>
+                          <span>{fmtCurrency(50000, true)}</span>
                         </div>
                       </div>
 
@@ -225,7 +225,7 @@ export function HomePage() {
                             {t('बचत अवधि', 'Saving Duration')}
                           </span>
                           <span className="text-base sm:text-lg font-bold text-surface-bright tabular-nums" id="duration-label">
-                            {t(`${savingYears} वर्ष`, `${savingYears} ${savingYears === 1 ? 'Year' : 'Years'}`)}
+                            {t(`${fmtDigits(savingYears)} वर्ष`, `${fmtDigits(savingYears)} ${savingYears === 1 ? 'Year' : 'Years'}`)}
                           </span>
                         </div>
                         <input
@@ -251,19 +251,19 @@ export function HomePage() {
                           {t('अनुमानित परिपक्वता रकम', 'PROJECTED MATURITY')}
                         </span>
                         <div className="text-2xl sm:text-3xl font-extrabold text-surface-bright tracking-tight" id="savings-maturity-total">
-                          NPR {fmtCurrency(maturityTotal, true)}
+                          {fmtCurrency(maturityTotal, true)}
                         </div>
                         <p className="text-[11px] text-brand-accent-lime" id="savings-rate-sub">
-                          {t(`*${savingRate}% वार्षिक चक्रवृद्धिका आधारमा`, `*Based on ${savingRate}% annual compounded return`)}
+                          {t(`*${fmtPercent(savingRate)} वार्षिक चक्रवृद्धिका आधारमा`, `*Based on ${fmtPercent(savingRate)} annual compounded return`)}
                         </p>
                         <div className="grid grid-cols-2 gap-2 pt-1.5 text-left text-xs">
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-tertiary-fixed-dim block">{t('कुल जम्मा साँवा:', 'Total Principal:')}</span>
-                            <span className="text-surface-bright font-semibold" id="savings-principal">NPR {fmtCurrency(totalPrincipal, true)}</span>
+                            <span className="text-surface-bright font-semibold" id="savings-principal">{fmtCurrency(totalPrincipal, true)}</span>
                           </div>
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-brand-accent-lime block">{t('आर्जित ब्याज:', 'Earned Interest:')}</span>
-                            <span className="text-brand-accent-lime font-semibold" id="savings-interest">NPR {fmtCurrency(earnedInterest, true)}</span>
+                            <span className="text-brand-accent-lime font-semibold" id="savings-interest">{fmtCurrency(earnedInterest, true)}</span>
                           </div>
                         </div>
                       </div>
@@ -300,7 +300,7 @@ export function HomePage() {
                             {t('आवश्यक कर्जा रकम', 'Loan Needed')}
                           </span>
                           <span className="text-base sm:text-lg font-bold text-brand-accent-lime tabular-nums" id="loan-amount-label">
-                            NPR {fmtCurrency(loanPrincipal, true)}
+                            {fmtCurrency(loanPrincipal, true)}
                           </span>
                         </div>
                         <input
@@ -314,9 +314,9 @@ export function HomePage() {
                           onChange={(e) => setLoanPrincipal(Number(e.target.value))}
                         />
                         <div className="flex justify-between text-[11px] text-tertiary-fixed-dim mt-0.5">
-                          <span>NPR 50K</span>
-                          <span>NPR 1.25M</span>
-                          <span>NPR 2.5M</span>
+                          <span>{fmtCurrency(50000, true)}</span>
+                          <span>{fmtCurrency(1250000, true)}</span>
+                          <span>{fmtCurrency(2500000, true)}</span>
                         </div>
                       </div>
 
@@ -326,7 +326,7 @@ export function HomePage() {
                             {t('भुक्तानी अवधि', 'Repayment Period')}
                           </span>
                           <span className="text-base sm:text-lg font-bold text-surface-bright tabular-nums" id="loan-duration-label">
-                            {t(`${loanYears} वर्ष`, `${loanYears} ${loanYears === 1 ? 'Year' : 'Years'}`)}
+                            {t(`${fmtDigits(loanYears)} वर्ष`, `${fmtDigits(loanYears)} ${loanYears === 1 ? 'Year' : 'Years'}`)}
                           </span>
                         </div>
                         <input
@@ -352,19 +352,19 @@ export function HomePage() {
                           {t('अनुमानित मासिक किस्ता', 'ESTIMATED MONTHLY EMI')}
                         </span>
                         <div className="text-2xl sm:text-3xl font-extrabold text-brand-accent-lime tracking-tight" id="loan-emi-total">
-                          NPR {fmtCurrency(emi, true)}
+                          {fmtCurrency(emi, true)}
                         </div>
                         <p className="text-[11px] text-surface-bright" id="loan-rate-sub">
-                          {t(`*${loanRate}% घट्दो ब्याजदर प्रणालीमा आधारित`, `*Based on ${loanRate}% reducing balance rate`)}
+                          {t(`*${fmtPercent(loanRate)} घट्दो ब्याजदर प्रणालीमा आधारित`, `*Based on ${fmtPercent(loanRate)} reducing balance rate`)}
                         </p>
                         <div className="grid grid-cols-2 gap-2 pt-1.5 text-left text-xs">
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-tertiary-fixed-dim block">{t('कुल ब्याज:', 'Total Interest:')}</span>
-                            <span className="text-surface-bright font-semibold" id="loan-total-interest">NPR {fmtCurrency(totalLoanInterest, true)}</span>
+                            <span className="text-surface-bright font-semibold" id="loan-total-interest">{fmtCurrency(totalLoanInterest, true)}</span>
                           </div>
                           <div className="bg-surface-dark-card/60 p-2 rounded">
                             <span className="text-tertiary-fixed-dim block">{t('कुल भुक्तानी:', 'Gross Payment:')}</span>
-                            <span className="text-surface-bright font-semibold" id="loan-total-payment">NPR {fmtCurrency(grossPayment, true)}</span>
+                            <span className="text-surface-bright font-semibold" id="loan-total-payment">{fmtCurrency(grossPayment, true)}</span>
                           </div>
                         </div>
                       </div>
@@ -395,7 +395,7 @@ export function HomePage() {
                     <span className="material-symbols-outlined text-[24px]">percent</span>
                   </div>
                   <div>
-                    <div className="font-display-stat text-display-stat text-primary font-bold">8%</div>
+                    <div className="font-display-stat text-display-stat text-primary font-bold">{fmtPercent(8)}</div>
                     <p className="font-headline-sm text-headline-sm text-on-surface">{t('सुरुवाती ब्याजदर', 'Starting Rate')}</p>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
                       {t('सहुलियतपूर्ण कृषि तथा लघु कर्जा दर', 'Concessional micro & agro loan rate p.a.')}
@@ -408,7 +408,7 @@ export function HomePage() {
                     <span className="material-symbols-outlined text-[24px]">groups</span>
                   </div>
                   <div>
-                    <div className="font-display-stat text-display-stat text-on-surface font-bold">12K+</div>
+                    <div className="font-display-stat text-display-stat text-on-surface font-bold">{t('१२,०००+', '12K+')}</div>
                     <p className="font-headline-sm text-headline-sm text-on-surface">{t('सक्रिय सदस्यहरू', 'Members')}</p>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
                       {t('दाङ र देउखुरीका समुदाय साझेदारहरू', 'Active rural and town cooperative partners')}
@@ -421,7 +421,7 @@ export function HomePage() {
                     <span className="material-symbols-outlined text-[24px]">verified</span>
                   </div>
                   <div>
-                    <div className="font-display-stat text-display-stat text-primary font-bold">100%</div>
+                    <div className="font-display-stat text-display-stat text-primary font-bold">{fmtPercent(100)}</div>
                     <p className="font-headline-sm text-headline-sm text-on-surface">{t('सुरक्षित निक्षेप', 'Secure')}</p>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
                       {t('सुरक्षित कोष र नियमनकारी तरलता', 'Insured deposits and statutory liquidity funds')}
@@ -434,7 +434,7 @@ export function HomePage() {
                     <span className="material-symbols-outlined text-[24px]">account_balance</span>
                   </div>
                   <div>
-                    <div className="font-display-stat text-display-stat text-on-surface font-bold">NPR 150M+</div>
+                    <div className="font-display-stat text-display-stat text-on-surface font-bold">{t('रु. १५ करोड+', 'NPR 150M+')}</div>
                     <p className="font-headline-sm text-headline-sm text-on-surface">{t('कुल सम्पत्ति आधार', 'Total Assets')}</p>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
                       {t('स्थानीय उद्यमशीलतामा परिचालित पुँजी', 'Capital mobilized for regional entrepreneurship')}
@@ -468,7 +468,7 @@ export function HomePage() {
                       <div className="w-12 h-12 rounded-xl bg-brand-accent-light flex items-center justify-center text-primary">
                         <span className="material-symbols-outlined text-[28px]">person_add</span>
                       </div>
-                      <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">01</span>
+                      <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">{fmtDigits('01')}</span>
                     </div>
                     <h3 className="font-headline-md text-headline-md text-on-surface">
                       {t('सदस्य बन्नुहोस्', 'Become a Member')}
@@ -495,7 +495,7 @@ export function HomePage() {
                       <div className="w-12 h-12 rounded-xl bg-brand-accent-light flex items-center justify-center text-primary">
                         <span className="material-symbols-outlined text-[28px]">schedule</span>
                       </div>
-                      <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">02</span>
+                      <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">{fmtDigits('02')}</span>
                     </div>
                     <h3 className="font-headline-md text-headline-md text-on-surface">
                       {t('मासिक बचत गर्नुहोस्', 'Save Monthly')}
@@ -522,7 +522,7 @@ export function HomePage() {
                       <div className="w-12 h-12 rounded-xl bg-brand-accent-light flex items-center justify-center text-primary">
                         <span className="material-symbols-outlined text-[28px]">credit_card</span>
                       </div>
-                      <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">03</span>
+                      <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">{fmtDigits('03')}</span>
                     </div>
                     <h3 className="font-headline-md text-headline-md text-on-surface">
                       {t('सहज कर्जा पाउनुहोस्', 'Access Loans')}

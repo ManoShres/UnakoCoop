@@ -22,7 +22,7 @@ const PERIOD_PRESETS = [
 type PeriodPreset = (typeof PERIOD_PRESETS)[number]['id'];
 
 export const PearlsAnalysisPage: React.FC = () => {
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount, fmtPercent } = useLanguageStore();
   const {
     members,
     savings,
@@ -109,10 +109,10 @@ export const PearlsAnalysisPage: React.FC = () => {
             <span>{t('जोखिममा रहेको साख (PAR)', 'PORTFOLIO AT RISK')}</span>
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            {riskMetrics.portfolioAtRiskPercent.toFixed(2)}%
+            {fmtPercent(riskMetrics.portfolioAtRiskPercent)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {fmtCurrency(riskMetrics.portfolioAtRisk, true)} · {riskMetrics.totalDelinquentLoans}{' '}
+            {fmtCurrency(riskMetrics.portfolioAtRisk, true)} · {fmtCount(riskMetrics.totalDelinquentLoans)}{' '}
             {t('ऋण', 'loans')}
           </div>
         </div>
@@ -122,10 +122,10 @@ export const PearlsAnalysisPage: React.FC = () => {
             <span>{t('साख असुली दर', 'LOAN REPAYMENT RATE')}</span>
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            {riskMetrics.repaymentRate.toFixed(2)}%
+            {fmtPercent(riskMetrics.repaymentRate)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {riskMetrics.totalActiveLoans} {t('सक्रिय ऋण खाता', 'active loan accounts')}
+            {fmtCount(riskMetrics.totalActiveLoans)} {t('सक्रिय ऋण खाता', 'active loan accounts')}
           </div>
         </div>
 
@@ -135,7 +135,7 @@ export const PearlsAnalysisPage: React.FC = () => {
             <span>{t('बचत/ऋण अनुपात', 'SAVINGS TO LOAN RATIO')}</span>
           </div>
           <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            {riskMetrics.savingsToLoanRatio.toFixed(2)}%
+            {fmtPercent(riskMetrics.savingsToLoanRatio)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {t('औसत ऋण आकार', 'Average loan size')}: {fmtCurrency(riskMetrics.averageLoanSize, true)}
@@ -182,7 +182,7 @@ export const PearlsAnalysisPage: React.FC = () => {
                       {fmtCurrency(item.amount, true)}
                     </span>
                     <span className="font-black text-slate-900 dark:text-white w-16 text-right">
-                      {item.percentage.toFixed(2)}%
+                      {fmtPercent(item.percentage)}
                     </span>
                   </div>
                 </div>

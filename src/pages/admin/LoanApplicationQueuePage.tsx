@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCoopStore } from '../../store/useCoopStore';
-import { LoanApplication } from '../../types';
+import { LoanApplication, LOAN_SCHEMES } from '../../types';
 import { Badge } from '../../components/ui/Badge';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { LoanOriginationModal } from '../../components/admin/LoanOriginationModal';
 import {
   FileCheck,
   CheckCircle2,
@@ -17,14 +18,33 @@ import {
   Landmark,
   User,
   Building,
+  PlusCircle,
 } from 'lucide-react';
 
 export const LoanApplicationQueuePage: React.FC = () => {
-  const { applications, updateApplicationStatus } = useCoopStore();
-  const { t, fmtCurrency } = useLanguageStore();
+  const { applications, updateApplicationStatus, members } = useCoopStore();
+  const { t, fmtCurrency, fmtDigits } = useLanguageStore();
   const [selectedApp, setSelectedApp] = useState<LoanApplication | null>(null);
   const [decisionNotes, setDecisionNotes] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
+  const [showOriginateModal, setShowOriginateModal] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedApp && !previewDoc) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        if (previewDoc) {
+          setPreviewDoc(null);
+        } else if (selectedApp) {
+          setSelectedApp(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedApp, previewDoc]);
 
   const handleDecision = (status: LoanApplication['status']) => {
     if (!selectedApp) return;
@@ -35,16 +55,40 @@ export const LoanApplicationQueuePage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-          {t('ऋण उपसमिति कर्जा मूल्याङ्कन कतार', 'Credit Committee Loan Queue')}
-        </h1>
-        <p className="text-xs text-slate-500">
-          {t(
-            'कर्जा जोखिम मूल्याङ्कन, धितो निरीक्षण र ऋण स्वीकृति तथा वितरण व्यवस्थापन।',
-            'Review creditworthiness, evaluate collateral, and approve loan disbursements.'
-          )}
-        </p>
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-emerald-500/40 flex items-center gap-3 animate-fade-in">
+          <CheckCircle2 className="size-5 text-emerald-400" />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
+
+      {/* Header Banner */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-bold mb-1">
+            <Landmark className="size-4" />
+            <span>{t('कर्जा विभाग तथा उपसमिति मूल्याङ्कन', 'CREDIT DEPARTMENT & UNDERWRITING')}</span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            {t('ऋण उपसमिति कर्जा मूल्याङ्कन कतार', 'Credit Committee Loan Queue')}
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {t(
+              'कर्जा जोखिम मूल्याङ्कन, धितो निरीक्षण, नयाँ आवेदन प्रविष्टि र ऋण स्वीकृति तथा वितरण व्यवस्थापन।',
+              'Originate counter credit, review creditworthiness, inspect collateral, and authorize disbursements.'
+            )}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowOriginateModal(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md transition shrink-0"
+        >
+          <PlusCircle className="size-4" />
+          <span>{t('+ नयाँ कर्जा आवेदन', '+ Originate Loan')}</span>
+        </button>
       </div>
 
       <div className="glass-panel rounded-2xl overflow-hidden shadow-xs">
@@ -62,73 +106,90 @@ export const LoanApplicationQueuePage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {applications.map((app) => (
-                <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                  <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">{app.applicationNo}</td>
-                  <td className="p-4">
-                    <div className="font-bold text-slate-900 dark:text-white">{app.memberName}</div>
-                    <span className="font-mono text-slate-400 text-[10px]">{app.memberNo}</span>
-                  </td>
-                  <td className="p-4 font-medium text-slate-700 dark:text-slate-300">{app.loanType}</td>
-                  <td className="p-4 font-bold text-emerald-600 dark:text-[#13ec37]">रु. {fmtCurrency(app.requestedAmount, true)}</td>
-                  <td className="p-4 text-slate-600 dark:text-slate-300">रु. {fmtCurrency(app.monthlyIncome, true)}</td>
+              {applications.map((app) => {
+                const member = members.find((m) => m.id === app.memberId || m.memberNo === app.memberNo);
+                const memberDisplayName = member ? t(member.nameNepali || member.name, member.name) : app.memberName;
+                const scheme = LOAN_SCHEMES.find((s) => s.type === app.loanType);
+                const loanTypeLabel = scheme ? t(scheme.labelNe, scheme.labelEn) : app.loanType;
+
+                return (
+                  <tr key={app.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                    <td className="p-4 font-mono font-bold text-slate-900 dark:text-white">{fmtDigits(app.applicationNo)}</td>
+                    <td className="p-4">
+                      <div className="font-bold text-slate-900 dark:text-white">{memberDisplayName}</div>
+                      <span className="font-mono text-slate-400 text-[10px]">{fmtDigits(app.memberNo)}</span>
+                    </td>
+                    <td className="p-4 font-medium text-slate-700 dark:text-slate-300">{loanTypeLabel}</td>
+                  <td className="p-4 font-bold text-emerald-600 dark:text-[#13ec37]">{fmtCurrency(app.requestedAmount, true)}</td>
+                  <td className="p-4 text-slate-600 dark:text-slate-300">{fmtCurrency(app.monthlyIncome, true)}</td>
                   <td className="p-4">
                     <Badge status={app.status} size="sm" />
                   </td>
-                  <td className="p-4 text-right">
-                    <button
-                      onClick={() => {
-                        setSelectedApp(app);
-                        setDecisionNotes(app.committeeNotes || '');
-                      }}
-                      className="flex items-center gap-1.5 ml-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs"
-                    >
-                      <Eye className="size-3.5" />
-                      <span>{t('जोखिम जाँच', 'Assess Risk')}</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => {
+                          setSelectedApp(app);
+                          setDecisionNotes(app.committeeNotes || '');
+                        }}
+                        className="flex items-center gap-1.5 ml-auto bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs"
+                      >
+                        <Eye className="size-3.5" />
+                        <span>{t('जोखिम जाँच', 'Assess Risk')}</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
       {/* Main Loan Risk Assessment Modal */}
-      {selectedApp && (
-        <div 
-          className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
-          onClick={() => setSelectedApp(null)}
-        >
-          <div 
-            className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/50">
-                    {selectedApp.applicationNo}
-                  </span>
-                  <Badge status={selectedApp.status} size="sm" />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">
-                  {selectedApp.memberName} <span className="text-xs font-mono text-slate-400 font-normal">({selectedApp.memberNo})</span>
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  {selectedApp.loanType} • {selectedApp.tenureMonths} Months Tenure
-                </p>
-              </div>
+      {selectedApp && (() => {
+        const selMember = members.find((m) => m.id === selectedApp.memberId || m.memberNo === selectedApp.memberNo);
+        const selMemberDisplayName = selMember ? t(selMember.nameNepali || selMember.name, selMember.name) : selectedApp.memberName;
+        const scheme = LOAN_SCHEMES.find((s) => s.type === selectedApp.loanType);
+        const loanTypeLabel = scheme ? t(scheme.labelNe, scheme.labelEn) : selectedApp.loanType;
 
-              <button
-                onClick={() => setSelectedApp(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-                type="button"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
+        return (
+          <div 
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('ऋण जोखिम मूल्याङ्कन', 'Loan Risk Assessment')}
+            className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setSelectedApp(null)}
+          >
+            <div 
+              className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="px-6 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/90 flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800/50">
+                      {fmtDigits(selectedApp.applicationNo)}
+                    </span>
+                    <Badge status={selectedApp.status} size="sm" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mt-1">
+                    {selMemberDisplayName} <span className="text-xs font-mono text-slate-400 font-normal">({fmtDigits(selectedApp.memberNo)})</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                    {loanTypeLabel} • {fmtDigits(selectedApp.tenureMonths)} {t('महिना अवधि', 'Months Tenure')}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  aria-label={t('बन्द गर्नुहोस्', 'Close')}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                  type="button"
+                >
+                  <X className="size-5" />
+                </button>
+              </div>
 
             {/* Body */}
             <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
@@ -137,25 +198,25 @@ export const LoanApplicationQueuePage: React.FC = () => {
                 <div>
                   <span className="text-slate-400 block font-medium">Requested Principal</span>
                   <p className="text-base font-black text-slate-900 dark:text-white mt-0.5">
-                    NPR {fmtCurrency(selectedApp.requestedAmount, true)}
+                    {fmtCurrency(selectedApp.requestedAmount, true)}
                   </p>
                 </div>
                 <div>
                   <span className="text-slate-400 block font-medium">Monthly Net Income</span>
                   <p className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    NPR {fmtCurrency(selectedApp.monthlyIncome, true)}
+                    {fmtCurrency(selectedApp.monthlyIncome, true)}
                   </p>
                 </div>
                 <div>
                   <span className="text-slate-400 block font-medium">Existing Debt</span>
                   <p className="text-base font-black text-slate-700 dark:text-slate-300 mt-0.5">
-                    NPR {selectedApp.existingDebt ? fmtCurrency(selectedApp.existingDebt, true) : '0'}
+                    {selectedApp.existingDebt ? fmtCurrency(selectedApp.existingDebt, true) : fmtCurrency(0, true)}
                   </p>
                 </div>
                 <div>
                   <span className="text-slate-400 block font-medium">Applied Date</span>
                   <p className="text-base font-bold text-slate-800 dark:text-slate-200 mt-0.5 font-mono">
-                    {selectedApp.appliedDate || '2026-03-15'}
+                    {fmtDigits(selectedApp.appliedDate || '2026-03-15')}
                   </p>
                 </div>
 
@@ -332,13 +393,17 @@ export const LoanApplicationQueuePage: React.FC = () => {
                 </button>
               </div>
             </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* ─── FULL DOCUMENT INSPECTION SUB-MODAL ─── */}
       {previewDoc && (
         <div 
+          role="dialog"
+          aria-modal="true"
+          aria-label={previewDoc.title}
           className="fixed inset-0 z-60 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           onClick={() => setPreviewDoc(null)}
         >
@@ -384,6 +449,22 @@ export const LoanApplicationQueuePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Loan Origination Modal */}
+      <LoanOriginationModal
+        isOpen={showOriginateModal}
+        onClose={() => setShowOriginateModal(false)}
+        onSuccess={(newApp) => {
+          setShowOriginateModal(false);
+          setToast(
+            t(
+              `नयाँ कर्जा आवेदन ${newApp.applicationNo} (${newApp.memberName}) दर्ता भयो!`,
+              `New loan application ${newApp.applicationNo} for ${newApp.memberName} originated!`
+            )
+          );
+          setTimeout(() => setToast(null), 3500);
+        }}
+      />
     </div>
   );
 };

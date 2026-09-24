@@ -47,6 +47,9 @@ import { CollectionEntryPage } from './pages/admin/CollectionEntryPage';
 import { TradingPLPage } from './pages/admin/TradingPLPage';
 import { PearlsAnalysisPage } from './pages/admin/PearlsAnalysisPage';
 import { ReconciliationPage } from './pages/admin/ReconciliationPage';
+import { LoanProvisioningPage } from './pages/admin/LoanProvisioningPage';
+import { TellerCounterPage } from './pages/admin/TellerCounterPage';
+import { StatutoryFundsPage } from './pages/admin/StatutoryFundsPage';
 import { SupportChatPopup } from './components/ui/SupportChatPopup';
 import { SystemTutorialModal } from './components/ui/SystemTutorialModal';
 
@@ -179,6 +182,9 @@ export function App() {
           <Route path="trading-pl" element={<TradingPLPage />} />
           <Route path="pearls-analysis" element={<PearlsAnalysisPage />} />
           <Route path="reconciliation" element={<ReconciliationPage />} />
+          <Route path="loan-provisioning" element={<LoanProvisioningPage />} />
+          <Route path="teller-counter" element={<TellerCounterPage />} />
+          <Route path="statutory-funds" element={<StatutoryFundsPage />} />
           <Route path="audit-reports" element={<AdminAuditReportsPage />} />
         </Route>
 

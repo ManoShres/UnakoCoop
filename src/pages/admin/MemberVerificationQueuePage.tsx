@@ -22,11 +22,27 @@ import {
 
 export const MemberVerificationQueuePage: React.FC = () => {
   const { members, updateMemberStatus } = useCoopStore();
-  const { t, fmtCurrency, fmtCount } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount, fmtDigits, fmtPhone } = useLanguageStore();
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'VERIFIED' | 'ACTION_REQUIRED'>('ALL');
   const [reviewNotes, setReviewNotes] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
+
+  React.useEffect(() => {
+    if (!selectedMember && !previewDoc) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        if (previewDoc) {
+          setPreviewDoc(null);
+        } else if (selectedMember) {
+          setSelectedMember(null);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedMember, previewDoc]);
 
   const filtered = members.filter((m) => {
     if (filter === 'ALL') return true;
@@ -95,17 +111,17 @@ export const MemberVerificationQueuePage: React.FC = () => {
                   <td className="p-4 flex items-center gap-3">
                     <img src={m.avatarUrl} alt={m.name} className="size-9 rounded-full object-cover" />
                     <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white">{m.name}</h4>
-                      <span className="font-mono text-slate-400 text-[10px]">{m.memberNo}</span>
+                      <h4 className="font-bold text-slate-900 dark:text-white">{t(m.nameNepali || m.name, m.name)}</h4>
+                      <span className="font-mono text-slate-400 text-[10px]">{fmtDigits(m.memberNo)}</span>
                     </div>
                   </td>
-                  <td className="p-4 font-mono font-semibold text-slate-800 dark:text-slate-200">{m.citizenshipNo}</td>
+                  <td className="p-4 font-mono font-semibold text-slate-800 dark:text-slate-200">{fmtDigits(m.citizenshipNo)}</td>
                   <td className="p-4 text-slate-600 dark:text-slate-300">
-                    <div>{m.phone}</div>
-                    <span className="text-[10px] text-slate-400">{m.address}</span>
+                    <div>{fmtPhone(m.phone)}</div>
+                    <span className="text-[10px] text-slate-400">{fmtDigits(t(m.addressNepali || m.address, m.address))}</span>
                   </td>
                   <td className="p-4 font-bold text-slate-900 dark:text-white">
-                    {t('रु.', 'NPR')} {fmtCurrency(m.shareCapital, true)}
+                    {fmtCurrency(m.shareCapital, true)}
                   </td>
                   <td className="p-4">
                     <Badge status={m.status} size="sm" />
@@ -132,6 +148,9 @@ export const MemberVerificationQueuePage: React.FC = () => {
       {/* Detailed Member Review Modal */}
       {selectedMember && (
         <div 
+          role="dialog"
+          aria-modal="true"
+          aria-label={t('केवाइसी समीक्षा', 'KYC Review')}
           className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
           onClick={() => setSelectedMember(null)}
         >
@@ -149,18 +168,19 @@ export const MemberVerificationQueuePage: React.FC = () => {
                 />
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">{selectedMember.name}</h3>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">{t(selectedMember.nameNepali || selectedMember.name, selectedMember.name)}</h3>
                     <Badge status={selectedMember.status} size="sm" />
                   </div>
                   <p className="text-xs font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                    {selectedMember.memberNo} • {t('नागरिकता', 'Citizenship')}: {selectedMember.citizenshipNo}
+                    {fmtDigits(selectedMember.memberNo)} • {t('नागरिकता', 'Citizenship')}: {fmtDigits(selectedMember.citizenshipNo)}
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setSelectedMember(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                aria-label={t('बन्द गर्नुहोस्', 'Close')}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 type="button"
               >
                 <X className="size-5" />
@@ -173,21 +193,23 @@ export const MemberVerificationQueuePage: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">{t('फोन', 'Phone')}</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">{selectedMember.phone}</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{fmtPhone(selectedMember.phone)}</span>
                 </div>
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">{t('ठेगाना', 'Address')}</span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{selectedMember.address}</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">
+                    {fmtDigits(t(selectedMember.addressNepali || selectedMember.address, selectedMember.address))}
+                  </span>
                 </div>
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">{t('सेयर पुँजी', 'Share Capital')}</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {t('रु.', 'NPR')} {fmtCurrency(selectedMember.shareCapital, true)}
+                    {fmtCurrency(selectedMember.shareCapital, true)}
                   </span>
                 </div>
                 <div>
                   <span className="text-[11px] text-slate-400 block font-medium">{t('क्रेडिट स्कोर', 'Credit Score')}</span>
-                  <span className="font-bold text-slate-900 dark:text-white">{selectedMember.creditScore} / 850</span>
+                  <span className="font-bold text-slate-900 dark:text-white">{fmtDigits(selectedMember.creditScore)} / {fmtDigits(850)}</span>
                 </div>
               </div>
 
@@ -213,7 +235,7 @@ export const MemberVerificationQueuePage: React.FC = () => {
                           {t('नेपाली नागरिकता प्रमाणपत्र', 'Citizenship Certificate')}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500 font-mono">{t('नं:', 'No:')} {selectedMember.citizenshipNo}</p>
+                      <p className="text-[11px] text-slate-500 font-mono">{t('नं:', 'No:')} {fmtDigits(selectedMember.citizenshipNo)}</p>
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">

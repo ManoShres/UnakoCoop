@@ -40,7 +40,7 @@ const MISMATCH_LABELS: Record<MismatchType, { ne: string; en: string }> = {
 };
 
 export function ReconciliationPage() {
-  const { t, fmtCurrency } = useLanguageStore();
+  const { t, fmtCurrency, fmtCount } = useLanguageStore();
   const {
     bankStatements,
     reconciliationEntries,
@@ -291,7 +291,7 @@ export function ReconciliationPage() {
               <span>{card.label}</span>
             </div>
             <div className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {card.value}
+              {fmtCount(card.value)}
             </div>
           </div>
         ))}

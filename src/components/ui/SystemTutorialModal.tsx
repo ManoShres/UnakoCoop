@@ -292,6 +292,30 @@ const TUTORIAL_GUIDES: TutorialGuide[] = [
     tipsEn: 'Adheres to Everything Claude Code (ECC) modular guidelines with high cohesion and zero hardcoded secrets.',
     tipsNp: 'सुरक्षित, सफा र व्यवस्थित ECC कोडिङ मापदण्डको पूर्ण परिपालना गरिएको छ।',
   },
+  {
+    id: 'arch-keyboard-shortcuts',
+    category: 'ARCHITECTURE',
+    titleEn: 'Keyboard Accessibility & Global Power-User Shortcuts',
+    titleNp: 'किबोर्ड पहुँचयोग्यता र सार्वभौम पावर-युजर सर्टकटहरू',
+    route: '/admin',
+    icon: Sparkles,
+    stepsEn: [
+      'Press "?" anywhere (outside input fields) to toggle the interactive Keyboard Shortcut Guide modal.',
+      'Press "Ctrl + Shift + L" to instantly toggle bilingual interface between Nepali and English.',
+      'Press "Ctrl + K" or "/" to immediately focus the primary search bar on any directory or ledger page.',
+      'Press "Escape" at any time to close modals, drawers, or overlay dialogues.',
+      'Administrative Quick Navigation: Use Alt+D (Dashboard), Alt+M (Members), Alt+S (Savings), Alt+L (Loans), Alt+T (Teller), Alt+G (Mother Groups), Alt+H (Homepage).',
+    ],
+    stepsNp: [
+      'इनपुट बाकस बाहिर कतै पनि "?" थिचेर किबोर्ड सर्टकट निर्देशिका खोल्नुहोस् वा बन्द गर्नुहोस्।',
+      '"Ctrl + Shift + L" थिचेर नेपाली र अंग्रेजी भाषा तुरुन्तै परिवर्तन गर्नुहोस्।',
+      '"Ctrl + K" वा "/" थिचेर कुनै पनि पृष्ठको मुख्य खोज बाकसमा तुरुन्त ध्यान केन्द्रित गर्नुहोस्।',
+      '"Escape" थिचेर जुनसुकै मोडल वा विन्डो तत्काल बन्द गर्नुहोस्।',
+      'प्रशासकीय द्रुत नेभिगेसन: Alt+D (ड्यासबोर्ड), Alt+M (सदस्यहरू), Alt+S (बचत), Alt+L (ऋण), Alt+T (काउन्टर टेलर), Alt+G (आमा समूह), Alt+H (गृहपृष्ठ)।',
+    ],
+    tipsEn: 'All modal dialogues feature full focus traps, aria attributes, and close automatically when pressing Escape.',
+    tipsNp: 'सबै मोडलहरूमा पहुँचयोग्यता (Accessibility) मापदण्ड र Escape मार्फत बन्द हुने सुविधा उपलब्ध छ।',
+  },
 ];
 
 export const SystemTutorialModal: React.FC = () => {
@@ -307,6 +331,18 @@ export const SystemTutorialModal: React.FC = () => {
     window.addEventListener('open-system-tutorial', handleOpen);
     return () => window.removeEventListener('open-system-tutorial', handleOpen);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setIsOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -329,8 +365,17 @@ export const SystemTutorialModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-fade-in">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-white">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="system-tutorial-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-fade-in"
+      onClick={() => setIsOpen(false)}
+    >
+      <div
+        className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden text-slate-900 dark:text-white"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-slate-900/50">
           <div className="flex items-center gap-3">
@@ -339,7 +384,7 @@ export const SystemTutorialModal: React.FC = () => {
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg sm:text-xl font-black tracking-tight">
+                <h2 id="system-tutorial-title" className="text-lg sm:text-xl font-black tracking-tight">
                   {t('उनको प्रणाली प्रयोग निर्देशिका तथा सहयोग केन्द्र', 'Unako System Tutorial & Feature Guide')}
                 </h2>
                 <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">

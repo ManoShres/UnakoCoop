@@ -25,6 +25,9 @@ import {
   TrendingUp,
   ScanSearch,
   Landmark,
+  ShieldAlert,
+  Banknote,
+  Keyboard,
 } from 'lucide-react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -33,10 +36,13 @@ import { isSupabaseConfigured } from '../../lib/supabase';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { KeyboardShortcutGuide } from '../ui/KeyboardShortcutGuide';
 
 export const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const { showShortcutGuide, toggleShortcutGuide, closeShortcutGuide } = useKeyboardShortcuts({ context: 'ADMIN' });
   const { members, applications, inquiries } = useCoopStore();
   const openMismatches = useCoopStore((s) =>
     s.reconciliationEntries.filter((entry) => entry.status === 'MISMATCH').length
@@ -89,12 +95,14 @@ export const AdminLayout: React.FC = () => {
       badge: pendingMembersCount > 0 ? pendingMembersCount : undefined,
     },
     { to: '/admin/savings', label: t('बचत खाता व्यवस्थापन', 'Savings & Passbooks'), icon: PiggyBank },
+    { to: '/admin/teller-counter', label: t('काउन्टर नगद तथा भल्ट', 'Teller Cash & Vault Desk'), icon: Banknote },
     {
       to: '/admin/loans',
       label: t('ऋण तथा कर्जा समिति', 'Loans & Credit Queue'),
       icon: FileCheck,
       badge: pendingLoansCount > 0 ? pendingLoansCount : undefined,
     },
+    { to: '/admin/loan-provisioning', label: t('कर्जा नोक्सानी व्यवस्था', 'Loan Loss Provisioning'), icon: ShieldAlert },
     { to: '/admin/transfers', label: t('कारोबार तथा गेटवे', 'Transfers & Gateways'), icon: ArrowLeftRight },
     { to: '/admin/shares', label: t('शेयर पूँजी तथा मुद्दती', 'Shares Capital & FD'), icon: PieChart },
     {
@@ -106,6 +114,7 @@ export const AdminLayout: React.FC = () => {
     { to: '/admin/collection-entry', label: t('कलेक्सन प्रवेश', 'Collection Entry'), icon: TrendingUp, badge: pendingDeposits > 0 ? pendingDeposits : undefined },
     { to: '/admin/trading-pl', label: t('ट्रेडिङ नाफा नोक्सान', 'Trading Profit & Loss'), icon: TrendingUp },
     { to: '/admin/pearls-analysis', label: t('पर्ल्स विश्लेषण', 'PEARLS Analysis'), icon: Landmark },
+    { to: '/admin/statutory-funds', label: t('वैधानिक जगेडा कोषहरू', 'Statutory Reserve Funds'), icon: Landmark },
     {
       to: '/admin/reconciliation',
       label: t('बैंक मिलान तथा भिन्नता', 'Reconciliation & Mismatch'),
@@ -271,6 +280,17 @@ export const AdminLayout: React.FC = () => {
                 <span className="hidden sm:inline">{t('निर्देशिका', 'Guide')}</span>
               </button>
 
+              {/* Keyboard Shortcuts Button */}
+              <button
+                type="button"
+                onClick={toggleShortcutGuide}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg border border-slate-300 dark:border-slate-700 transition-colors cursor-pointer"
+                title={t('किबोर्ड सर्टकटहरू (?)', 'Keyboard Shortcuts (?)')}
+              >
+                <Keyboard className="size-3.5" />
+                <span className="hidden sm:inline">{t('सर्टकट (?)', 'Shortcuts (?)')}</span>
+              </button>
+
               {/* Language Switcher */}
               <LanguageToggle variant="compact" />
               <ThemeToggle variant="compact" />
@@ -292,6 +312,9 @@ export const AdminLayout: React.FC = () => {
           </main>
         </div>
       </div>
+
+      {/* Keyboard Shortcut Guide Modal */}
+      <KeyboardShortcutGuide isOpen={showShortcutGuide} onClose={closeShortcutGuide} />
     </div>
   );
 };

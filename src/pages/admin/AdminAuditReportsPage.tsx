@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
 import { generateCopomisXml, generateCopomisCsv, triggerBrowserDownload } from '../../utils/copomisExport';
@@ -58,7 +58,7 @@ export const AdminAuditReportsPage: React.FC = () => {
     reconciliationEntries,
     coopSettings,
   } = useCoopStore();
-  const { t, lang } = useLanguageStore();
+  const { t, lang, fmtCurrency, fmtCount, fmtPercent, fmtDigits } = useLanguageStore();
   const [activeTab, setActiveTab] = useState<'REPORTS' | 'LOGS' | 'COMPLIANCE'>('REPORTS');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
@@ -292,8 +292,8 @@ export const AdminAuditReportsPage: React.FC = () => {
               <ShieldCheck className="size-4" />
             </span>
           </div>
-          <div className="text-xl font-black text-blue-600 dark:text-blue-400">18.4%</div>
-          <p className="text-[11px] text-slate-500">{t('नियामक न्यूनतम: १०.०%', 'Regulatory Min: 10.0%')}</p>
+          <div className="text-xl font-black text-blue-600 dark:text-blue-400">{fmtPercent('18.4')}</div>
+          <p className="text-[11px] text-slate-500">{t('नियामक न्यूनतम: ', 'Regulatory Min: ')}{fmtPercent('10.0')}</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
@@ -303,8 +303,8 @@ export const AdminAuditReportsPage: React.FC = () => {
               <Layers className="size-4" />
             </span>
           </div>
-          <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">24.1%</div>
-          <p className="text-[11px] text-slate-500">{t('मापदण्ड दायरा: १५% - २०%', 'Standard Band: 15% - 20%')}</p>
+          <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">{fmtPercent('24.1')}</div>
+          <p className="text-[11px] text-slate-500">{t('मापदण्ड दायरा: ', 'Standard Band: ')}{fmtPercent(15)} - {fmtPercent(20)}</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
@@ -314,7 +314,7 @@ export const AdminAuditReportsPage: React.FC = () => {
               <Lock className="size-4" />
             </span>
           </div>
-          <div className="text-xl font-black text-purple-600 dark:text-purple-400">{t('१००% अपरिवर्तनीय', '100% Immutable')}</div>
+          <div className="text-xl font-black text-purple-600 dark:text-purple-400">{fmtPercent(100)} {t('अपरिवर्तनीय', 'Immutable')}</div>
           <p className="text-[11px] text-slate-500">{t('शून्य हेरफेर प्रमाणीकरण', 'Zero Tampering Detected')}</p>
         </div>
       </div>
@@ -331,7 +331,7 @@ export const AdminAuditReportsPage: React.FC = () => {
           }`}
         >
           <FileText className="size-4" />
-          <span>{t('वैधानिक लेखापरीक्षण विवरणहरू', 'Statutory Audit Disclosures')} ({reports.length})</span>
+          <span>{t('वैधानिक लेखापरीक्षण विवरणहरू', 'Statutory Audit Disclosures')} ({fmtCount(reports.length)})</span>
         </button>
 
         <button
@@ -429,7 +429,7 @@ export const AdminAuditReportsPage: React.FC = () => {
                             </h4>
                             <p className="text-[11px] text-slate-500 font-serif mt-0.5">{r.titleNepali}</p>
                             <span className="text-[10px] font-mono text-slate-400 mt-1 block">
-                              {r.id} • {r.size} • {r.metrics} {t('मापदण्डहरू', 'data metrics')}
+                              {r.id} • {r.size} • {fmtCount(r.metrics)} {t('मापदण्डहरू', 'data metrics')}
                             </span>
                           </div>
                         </div>
@@ -442,13 +442,13 @@ export const AdminAuditReportsPage: React.FC = () => {
                       </td>
 
                       <td className="p-4 font-medium text-slate-800 dark:text-slate-200">
-                        {r.fiscalYear}
-                        <span className="text-[10px] text-slate-400 block">{r.period}</span>
+                        {fmtDigits(r.fiscalYear)}
+                        <span className="text-[10px] text-slate-400 block">{fmtDigits(r.period)}</span>
                       </td>
 
                       <td className="p-4 text-slate-600 dark:text-slate-300">
                         <span className="font-semibold block">{r.auditor}</span>
-                        <span className="text-[10px] text-slate-400">{t('प्रकाशित:', 'Published:')} {r.publishDate}</span>
+                        <span className="text-[10px] text-slate-400">{t('प्रकाशित:', 'Published:')} {fmtDigits(r.publishDate)}</span>
                       </td>
 
                       <td className="p-4">
@@ -510,7 +510,7 @@ export const AdminAuditReportsPage: React.FC = () => {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {auditLogs.map((log) => (
                     <tr key={log.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition">
-                      <td className="p-4 font-mono text-slate-500 whitespace-nowrap">{log.timestamp}</td>
+                      <td className="p-4 font-mono text-slate-500 whitespace-nowrap">{fmtDigits(log.timestamp)}</td>
                       <td className="p-4 font-bold text-slate-900 dark:text-white">{log.adminUser}</td>
                       <td className="p-4">
                         <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 font-semibold text-slate-700 dark:text-slate-300">
@@ -519,7 +519,7 @@ export const AdminAuditReportsPage: React.FC = () => {
                       </td>
                       <td className="p-4 font-mono font-bold text-blue-600 dark:text-blue-400">{log.action}</td>
                       <td className="p-4 text-slate-700 dark:text-slate-300 max-w-sm leading-relaxed">{log.details}</td>
-                      <td className="p-4 font-mono text-slate-400 text-[11px]">{log.ipAddress}</td>
+                      <td className="p-4 font-mono text-slate-400 text-[11px]">{fmtDigits(log.ipAddress)}</td>
                       <td className="p-4 text-right">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
                           <CheckCircle2 className="size-3" /> {log.status}
@@ -658,13 +658,13 @@ export const AdminAuditReportsPage: React.FC = () => {
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase">{t('कुल सेयर पुँजी', 'Total Share Capital')}</span>
                 <strong className="text-white text-sm">
-                  {t('रु.', 'NPR')} {fmtCurrency(members.reduce((s, m) => s + m.shareCapital, 0), true)}
+                  {fmtCurrency(members.reduce((s, m) => s + m.shareCapital, 0), true)}
                 </strong>
               </div>
               <div>
                 <span className="text-slate-400 block text-[10px] uppercase">{t('कुल सक्रिय बचत', 'Total Active Savings')}</span>
                 <strong className="text-white text-sm">
-                  {t('रु.', 'NPR')} {fmtCurrency(members.reduce((s, m) => s + m.totalSavings, 0), true)}
+                  {fmtCurrency(members.reduce((s, m) => s + m.totalSavings, 0), true)}
                 </strong>
               </div>
               <div>

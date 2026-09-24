@@ -16,22 +16,28 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { MemberOnboardingWizard } from '../../components/admin/MemberOnboardingWizard';
 
 export function MemberManagementPage() {
-  const { members, updateMemberDetails, addMember } = useCoopStore();
-  const { t, fmtCurrency, fmtCount } = useLanguageStore();
+  const { members, updateMemberDetails } = useCoopStore();
+  const { t, fmtCurrency, fmtCount, fmtDigits, fmtPhone } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | VerificationStatus>('ALL');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  // New member form state
-  const [newMemberName, setNewMemberName] = useState('');
-  const [newMemberPhone, setNewMemberPhone] = useState('');
-  const [newMemberCitizenship, setNewMemberCitizenship] = useState('');
-  const [newMemberAddress, setNewMemberAddress] = useState('Gadhwa-5, Dang');
-  const [newMemberShares, setNewMemberShares] = useState(10000);
+  React.useEffect(() => {
+    if (!editingMember) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setEditingMember(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editingMember]);
 
   const showToastMsg = (msg: string) => {
     setToast(msg);
@@ -61,52 +67,6 @@ export function MemberManagementPage() {
     });
     showToastMsg(t(`सदस्य ${editingMember.name} को विवरण अद्यावधिक भयो!`, `Member ${editingMember.name} successfully updated!`));
     setEditingMember(null);
-  };
-
-  const handleCreateMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMemberName || !newMemberCitizenship) {
-      alert(t('कृपया आवश्यक सदस्य नाम र नागरिकता भर्नुहोस्।', 'Please fill out required member name and citizenship.'));
-      return;
-    }
-    const memberNo = 'UKO-2081-' + Math.floor(10000 + Math.random() * 90000);
-    const created = addMember({
-      memberNo,
-      name: newMemberName,
-      nameNepali: newMemberName,
-      email: newMemberName.toLowerCase().replace(/\s+/g, '.') + '@gmail.com',
-      phone: newMemberPhone || '98578-00000',
-      citizenshipNo: newMemberCitizenship,
-      joinedDate: new Date().toISOString().split('T')[0],
-      address: newMemberAddress,
-      status: 'VERIFIED',
-      avatarUrl: '/assets/kyc/avatar_hari.png',
-      shareCapital: newMemberShares,
-      totalSavings: 5000,
-      activeLoanBalance: 0,
-      accruedDividend: 725,
-      creditScore: 780,
-      bankDetails: {
-        bankName: 'Agricultural Development Bank Ltd',
-        accountNo: '023-' + Math.floor(100000 + Math.random() * 900000),
-        branch: 'Gadhwa',
-        holderName: newMemberName,
-      },
-      kycDocuments: {
-        citizenshipFront: true,
-        citizenshipBack: true,
-        photo: true,
-        signature: true,
-        utilityBill: true,
-      },
-      notes: 'New verified shareholder added via Admin Management Suite',
-    });
-
-    showToastMsg(t(`नयाँ सदस्य ${created.name} (${created.memberNo}) दर्ता भयो!`, `New member ${created.name} (${created.memberNo}) registered!`));
-    setShowAddModal(false);
-    setNewMemberName('');
-    setNewMemberPhone('');
-    setNewMemberCitizenship('');
   };
 
   return (
@@ -215,11 +175,11 @@ export function MemberManagementPage() {
                         <img src={m.avatarUrl} alt={m.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-sm">{m.name}</div>
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">{t(m.nameNepali || m.name, m.name)}</div>
                         <div className="text-[11px] font-mono text-blue-600 dark:text-blue-400 font-semibold">
-                          {m.memberNo}
+                          {fmtDigits(m.memberNo)}
                         </div>
-                        <div className="text-[10px] text-slate-400">{t('ना.प्र.नं:', 'Citiz:')} {m.citizenshipNo}</div>
+                        <div className="text-[10px] text-slate-400">{t('ना.प्र.नं:', 'Citiz:')} {fmtDigits(m.citizenshipNo)}</div>
                       </div>
                     </div>
                   </td>
@@ -228,25 +188,25 @@ export function MemberManagementPage() {
                   <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-1">
                       <Phone className="size-3.5 text-slate-400" />
-                      <span>{m.phone}</span>
+                      <span>{fmtPhone(m.phone)}</span>
                     </div>
                     <div className="flex items-center gap-1 mt-0.5">
                       <MapPin className="size-3.5 text-slate-400" />
-                      <span>{m.address}</span>
+                      <span>{fmtDigits(t(m.addressNepali || m.address, m.address))}</span>
                     </div>
                   </td>
 
                   {/* Financials */}
                   <td className="py-3.5 px-4">
                     <div className="font-bold text-slate-900 dark:text-white">
-                      {t('बचत: रु. ', 'Savings: NPR ')}{fmtCurrency(m.totalSavings, true)}
+                      {t('बचत: ', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
                     </div>
                     <div className="text-[11px] text-emerald-600 font-semibold">
-                      {t('सेयर: रु. ', 'Shares: NPR ')}{fmtCurrency(m.shareCapital, true)}
+                      {t('सेयर: ', 'Shares: ')}{fmtCurrency(m.shareCapital, true)}
                     </div>
                     {m.activeLoanBalance > 0 && (
                       <div className="text-[10px] text-amber-600 font-medium">
-                        {t('कर्जा: रु. ', 'Loan: NPR ')}{fmtCurrency(m.activeLoanBalance, true)}
+                        {t('कर्जा: ', 'Loan: ')}{fmtCurrency(m.activeLoanBalance, true)}
                       </div>
                     )}
                   </td>
@@ -277,7 +237,7 @@ export function MemberManagementPage() {
                         ? t('कारबाही आवश्यक', 'ACTION_REQUIRED')
                         : t('अस्वीकृत', 'REJECTED')}
                     </span>
-                    <div className="text-[10px] text-slate-400 mt-1 font-mono">{t('स्कोर: ', 'Score: ')}{m.creditScore}/850</div>
+                    <div className="text-[10px] text-slate-400 mt-1 font-mono">{t('स्कोर: ', 'Score: ')}{fmtDigits(m.creditScore)}/{fmtDigits(850)}</div>
                   </td>
 
                   {/* Actions */}
@@ -300,6 +260,9 @@ export function MemberManagementPage() {
       {/* EDIT MEMBER MODAL */}
       {editingMember && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-member-title"
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
           onClick={() => setEditingMember(null)}
         >
@@ -310,13 +273,14 @@ export function MemberManagementPage() {
             <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
               <div className="flex items-center gap-2">
                 <Edit className="size-4 text-blue-400" />
-                <h3 className="font-bold text-sm">
-                  {t('सदस्य विवरण अद्यावधिक', 'Update Member Profile')}: {editingMember.name}
+                <h3 id="edit-member-title" className="font-bold text-sm">
+                  {t('सदस्य विवरण अद्यावधिक', 'Update Member Profile')}: {t(editingMember.nameNepali || editingMember.name, editingMember.name)}
                 </h3>
               </div>
               <button
                 onClick={() => setEditingMember(null)}
-                className="text-slate-400 hover:text-white p-1"
+                aria-label={t('बन्द गर्नुहोस्', 'Close')}
+                className="text-slate-400 hover:text-white p-1 cursor-pointer"
               >
                 <X className="size-5" />
               </button>
@@ -428,116 +392,20 @@ export function MemberManagementPage() {
         </div>
       )}
 
-      {/* ADD NEW MEMBER MODAL */}
-      {showAddModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
-          onClick={() => setShowAddModal(false)}
-        >
-          <div
-            className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-6 py-4 bg-blue-600 text-white flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <UserPlus className="size-4" />
-                <h3 className="font-bold text-sm">{t('नयाँ सहकारी सदस्य दर्ता', 'Register New Cooperative Member')}</h3>
-              </div>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-white/80 hover:text-white p-1"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateMember} className="p-6 space-y-3.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('पूरा कानुनी नाम *', 'Full Legal Name *')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('जस्तै: रमेश चौधरी', 'e.g. Ramesh Chaudhary')}
-                  value={newMemberName}
-                  onChange={(e) => setNewMemberName(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('नागरिकता प्रमाणपत्र नं. *', 'Citizenship Certificate No. *')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('जस्तै: ५२-०१-७८-०९१४२', 'e.g. 52-01-78-09142')}
-                  value={newMemberCitizenship}
-                  onChange={(e) => setNewMemberCitizenship(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('मोबाइल नम्बर', 'Mobile Phone')}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={t('९८५७८-XXXXX', '98578-XXXXX')}
-                    value={newMemberPhone}
-                    onChange={(e) => setNewMemberPhone(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('प्रारम्भिक सेयर पुँजी (रु.)', 'Initial Shares (NPR)')}
-                  </label>
-                  <input
-                    type="number"
-                    value={newMemberShares}
-                    step={1000}
-                    onChange={(e) => setNewMemberShares(Number(e.target.value))}
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('स्थायी ठेगाना', 'Permanent Address')}
-                </label>
-                <input
-                  type="text"
-                  value={newMemberAddress}
-                  onChange={(e) => setNewMemberAddress(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition"
-                >
-                  {t('रद्द गर्नुहोस्', 'Cancel')}
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition"
-                >
-                  {t('सदस्य दर्ता गर्नुहोस्', 'Register Member')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* STATUTORY 4-STEP MEMBER ONBOARDING WIZARD */}
+      <MemberOnboardingWizard
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={(newMember) => {
+          setShowAddModal(false);
+          showToastMsg(
+            t(
+              `नयाँ सदस्य ${newMember.nameNepali || newMember.name} (${newMember.memberNo}) सफलतापूर्वक दर्ता भयो!`,
+              `New member ${newMember.name} (${newMember.memberNo}) successfully registered!`
+            )
+          );
+        }}
+      />
     </div>
   );
 }

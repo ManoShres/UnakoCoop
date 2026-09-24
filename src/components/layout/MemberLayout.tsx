@@ -7,9 +7,12 @@ import { isSupabaseConfigured } from '../../lib/supabase';
 import { signOutOfSupabase } from '../../services/employeeService';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
+import { KeyboardShortcutGuide } from '../ui/KeyboardShortcutGuide';
 
 export function MemberLayout() {
-  const { lang, t } = useLanguageStore();
+  const { lang, t, fmtDigits } = useLanguageStore();
+  const { showShortcutGuide, toggleShortcutGuide, closeShortcutGuide } = useKeyboardShortcuts({ context: 'MEMBER' });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { role, currentMember, authLoading, switchToPreset } = useAuthStore();
@@ -170,7 +173,9 @@ export function MemberLayout() {
                 <span className="w-1.5 h-1.5 rounded-full bg-status-success inline-block"></span>
                 CBS Connected
               </span>
-              <span className="truncate">{currentMember?.nameNepali ? t('कलंकी-१४, काठमाडौं', currentMember.address) : (currentMember?.address || t('चैनपुर, गढवा-५', 'Chainpur, Gadhwa-5'))}</span>
+              <span className="truncate">
+                {fmtDigits(t(currentMember?.addressNepali || currentMember?.address || 'चैनपुर, गढवा-५', currentMember?.address || 'Chainpur, Gadhwa-5'))}
+              </span>
             </div>
           </div>
 
@@ -252,6 +257,17 @@ export function MemberLayout() {
               <span className="hidden sm:inline">{t('निर्देशिका', 'Guide')}</span>
             </button>
 
+            {/* Keyboard Shortcuts Button */}
+            <button
+              type="button"
+              onClick={toggleShortcutGuide}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest rounded-lg border border-outline-variant/30 transition-all cursor-pointer shadow-2xs"
+              title={t('किबोर्ड सर्टकटहरू (?)', 'Keyboard Shortcuts (?)')}
+            >
+              <span className="material-symbols-outlined text-[16px]">keyboard</span>
+              <span className="hidden sm:inline">{t('सर्टकट (?)', 'Shortcuts (?)')}</span>
+            </button>
+
             {/* Global Language Toggle Component */}
             <LanguageToggle variant="compact" />
             <ThemeToggle variant="compact" />
@@ -309,6 +325,9 @@ export function MemberLayout() {
           onClick={() => setMobileMenuOpen(false)}
         />
       )}
+
+      {/* Keyboard Shortcut Guide Modal */}
+      <KeyboardShortcutGuide isOpen={showShortcutGuide} onClose={closeShortcutGuide} />
     </div>
   );
 }

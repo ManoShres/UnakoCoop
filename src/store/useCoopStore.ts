@@ -47,6 +47,7 @@ import {
   summariseMeetingDeposits,
   type CollectionPostingResult,
 } from '../utils/collectionPosting';
+import { formatNPR } from '../utils/nepaliDate';
 import { isSupabaseConfigured } from '../lib/supabase';
 import {
   fetchEmployeesFromSupabase,
@@ -427,6 +428,7 @@ interface CoopState {
   // Savings actions
   adjustSavingsBalance: (accountNo: string, amount: number, type: 'DEPOSIT' | 'WITHDRAWAL', note?: string) => void;
   updateSavingsRate: (accountType: string, newRate: number) => void;
+  addSavingsAccount: (account: Omit<SavingsAccount, 'id'>) => SavingsAccount;
 
   // Transfers & Gateways actions
   addTransaction: (tx: Omit<Transaction, 'id' | 'date' | 'status'>) => void;
@@ -435,6 +437,7 @@ interface CoopState {
 
   // Shares actions
   updateSharePool: (updates: Partial<SharePool>) => void;
+  issueShareCertificate: (memberId: string, kittaCount: number, certificateNo: string) => void;
 
   // Notice & Announcements actions
   addNotice: (notice: Omit<Notice, 'id' | 'publishedDate'>) => void;
@@ -827,6 +830,17 @@ export const useCoopStore = create<CoopState>((set, get) => ({
     }));
   },
 
+  addSavingsAccount: (accountData) => {
+    const newAccount: SavingsAccount = {
+      ...accountData,
+      id: 'sav-' + Date.now(),
+    };
+    set((state) => ({
+      savings: [newAccount, ...state.savings],
+    }));
+    return newAccount;
+  },
+
   // Transactions & Gateways
   addTransaction: (txData) => {
     const newTx: Transaction = {
@@ -861,6 +875,38 @@ export const useCoopStore = create<CoopState>((set, get) => ({
   updateSharePool: (updates) => {
     set((state) => ({
       sharePool: { ...state.sharePool, ...updates },
+    }));
+  },
+
+  issueShareCertificate: (memberId, kittaCount, certificateNo) => {
+    const kittaAmount = kittaCount * 100;
+    set((state) => ({
+      sharePool: {
+        ...state.sharePool,
+        totalAllottedKitta: state.sharePool.totalAllottedKitta + kittaCount,
+      },
+      members: state.members.map((m) =>
+        m.id === memberId
+          ? {
+              ...m,
+              shareCapital: m.shareCapital + kittaAmount,
+              shareKitta: (m.shareKitta || Math.round(m.shareCapital / 100)) + kittaCount,
+            }
+          : m
+      ),
+      transactions: [
+        {
+          id: 'tx-' + Date.now(),
+          memberId,
+          date: new Date().toISOString().split('T')[0],
+          type: 'SHARE_PURCHASE',
+          description: `Share Certificate Allotment (${kittaCount} Kitta, Cert #${certificateNo})`,
+          amount: kittaAmount,
+          referenceNo: certificateNo,
+          status: 'COMPLETED',
+        },
+        ...state.transactions,
+      ],
     }));
   },
 
@@ -1038,7 +1084,7 @@ export const useCoopStore = create<CoopState>((set, get) => ({
   recordMeeting: (data) => {
     const newMeeting: MotherGroupMeeting = {
       ...data,
-      id: 'mgmt-' + Date.now(),
+      id: 'mgmt-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       createdAt: new Date().toISOString().split('T')[0],
     };
     set((state) => ({
@@ -1069,7 +1115,7 @@ export const useCoopStore = create<CoopState>((set, get) => ({
       ...data,
       referenceNo,
       status: data.status ?? 'PENDING',
-      id: 'mgd-' + Date.now(),
+      id: 'mgd-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
       depositDate: today,
       createdAt: today,
     };

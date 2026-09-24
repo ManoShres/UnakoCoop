@@ -84,7 +84,7 @@ const parseWards = (wardsText: string): string[] =>
 export function EmployeeManagementPage() {
   const { employees, addEmployee, updateEmployee, removeEmployee, employeeSync, syncEmployees } =
     useCoopStore();
-  const { t } = useLanguageStore();
+  const { t, fmtCount, fmtPhone, fmtDigits } = useLanguageStore();
 
   useEffect(() => {
     void syncEmployees();
@@ -126,6 +126,20 @@ export function EmployeeManagementPage() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!showAddModal && !editingEmployee && !employeeToDelete) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setShowAddModal(false);
+        setEditingEmployee(null);
+        setEmployeeToDelete(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAddModal, editingEmployee, employeeToDelete]);
 
   const showToastMsg = (msg: string) => {
     setToast(msg);
@@ -290,9 +304,9 @@ export function EmployeeManagementPage() {
             </span>
             <IdCard className="size-4 text-blue-500" />
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{employees.length}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{fmtCount(employees.length)}</div>
           <div className="text-[10px] text-slate-400 mt-0.5">
-            {t('क्षेत्र सहजकर्ता: ', 'Field officers: ')}{fieldOfficerCount}
+            {t('क्षेत्र सहजकर्ता: ', 'Field officers: ')}{fmtCount(fieldOfficerCount)}
           </div>
         </div>
 
@@ -303,7 +317,7 @@ export function EmployeeManagementPage() {
             </span>
             <CheckCircle2 className="size-4 text-emerald-500" />
           </div>
-          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{activeCount}</div>
+          <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{fmtCount(activeCount)}</div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm">
@@ -313,7 +327,7 @@ export function EmployeeManagementPage() {
             </span>
             <Clock className="size-4 text-amber-500" />
           </div>
-          <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{onLeaveCount}</div>
+          <div className="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">{fmtCount(onLeaveCount)}</div>
         </div>
 
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm">
@@ -323,7 +337,7 @@ export function EmployeeManagementPage() {
             </span>
             <Building className="size-4 text-indigo-500" />
           </div>
-          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{branchCount}</div>
+          <div className="text-2xl font-black text-slate-900 dark:text-white mt-1">{fmtCount(branchCount)}</div>
         </div>
       </div>
 
@@ -386,8 +400,14 @@ export function EmployeeManagementPage() {
                         <img src={emp.avatarUrl} alt={emp.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <div className="font-bold text-slate-900 dark:text-white text-sm">{emp.name}</div>
-                        {emp.nameNepali && <div className="text-[11px] text-slate-500">{emp.nameNepali}</div>}
+                        <div className="font-bold text-slate-900 dark:text-white text-sm">
+                          {t(emp.nameNepali || emp.name, emp.name)}
+                        </div>
+                        {emp.nameNepali && (
+                          <div className="text-[11px] text-slate-500">
+                            {t(emp.name, emp.nameNepali)}
+                          </div>
+                        )}
                         <div className="text-[11px] font-mono text-blue-600 dark:text-blue-400 font-semibold">
                           {emp.employeeNo}
                         </div>
@@ -399,7 +419,7 @@ export function EmployeeManagementPage() {
                   <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-1">
                       <Phone className="size-3.5 text-slate-400" />
-                      <span>{emp.phone}</span>
+                      <span>{fmtPhone(emp.phone)}</span>
                     </div>
                     <div className="flex items-center gap-1 mt-0.5">
                       <Mail className="size-3.5 text-slate-400" />
@@ -409,7 +429,9 @@ export function EmployeeManagementPage() {
 
                   {/* Posting & Access Role */}
                   <td className="py-3.5 px-4">
-                    <div className="font-bold text-slate-900 dark:text-white">{emp.designation}</div>
+                    <div className="font-bold text-slate-900 dark:text-white">
+                      {t(emp.designationNepali || emp.designation, emp.designation)}
+                    </div>
                     <div className="text-[11px] text-slate-500">{emp.department}</div>
                     <div className="flex items-center gap-1 mt-0.5 text-[11px] text-slate-500">
                       <Building className="size-3 text-slate-400" />
@@ -716,7 +738,7 @@ export function EmployeeManagementPage() {
               <div className="flex items-center gap-2">
                 <Edit className="size-4 text-blue-400" />
                 <h3 className="font-bold text-sm">
-                  {t('कर्मचारी विवरण अद्यावधिक', 'Update Employee Record')}: {editingEmployee.name}
+                  {t('कर्मचारी विवरण अद्यावधिक', 'Update Employee Record')}: {t(editingEmployee.nameNepali || editingEmployee.name, editingEmployee.name)}
                 </h3>
               </div>
               <button
@@ -941,9 +963,13 @@ export function EmployeeManagementPage() {
                   />
                 </div>
                 <div>
-                  <div className="font-bold text-sm text-slate-900 dark:text-white">{employeeToDelete.name}</div>
+                  <div className="font-bold text-sm text-slate-900 dark:text-white">
+                    {t(employeeToDelete.nameNepali || employeeToDelete.name, employeeToDelete.name)}
+                  </div>
                   <div className="text-[11px] font-mono text-slate-500">{employeeToDelete.employeeNo}</div>
-                  <div className="text-[11px] text-slate-500">{employeeToDelete.designation}</div>
+                  <div className="text-[11px] text-slate-500">
+                    {t(employeeToDelete.designationNepali || employeeToDelete.designation, employeeToDelete.designation)}
+                  </div>
                 </div>
               </div>
 
