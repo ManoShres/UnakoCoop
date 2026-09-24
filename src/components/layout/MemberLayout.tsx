@@ -1,5 +1,23 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate, Navigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Wallet,
+  CreditCard,
+  ArrowLeftRight,
+  PiggyBank,
+  FileText,
+  Vote,
+  Menu,
+  X,
+  BookOpen,
+  Keyboard,
+  ShieldCheck,
+  Bell,
+  User,
+  LogOut,
+  Headphones,
+} from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDesignStore } from '../../store/useDesignStore';
@@ -26,13 +44,11 @@ export function MemberLayout() {
     navigate('/login');
   };
 
-  // Live (Supabase) mode: the member portal requires an authenticated member
-  // session. Offline demo keeps the original open-access behaviour.
   if (isSupabaseConfigured()) {
     if (authLoading) {
       return (
-        <div className="min-h-screen bg-surface-canvas flex items-center justify-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant animate-pulse">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-500 animate-pulse">
             {t('सत्र जाँच गर्दै…', 'Checking session…')}
           </span>
         </div>
@@ -47,68 +63,68 @@ export function MemberLayout() {
     {
       to: '/member',
       label: t('ड्यासबोर्ड', 'Dashboard'),
-      icon: 'space_dashboard',
+      icon: LayoutDashboard,
       end: true,
       show: true,
     },
     {
       to: '/member/my-accounts-passbook',
       label: t('खाता तथा पासबुक', 'My Accounts & Passbook'),
-      icon: 'account_balance_wallet',
+      icon: Wallet,
       end: false,
       show: true,
     },
     {
       to: '/member/loan-portfolio-repayments',
       label: t('ऋण तथा किस्ता भुक्तानी', 'Loan Portfolio & Repayments'),
-      icon: 'real_estate_agent',
+      icon: CreditCard,
       end: false,
       show: true,
     },
     {
       to: '/member/transfers-payments',
       label: t('रकम स्थानान्तरण र भुक्तानी', 'Transfers & Payments'),
-      icon: 'payments',
+      icon: ArrowLeftRight,
       end: false,
       show: features.enableSavingsTransfer,
     },
     {
       to: '/member/shares-fixed-deposits',
       label: t('शेयर तथा मुद्दती निक्षेप', 'Shares & Fixed Deposits'),
-      icon: 'savings',
+      icon: PiggyBank,
       end: false,
       show: true,
     },
     {
       to: '/member/annual-statement',
       label: t('वार्षिक वित्तीय विवरण', 'Annual Statement & Tax'),
-      icon: 'receipt_long',
+      icon: FileText,
       end: false,
       show: true,
     },
     {
       to: '/member/cooperative-governance-support',
       label: t('सहकारी सुशासन र सहयोग', 'Governance & Support'),
-      icon: 'how_to_vote',
+      icon: Vote,
       end: false,
       show: features.enableEBallot || features.enableAgmPass || features.enableGrievance,
     },
   ].filter((item) => item.show);
 
   return (
-    <div className="bg-surface-canvas text-on-surface font-body-md min-h-screen">
+    <div className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 min-h-screen">
       {/* Mobile Top Bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-surface-card border-b border-outline-variant/30 z-50 flex items-center justify-between px-4 print:hidden">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-50 flex items-center justify-between px-4 print:hidden shadow-xs">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg text-on-surface-variant hover:bg-surface-container"
+            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
             aria-label={t('मेनु टगल गर्नुहोस्', 'Toggle Navigation')}
           >
-            <span className="material-symbols-outlined">{mobileMenuOpen ? 'close' : 'menu'}</span>
+            {mobileMenuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
           <div className="flex items-center gap-2">
-            <img src={logoUrl} alt="Unako Logo" className="h-9 w-auto object-contain" />
+            <img src={logoUrl} alt="Unako Logo" className="h-8 w-auto object-contain" />
           </div>
         </div>
 
@@ -117,61 +133,63 @@ export function MemberLayout() {
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-system-tutorial'))}
-              className="p-1.5 rounded-lg text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
+              className="p-1.5 rounded-lg text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 transition-colors"
               title={t('प्रणाली प्रयोग निर्देशिका', 'System Guide')}
             >
-              <span className="material-symbols-outlined text-[18px]">menu_book</span>
+              <BookOpen className="size-4" />
             </button>
           )}
           <LanguageToggle variant="compact" />
           <ThemeToggle variant="compact" />
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 rounded-lg border border-rose-200 dark:border-rose-900 transition-colors"
             title={t('लगआउट', 'Log Out')}
           >
-            <span className="material-symbols-outlined text-[16px]">logout</span>
+            <LogOut className="size-3.5" />
             <span>{t('लगआउट', 'Exit')}</span>
           </button>
           <Link
             to="/member/profile"
-            className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs"
+            className="size-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs"
             title={currentMember?.name || 'Member Profile'}
           >
-            {currentMember?.name ? currentMember.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'HP'}
+            {currentMember?.name ? currentMember.name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase() : 'HP'}
           </Link>
         </div>
       </div>
 
       {/* Desktop / Responsive Sidebar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-40 w-64 print:hidden bg-surface-card border-r border-outline-variant/30 transition-transform duration-300 ease-in-out lg:translate-x-0 h-screen flex flex-col justify-between shrink-0 ${
+        className={`fixed top-0 bottom-0 left-0 z-40 w-64 print:hidden bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-transform duration-300 ease-in-out lg:translate-x-0 h-screen flex flex-col justify-between shrink-0 shadow-sm ${
           mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full min-h-0">
           {/* Logo & Cooperative Identity */}
-          <div className="p-6 border-b border-outline-variant/20 shrink-0">
-            <div className="flex items-center justify-center py-2">
-              <img src={logoUrl} alt="Unako Cooperative Logo" className="h-12 w-auto object-contain" />
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
+            <div className="flex items-center justify-center py-1">
+              <img src={logoUrl} alt="Unako Cooperative Logo" className="h-10 w-auto object-contain" />
             </div>
 
             {/* Member Card Widget in Sidebar */}
-            <div className="mt-4 p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm shrink-0 border border-primary/20">
-                {currentMember?.name ? currentMember.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() : 'HP'}
+            <div className="mt-4 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 flex items-center gap-3">
+              <div className="size-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                {currentMember?.name ? currentMember.name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase() : 'HP'}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-on-surface truncate">{currentMember?.name || 'Member'}</p>
-                <p className="text-[11px] font-mono text-on-surface-variant truncate">{currentMember?.memberNo || 'UKO-2070'}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{currentMember?.name || 'Member'}</p>
+                <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate">{currentMember?.memberNo || 'UKO-2070'}</p>
               </div>
-              <span className="text-[11px] font-bold text-primary uppercase tracking-wide">{t('सक्रिय सदस्य', 'Active Member')}</span>
+              <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800">
+                {t('सक्रिय', 'Active')}
+              </span>
             </div>
 
-            <div className="mt-2.5 flex items-center justify-between text-[11px] text-on-surface-variant px-1">
-              <span className="flex items-center gap-1 text-status-success font-semibold">
-                <span className="w-1.5 h-1.5 rounded-full bg-status-success inline-block"></span>
-                CBS Connected
+            <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500 px-1">
+              <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+                <span className="size-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                CBS Live
               </span>
               <span className="truncate">
                 {fmtDigits(t(currentMember?.addressNepali || currentMember?.address || 'चैनपुर, गढवा-५', currentMember?.address || 'Chainpur, Gadhwa-5'))}
@@ -181,40 +199,43 @@ export function MemberLayout() {
 
           {/* Navigation Links */}
           <nav className="flex-1 min-h-0 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={() => setMobileMenuOpen(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md transition-all text-xs font-semibold ${
-                    isActive
-                      ? 'bg-primary text-white shadow-xs font-bold'
-                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-                  }`
-                }
-              >
-                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
-                <span>{item.label}</span>
-              </NavLink>
-            ))}
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all text-xs font-semibold ${
+                      isActive
+                        ? 'bg-emerald-600 text-white shadow-sm font-bold'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                    }`
+                  }
+                >
+                  <Icon className="size-4 shrink-0" />
+                  <span>{item.label}</span>
+                </NavLink>
+              );
+            })}
           </nav>
 
           {/* Member Helpdesk & Support Card */}
-          <div className="p-3 border-t border-outline-variant/20 space-y-2 shrink-0 bg-surface-card">
-            <div className="p-3 bg-brand-accent-light/50 border border-brand-accent-lime/30 rounded-xl flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-brand-accent-lime/20 flex items-center justify-center text-primary shrink-0">
-                <span className="material-symbols-outlined text-[18px]">support_agent</span>
+          <div className="p-3 border-t border-slate-100 dark:border-slate-800 space-y-2 shrink-0 bg-white dark:bg-slate-900">
+            <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 rounded-xl flex items-center gap-3">
+              <div className="size-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                <Headphones className="size-4" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-on-surface">{t('सदस्य सहायता कक्ष', 'Member Desk')}</p>
-                <p className="text-[11px] text-on-surface-variant font-mono">082-412055</p>
+                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{t('सदस्य सहायता कक्ष', 'Member Desk')}</p>
+                <p className="text-[11px] text-slate-500 font-mono">082-412055</p>
               </div>
               <button
                 type="button"
                 onClick={() => window.dispatchEvent(new CustomEvent('open-support-chat'))}
-                className="text-[11px] font-bold text-primary hover:underline shrink-0 cursor-pointer"
+                className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0 cursor-pointer"
               >
                 {t('च्याट', 'Chat')}
               </button>
@@ -225,7 +246,7 @@ export function MemberLayout() {
               onClick={handleLogout}
               className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 rounded-xl border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer shadow-xs"
             >
-              <span className="material-symbols-outlined text-[18px]">logout</span>
+              <LogOut className="size-4" />
               <span>{t('खाताबाट बाहिरिनुहोस्', 'Log Out of Account')}</span>
             </button>
           </div>
@@ -235,9 +256,9 @@ export function MemberLayout() {
       {/* Main Content Area */}
       <div className="lg:pl-64 flex flex-col min-h-screen print:pl-0 print:min-h-0">
         {/* Sticky Desktop Header */}
-        <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 bg-surface-card/90 backdrop-blur-md border-b border-outline-variant/30 z-30 flex items-center justify-between px-4 sm:px-8 print:hidden">
+        <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 z-30 flex items-center justify-between px-4 sm:px-8 print:hidden shadow-2xs">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="font-headline font-bold text-base sm:text-lg text-on-surface truncate">
+            <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">
               {t(
                 'उनको बचत तथा ऋण सहकारी संस्था लि. | सदस्य पोर्टल',
                 'Unako Saving & Credit Cooperative Ltd. | Member Portal'
@@ -250,10 +271,10 @@ export function MemberLayout() {
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('open-system-tutorial'))}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-primary hover:text-white bg-primary/10 hover:bg-primary rounded-lg border border-primary/30 transition-all cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-white hover:bg-emerald-600 rounded-lg border border-emerald-200 dark:border-emerald-800 transition-all cursor-pointer"
               title={t('प्रणाली प्रयोग निर्देशिका', 'System Tutorial & Guide')}
             >
-              <span className="material-symbols-outlined text-[16px]">menu_book</span>
+              <BookOpen className="size-3.5" />
               <span className="hidden sm:inline">{t('निर्देशिका', 'Guide')}</span>
             </button>
 
@@ -261,10 +282,10 @@ export function MemberLayout() {
             <button
               type="button"
               onClick={toggleShortcutGuide}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-on-surface-variant hover:text-on-surface bg-surface-container-high hover:bg-surface-container-highest rounded-lg border border-outline-variant/30 transition-all cursor-pointer shadow-2xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 transition-all cursor-pointer"
               title={t('किबोर्ड सर्टकटहरू (?)', 'Keyboard Shortcuts (?)')}
             >
-              <span className="material-symbols-outlined text-[16px]">keyboard</span>
+              <Keyboard className="size-3.5" />
               <span className="hidden sm:inline">{t('सर्टकट (?)', 'Shortcuts (?)')}</span>
             </button>
 
@@ -275,45 +296,45 @@ export function MemberLayout() {
             {/* KYC Status Badge */}
             <Link
               to="/member/profile"
-              className="hidden md:flex items-center gap-1.5 bg-brand-accent-light px-3 py-1 rounded-full border border-emerald-200/60 hover:shadow-xs transition-shadow"
+              className="hidden md:flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800 hover:shadow-xs transition-shadow"
             >
-              <span className="material-symbols-outlined text-status-success text-[16px]">verified</span>
-              <span className="text-xs font-bold text-primary">{t('केवाईसी प्रमाणित', 'KYC Verified')}</span>
+              <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{t('केवाईसी प्रमाणित', 'KYC Verified')}</span>
             </Link>
 
             {/* Notification Bell */}
             <Link
               to="/member/notifications"
-              className="relative p-2 rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant hover:text-on-surface flex items-center justify-center"
+              className="relative p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-300 flex items-center justify-center"
               title={t('सूचनाहरू', 'Notifications')}
             >
-              <span className="material-symbols-outlined text-[22px]">notifications</span>
-              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-error"></span>
+              <Bell className="size-4" />
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-rose-500"></span>
             </Link>
 
             {/* Member Profile Avatar */}
             <Link
               to="/member/profile"
-              className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white hover:ring-2 hover:ring-primary/40 transition-all shadow-xs"
+              className="size-8 rounded-full bg-emerald-600 flex items-center justify-center text-white hover:ring-2 hover:ring-emerald-400/40 transition-all shadow-xs"
               title={currentMember?.name || 'Member Profile'}
             >
-              <span className="material-symbols-outlined text-[18px]">person</span>
+              <User className="size-4" />
             </Link>
 
             {/* Header Direct Logout Button */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 transition-colors cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/40 rounded-lg border border-rose-200 dark:border-rose-900 transition-colors cursor-pointer"
               title={t('लगआउट गर्नुहोस्', 'Log Out of Member Portal')}
             >
-              <span className="material-symbols-outlined text-[18px]">logout</span>
+              <LogOut className="size-3.5" />
               <span className="hidden sm:inline">{t('लगआउट', 'Log Out')}</span>
             </button>
           </div>
         </header>
 
         {/* Dynamic Nested Page Content */}
-        <main className="w-full pt-16 bg-surface-canvas min-h-screen print:pt-0 print:min-h-0 print:bg-white">
+        <main className="w-full pt-16 bg-slate-50 dark:bg-slate-950 min-h-screen print:pt-0 print:min-h-0 print:bg-white">
           <Outlet context={{ lang }} />
         </main>
       </div>
@@ -321,7 +342,7 @@ export function MemberLayout() {
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30 backdrop-blur-xs"
+          className="lg:hidden fixed inset-0 bg-slate-950/60 z-30 backdrop-blur-xs"
           onClick={() => setMobileMenuOpen(false)}
         />
       )}

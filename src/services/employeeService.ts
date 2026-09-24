@@ -1,5 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Employee, EmployeeAccessRole, EmployeeStatus } from '../types';
+import { CreateEmployeeSchema, UpdateEmployeeSchema } from '../schemas/employeeSchema';
+import { LoginSchema } from '../schemas/authSchema';
 
 /** Snake-case shape of the `public.employees` table (see supabase/schema.sql). */
 export interface EmployeeRow {
@@ -113,10 +115,17 @@ export const createEmployeeInSupabase = async (
 ): Promise<ServiceResult<Employee>> => {
   if (!supabase) return { data: null, error: NOT_CONFIGURED };
 
+  // Validate input before sending to Supabase.
+  const validation = CreateEmployeeSchema.safeParse(employee);
+  if (!validation.success) {
+    const firstIssue = validation.error.issues[0];
+    return { data: null, error: firstIssue?.message ?? 'Invalid employee data.' };
+  }
+
   try {
     const { data, error } = await supabase
       .from('employees')
-      .insert(employeeToRow(employee))
+      .insert(employeeToRow(validation.data as Omit<Employee, 'id'>))
       .select()
       .single();
 
@@ -134,10 +143,17 @@ export const updateEmployeeInSupabase = async (
 ): Promise<ServiceResult<Employee>> => {
   if (!supabase) return { data: null, error: NOT_CONFIGURED };
 
+  // Validate the partial update payload.
+  const validation = UpdateEmployeeSchema.safeParse(updates);
+  if (!validation.success) {
+    const firstIssue = validation.error.issues[0];
+    return { data: null, error: firstIssue?.message ?? 'Invalid update data.' };
+  }
+
   try {
     const { data, error } = await supabase
       .from('employees')
-      .update(employeePatchToRow(updates))
+      .update(employeePatchToRow(validation.data as Partial<Employee>))
       .eq('employee_no', employeeNo)
       .select()
       .single();
@@ -171,8 +187,18 @@ export const signInStaffWithSupabase = async (
 ): Promise<ServiceResult<{ userId: string | null; email: string | null }>> => {
   if (!supabase) return { data: null, error: NOT_CONFIGURED };
 
+  // Validate login input before reaching Supabase Auth.
+  const validation = LoginSchema.safeParse({ email, password });
+  if (!validation.success) {
+    const firstIssue = validation.error.issues[0];
+    return { data: null, error: firstIssue?.message ?? 'Invalid login input.' };
+  }
+
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: validation.data.email,
+      password: validation.data.password,
+    });
     if (error) return { data: null, error: error.message };
     return {
       data: { userId: data.user?.id ?? null, email: data.user?.email ?? null },

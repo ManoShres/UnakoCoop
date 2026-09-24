@@ -6,20 +6,20 @@ import { toNepaliDigits } from '../../utils/nepaliDate';
 import {
   User,
   MapPin,
-  FileText,
   HeartHandshake,
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
-  Upload,
   X,
   ShieldCheck,
-  Building,
-  CreditCard,
-  Camera,
   FileCheck,
   AlertCircle,
 } from 'lucide-react';
+import { GenderType, MaritalStatusType } from './onboarding/OnboardingTypes';
+import { OnboardingStep1Personal } from './onboarding/OnboardingStep1Personal';
+import { OnboardingStep2Address } from './onboarding/OnboardingStep2Address';
+import { OnboardingStep3Identity } from './onboarding/OnboardingStep3Identity';
+import { OnboardingStep4NomineeShares } from './onboarding/OnboardingStep4NomineeShares';
 
 interface MemberOnboardingWizardProps {
   isOpen: boolean;
@@ -27,32 +27,13 @@ interface MemberOnboardingWizardProps {
   onSuccess: (newMember: Member) => void;
 }
 
-const NEPAL_PROVINCES = [
-  'कोशी प्रदेश (Koshi)',
-  'मधेश प्रदेश (Madhesh)',
-  'बागमती प्रदेश (Bagmati)',
-  'गण्डकी प्रदेश (Gandaki)',
-  'लुम्बिनी प्रदेश (Lumbini)',
-  'कर्णाली प्रदेश (Karnali)',
-  'सुदूरपश्चिम प्रदेश (Sudurpashchim)',
-];
-
-const OCCUPATION_OPTIONS = [
-  { value: 'Agriculture', labelNe: 'कृषि तथा पशुपालन', labelEn: 'Agriculture & Livestock' },
-  { value: 'Business', labelNe: 'साना तथा मझौला व्यापार', labelEn: 'Small/Medium Business' },
-  { value: 'Service', labelNe: 'सरकारी/निजी जागिर', labelEn: 'Public/Private Service' },
-  { value: 'ForeignEmployment', labelNe: 'वैदेशिक रोजगार', labelEn: 'Foreign Employment' },
-  { value: 'HomeMaker', labelNe: 'घरायसी कार्य', labelEn: 'Home Maker' },
-  { value: 'Other', labelNe: 'अन्य पेशा/व्यवसाय', labelEn: 'Other Enterprise' },
-];
-
 export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
   isOpen,
   onClose,
   onSuccess,
 }) => {
   const { addMember, motherGroups } = useCoopStore();
-  const { t, fmtCurrency } = useLanguageStore();
+  const { t } = useLanguageStore();
 
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -72,12 +53,12 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
   // Step 1: Personal & Lineage
   const [fullNameEn, setFullNameEn] = useState('');
   const [fullNameNe, setFullNameNe] = useState('');
-  const [gender, setGender] = useState<'FEMALE' | 'MALE' | 'OTHER'>('FEMALE');
-  const [maritalStatus, setMaritalStatus] = useState<'UNMARRIED' | 'MARRIED' | 'WIDOWED' | 'DIVORCED' | 'OTHER'>('MARRIED');
+  const [gender, setGender] = useState<GenderType>('FEMALE');
+  const [maritalStatus, setMaritalStatus] = useState<MaritalStatusType>('MARRIED');
   const [dobBs, setDobBs] = useState('२०४८-०४-१५');
-  const [dobAd, setDobAd] = useState('1991-07-30');
+  const [dobAd] = useState('1991-07-30');
   const [phone, setPhone] = useState('98578-');
-  const [email, setEmail] = useState('');
+  const [email] = useState('');
   const [occupation, setOccupation] = useState('Agriculture');
   const [fatherName, setFatherName] = useState('');
   const [motherName, setMotherName] = useState('');
@@ -178,7 +159,6 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
     setCurrentStep((prev) => Math.max(prev - 1, 1) as 1 | 2 | 3 | 4);
   };
 
-  // Extract Nepali or English part from bilingual strings like 'दाङ (Dang)'
   const extractLangPart = (val: string, wantNepali: boolean): string => {
     if (!val) return '';
     const match = val.match(/^(.*?)\s*\((.*?)\)$/);
@@ -370,637 +350,107 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
 
         {/* Modal Form Body (Scrollable) */}
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
-          {/* STEP 1: Personal & Lineage */}
           {currentStep === 1 && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {t('१. व्यक्तिगत पहिचान तथा ३ पुस्ते पारिवारिक विवरण', '1. Personal Demographics & 3-Generation Lineage')}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {t('सदस्यको कानुनी नाम, जन्म मिति, पेशा र पारिवारिक तीन पुस्ते नाम', 'Enter full legal names, birth particulars, and statutory 3-generation lineage.')}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('पूरा नाम (नेपालीमा) *', 'Full Legal Name (Nepali) *')}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="जस्तै: सुनिता थारु"
-                    value={fullNameNe}
-                    onChange={(e) => setFullNameNe(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('पूरा नाम (English मा) *', 'Full Name (in English) *')}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Sunita Tharu"
-                    value={fullNameEn}
-                    onChange={(e) => setFullNameEn(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('लिङ्ग (Gender) *', 'Gender *')}
-                  </label>
-                  <select
-                    value={gender}
-                    onChange={(e) => setGender(e.target.value as any)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  >
-                    <option value="FEMALE">{t('महिला (Female)', 'Female')}</option>
-                    <option value="MALE">{t('पुरुष (Male)', 'Male')}</option>
-                    <option value="OTHER">{t('अन्य (Other)', 'Other')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('वैवाहिक स्थिति *', 'Marital Status *')}
-                  </label>
-                  <select
-                    value={maritalStatus}
-                    onChange={(e) => setMaritalStatus(e.target.value as any)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  >
-                    <option value="MARRIED">{t('विवाहित (Married)', 'Married')}</option>
-                    <option value="UNMARRIED">{t('अविवाहित (Unmarried)', 'Unmarried')}</option>
-                    <option value="WIDOWED">{t('एकल/विधवा/विदुर (Widowed)', 'Widowed')}</option>
-                    <option value="DIVORCED">{t('पारपाचुके (Divorced)', 'Divorced')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('मुख्य पेशा *', 'Primary Occupation *')}
-                  </label>
-                  <select
-                    value={occupation}
-                    onChange={(e) => setOccupation(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  >
-                    {OCCUPATION_OPTIONS.map((occ) => (
-                      <option key={occ.value} value={occ.value}>
-                        {t(occ.labelNe, occ.labelEn)}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('जन्म मिति (वि.सं. B.S.) *', 'Date of Birth (B.S.) *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={dobBs}
-                    onChange={(e) => setDobBs(e.target.value)}
-                    placeholder="YYYY-MM-DD (जस्तै: २०४८-०४-१५)"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('मोबाइल नम्बर *', 'Mobile Number *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="98XXXXXXXX"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                </div>
-              </div>
-
-              {/* 3-Generation Lineage Card */}
-              <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 space-y-3">
-                <div className="text-xs font-black text-blue-900 dark:text-blue-300 flex items-center gap-2">
-                  <ShieldCheck className="size-4 text-blue-600" />
-                  <span>{t('कानुनी तीन पुस्ते विवरण (3-Generation Lineage)', 'Statutory 3-Generation Lineage')}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('बाबुको पूरा नाम *', "Father's Full Name *")}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="जस्तै: रामप्रसाद थारु"
-                      value={fatherName}
-                      onChange={(e) => setFatherName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('बाजेको पूरा नाम *', "Grandfather's Full Name *")}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="जस्तै: मानबहादुर थारु"
-                      value={grandfatherName}
-                      onChange={(e) => setGrandfatherName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('आमाको पूरा नाम', "Mother's Full Name")}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="जस्तै: कौशिल्या थारु"
-                      value={motherName}
-                      onChange={(e) => setMotherName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('पति / पत्नीको पूरा नाम (विवाहित भएमा)', 'Spouse Name (If Married)')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="जस्तै: जीवन चौधरी"
-                      value={spouseName}
-                      onChange={(e) => setSpouseName(e.target.value)}
-                      disabled={maritalStatus === 'UNMARRIED'}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium disabled:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <OnboardingStep1Personal
+              fullNameNe={fullNameNe}
+              setFullNameNe={setFullNameNe}
+              fullNameEn={fullNameEn}
+              setFullNameEn={setFullNameEn}
+              gender={gender}
+              setGender={setGender}
+              maritalStatus={maritalStatus}
+              setMaritalStatus={setMaritalStatus}
+              occupation={occupation}
+              setOccupation={setOccupation}
+              dobBs={dobBs}
+              setDobBs={setDobBs}
+              phone={phone}
+              setPhone={setPhone}
+              fatherName={fatherName}
+              setFatherName={setFatherName}
+              grandfatherName={grandfatherName}
+              setGrandfatherName={setGrandfatherName}
+              motherName={motherName}
+              setMotherName={setMotherName}
+              spouseName={spouseName}
+              setSpouseName={setSpouseName}
+            />
           )}
 
-          {/* STEP 2: Address & Group */}
           {currentStep === 2 && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {t('२. नेपालको ५-तह स्थायी ठेगाना तथा आमा समूह आवद्धता', '2. 5-Tier Nepalese Address & Self-Help Group Affiliation')}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {t('प्रदेश, जिल्ला, स्थानीय तह, वडा र टोल विवरण तथा कार्यक्षेत्र समूह चयन', 'Permanent residence tiering and mother group assignment.')}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('प्रदेश *', 'Province *')}
-                  </label>
-                  <select
-                    value={province}
-                    onChange={(e) => setProvince(e.target.value)}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  >
-                    {NEPAL_PROVINCES.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('जिल्ला *', 'District *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    placeholder="दाङ (Dang)"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('नगरपालिका / गाउँपालिका *', 'Municipality / Rural Municipality *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={palika}
-                    onChange={(e) => setPalika(e.target.value)}
-                    placeholder="गढवा गाउँपालिका (Gadhwa)"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('वडा नं. *', 'Ward Number *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={wardNo}
-                    onChange={(e) => setWardNo(e.target.value)}
-                    placeholder="५"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('टोल / बस्ती *', 'Tole / Village *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={tole}
-                    onChange={(e) => setTole(e.target.value)}
-                    placeholder="चेपे (Chepe)"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  />
-                </div>
-              </div>
-
-              {/* Temporary Address Toggle */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sameAsPermanent}
-                    onChange={(e) => setSameAsPermanent(e.target.checked)}
-                    className="size-4 rounded text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('हालको बसोबास स्थायी ठेगानामै हो (Current address same as permanent)', 'Current residence is same as permanent address')}
-                  </span>
-                </label>
-                {!sameAsPermanent && (
-                  <div className="pt-2">
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('हालको अस्थायी ठेगाना', 'Temporary / Residential Address')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="जस्तै: काठमाडौं-३२, कोटेश्वर"
-                      value={tempAddress}
-                      onChange={(e) => setTempAddress(e.target.value)}
-                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Mother Group Assignment */}
-              <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/40 space-y-2">
-                <div className="text-xs font-black text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
-                  <Building className="size-4 text-indigo-600" />
-                  <span>{t('आमा समूह / केन्द्र आवद्धता (Mother Group Center)', 'Mother Group / Center Affiliation')}</span>
-                </div>
-                <select
-                  value={selectedMotherGroup}
-                  onChange={(e) => setSelectedMotherGroup(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-800 text-xs font-bold"
-                >
-                  <option value="">{t('-- सिधा सहकारी सदस्य (कुनै समूहमा नभएको) --', '-- Direct Member (Not affiliated with group) --')}</option>
-                  {motherGroups.map((mg) => (
-                    <option key={mg.id} value={mg.id}>
-                      {mg.name} ({mg.location}) • {mg.meetingDay}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[11px] text-indigo-600 dark:text-indigo-400">
-                  {t('महिला समूहमा आवद्ध हुँदा नियमित मासिक बैठक तथा समूह जमानी कर्जा सुविधा प्राप्त हुन्छ।', 'Affiliating with a Mother Group enables regular monthly center deposits and peer group lending.')}
-                </p>
-              </div>
-            </div>
+            <OnboardingStep2Address
+              province={province}
+              setProvince={setProvince}
+              district={district}
+              setDistrict={setDistrict}
+              palika={palika}
+              setPalika={setPalika}
+              wardNo={wardNo}
+              setWardNo={setWardNo}
+              tole={tole}
+              setTole={setTole}
+              sameAsPermanent={sameAsPermanent}
+              setSameAsPermanent={setSameAsPermanent}
+              tempAddress={tempAddress}
+              setTempAddress={setTempAddress}
+              selectedMotherGroup={selectedMotherGroup}
+              setSelectedMotherGroup={setSelectedMotherGroup}
+              motherGroups={motherGroups}
+            />
           )}
 
-          {/* STEP 3: Identity & Documents */}
           {currentStep === 3 && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {t('३. नागरिकता, राष्ट्रिय परिचयपत्र तथा डिजिटल कागजात', '3. Citizenship, National ID & Document Uploads')}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {t('नागरिकता जारी विवरण र स्पष्ट डिजिटल प्रतिलिपि अपलोड', 'Statutory citizenship registry particulars and document attachments.')}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('नागरिकता प्रमाणपत्र नं. *', 'Citizenship Certificate No. *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={citizenshipNo}
-                    onChange={(e) => setCitizenshipNo(e.target.value)}
-                    placeholder="५२-०१-७५-०३२१४"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('जारी मिति (वि.सं.) *', 'Issue Date (B.S.) *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={citizenshipIssueDateBs}
-                    onChange={(e) => setCitizenshipIssueDateBs(e.target.value)}
-                    placeholder="२०६६-०२-११"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('जारी जिल्ला *', 'Issuing District *')}
-                  </label>
-                  <input
-                    type="text"
-                    value={citizenshipIssueDistrict}
-                    onChange={(e) => setCitizenshipIssueDistrict(e.target.value)}
-                    placeholder="दाङ (Dang)"
-                    className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('राष्ट्रिय परिचयपत्र नं. (ऐच्छिक)', 'National ID Number (Optional)')}
-                  </label>
-                  <input
-                    type="text"
-                    value={nationalIdNo}
-                    onChange={(e) => setNationalIdNo(e.target.value)}
-                    placeholder="९८०-XXXX-XXXX"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('स्थायी लेखा नम्बर (PAN नं. - ऐच्छिक)', 'Permanent Account Number (PAN)')}
-                  </label>
-                  <input
-                    type="text"
-                    value={panNo}
-                    onChange={(e) => setPanNo(e.target.value)}
-                    placeholder="६००XXXXXX"
-                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                  />
-                </div>
-              </div>
-
-              {/* Upload Dropzones */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-                {/* Photo */}
-                <div className="p-3 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center hover:border-blue-500 transition cursor-pointer">
-                  <Camera className="size-6 text-blue-500 mx-auto mb-1" />
-                  <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    {t('पासपोर्ट फोटो', 'Member Photo')}
-                  </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-                    {docPhotoUploaded ? '✓ ' + t('संलग्न भयो', 'Attached') : t('अपलोड', 'Upload')}
-                  </div>
-                </div>
-
-                {/* Citizenship Front */}
-                <div className="p-3 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center hover:border-blue-500 transition cursor-pointer">
-                  <FileText className="size-6 text-indigo-500 mx-auto mb-1" />
-                  <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    {t('नागरिकता अगाडि', 'Citizenship Front')}
-                  </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-                    {docCitizenshipFrontUploaded ? '✓ ' + t('संलग्न भयो', 'Attached') : t('अपलोड', 'Upload')}
-                  </div>
-                </div>
-
-                {/* Citizenship Back */}
-                <div className="p-3 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center hover:border-blue-500 transition cursor-pointer">
-                  <FileText className="size-6 text-indigo-500 mx-auto mb-1" />
-                  <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    {t('नागरिकता पछाडि', 'Citizenship Back')}
-                  </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-                    {docCitizenshipBackUploaded ? '✓ ' + t('संलग्न भयो', 'Attached') : t('अपलोड', 'Upload')}
-                  </div>
-                </div>
-
-                {/* Signature */}
-                <div className="p-3 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700 text-center hover:border-blue-500 transition cursor-pointer">
-                  <Upload className="size-6 text-emerald-500 mx-auto mb-1" />
-                  <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">
-                    {t('हस्ताक्षर नमुना', 'Signature Sample')}
-                  </div>
-                  <div className="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-                    {docSignatureUploaded ? '✓ ' + t('संलग्न भयो', 'Attached') : t('अपलोड', 'Upload')}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <OnboardingStep3Identity
+              citizenshipNo={citizenshipNo}
+              setCitizenshipNo={setCitizenshipNo}
+              citizenshipIssueDateBs={citizenshipIssueDateBs}
+              setCitizenshipIssueDateBs={setCitizenshipIssueDateBs}
+              citizenshipIssueDistrict={citizenshipIssueDistrict}
+              setCitizenshipIssueDistrict={setCitizenshipIssueDistrict}
+              nationalIdNo={nationalIdNo}
+              setNationalIdNo={setNationalIdNo}
+              panNo={panNo}
+              setPanNo={setPanNo}
+              docPhotoUploaded={docPhotoUploaded}
+              setDocPhotoUploaded={setDocPhotoUploaded}
+              docCitizenshipFrontUploaded={docCitizenshipFrontUploaded}
+              setDocCitizenshipFrontUploaded={setDocCitizenshipFrontUploaded}
+              docCitizenshipBackUploaded={docCitizenshipBackUploaded}
+              setDocCitizenshipBackUploaded={setDocCitizenshipBackUploaded}
+              docSignatureUploaded={docSignatureUploaded}
+              setDocSignatureUploaded={setDocSignatureUploaded}
+            />
           )}
 
-          {/* STEP 4: Nominee & Shares / Accounts */}
           {currentStep === 4 && (
-            <div className="space-y-4 animate-fade-in">
-              <div className="border-b border-slate-100 dark:border-slate-800 pb-2">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                  {t('४. कानुनी हकवाला (इच्छाइएको व्यक्ति) तथा प्रारम्भिक सेयर खाता', '4. Statutory Nominee (Haqwala) & Initial Share Account')}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {t('सहकारी विधान अनुसार हकवालाको विवरण र प्रारम्भिक शेयर पुँजी जम्मा', 'Nominee designation, share capital subscription, and banking payout route.')}
-                </p>
-              </div>
-
-              {/* Nominee Details Card */}
-              <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-3">
-                <div className="text-xs font-black text-amber-900 dark:text-amber-300 flex items-center gap-2">
-                  <HeartHandshake className="size-4 text-amber-600" />
-                  <span>{t('इच्छाइएको कानुनी हकवाला (Nominee Information)', 'Designated Legal Nominee')}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('हकवालाको पूरा नाम *', 'Nominee Full Name *')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="जस्तै: सुरेश चौधरी"
-                      value={nomineeName}
-                      onChange={(e) => setNomineeName(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('नाता (Relationship) *', 'Relationship *')}
-                    </label>
-                    <select
-                      value={nomineeRelation}
-                      onChange={(e) => setNomineeRelation(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
-                    >
-                      <option value="छोरा (Son)">छोरा (Son)</option>
-                      <option value="छोरी (Daughter)">छोरी (Daughter)</option>
-                      <option value="पति/पत्नी (Spouse)">पति/पत्नी (Spouse)</option>
-                      <option value="आमा (Mother)">आमा (Mother)</option>
-                      <option value="बाबु (Father)">बाबु (Father)</option>
-                      <option value="भाइ/बहिनी (Sibling)">भाइ/बहिनी (Sibling)</option>
-                      <option value="अन्य (Other)">अन्य (Other)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('हकवालाको नागरिकता नं.', 'Nominee Citizenship No.')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="५२-०१-८०-XXXXX"
-                      value={nomineeCitizenship}
-                      onChange={(e) => setNomineeCitizenship(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('हकवालाको सम्पर्क फोन', 'Nominee Contact Phone')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="९८XXXXXXXX"
-                      value={nomineePhone}
-                      onChange={(e) => setNomineePhone(e.target.value)}
-                      className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-1">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={nomineeIsMinor}
-                      onChange={(e) => setNomineeIsMinor(e.target.checked)}
-                      className="size-3.5 rounded text-amber-600 focus:ring-amber-500"
-                    />
-                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                      {t('हकवाला १८ वर्ष मुनिको नाबालक छ (Nominee is a minor under 18 years)', 'Nominee is a minor under 18')}
-                    </span>
-                  </label>
-                  {nomineeIsMinor && (
-                    <div className="grid grid-cols-2 gap-3 mt-2">
-                      <input
-                        type="text"
-                        placeholder={t('संरक्षकको नाम (Guardian Name)', 'Guardian Name')}
-                        value={nomineeGuardianName}
-                        onChange={(e) => setNomineeGuardianName(e.target.value)}
-                        className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                      />
-                      <input
-                        type="text"
-                        placeholder={t('संरक्षकको नाता (Guardian Relation)', 'Guardian Relation')}
-                        value={nomineeGuardianRelation}
-                        onChange={(e) => setNomineeGuardianRelation(e.target.value)}
-                        className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Share Allotment & Financial Setup */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('प्रारम्भिक शेयर कित्ता (दर रु. १००) *', 'Initial Share Kitta (@ NPR 100) *')}
-                  </label>
-                  <input
-                    type="number"
-                    min={10}
-                    step={10}
-                    value={shareKitta}
-                    onChange={(e) => setShareKitta(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                  <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-                    = रु. {fmtCurrency(shareKitta * 100, true)}
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('प्रवेश शुल्क (Entrance Fee)', 'Entrance Fee (NPR)')}
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    step={100}
-                    value={entranceFee}
-                    onChange={(e) => setEntranceFee(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                  <div className="text-[10px] text-slate-400 mt-1">
-                    {t('सहकारी सदस्यता प्रवेश शुल्क', 'One-time admission charge')}
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('मासिक अनिवार्य बचत (प्रति महिना)', 'Mandatory Monthly Savings')}
-                  </label>
-                  <input
-                    type="number"
-                    min={200}
-                    step={100}
-                    value={monthlySavingsCommitment}
-                    onChange={(e) => setMonthlySavingsCommitment(Number(e.target.value))}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
-                  />
-                  <div className="text-[10px] text-slate-400 mt-1">
-                    {t('नियमित मासिक बचत खाता', 'Regular monthly recurring fund')}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bank Payout Account */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-2">
-                <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                  <CreditCard className="size-4 text-blue-500" />
-                  <span>{t('लाभांश भुक्तानी बैंक खाता (Dividend Payout Bank Account)', 'Dividend Payout Bank Account')}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <input
-                    type="text"
-                    placeholder={t('बैंकको नाम', 'Bank Name')}
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t('खाता नम्बर', 'Account Number')}
-                    value={bankAccountNo}
-                    onChange={(e) => setBankAccountNo(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t('शाखा कार्यालय', 'Branch Name')}
-                    value={bankBranch}
-                    onChange={(e) => setBankBranch(e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
-                  />
-                </div>
-              </div>
-            </div>
+            <OnboardingStep4NomineeShares
+              nomineeName={nomineeName}
+              setNomineeName={setNomineeName}
+              nomineeRelation={nomineeRelation}
+              setNomineeRelation={setNomineeRelation}
+              nomineeCitizenship={nomineeCitizenship}
+              setNomineeCitizenship={setNomineeCitizenship}
+              nomineePhone={nomineePhone}
+              setNomineePhone={setNomineePhone}
+              nomineeIsMinor={nomineeIsMinor}
+              setNomineeIsMinor={setNomineeIsMinor}
+              nomineeGuardianName={nomineeGuardianName}
+              setNomineeGuardianName={setNomineeGuardianName}
+              nomineeGuardianRelation={nomineeGuardianRelation}
+              setNomineeGuardianRelation={setNomineeGuardianRelation}
+              shareKitta={shareKitta}
+              setShareKitta={setShareKitta}
+              entranceFee={entranceFee}
+              setEntranceFee={setEntranceFee}
+              monthlySavingsCommitment={monthlySavingsCommitment}
+              setMonthlySavingsCommitment={setMonthlySavingsCommitment}
+              bankName={bankName}
+              setBankName={setBankName}
+              bankAccountNo={bankAccountNo}
+              setBankAccountNo={setBankAccountNo}
+              bankBranch={bankBranch}
+              setBankBranch={setBankBranch}
+            />
           )}
         </div>
 
@@ -1011,7 +461,7 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
               <button
                 type="button"
                 onClick={handleBack}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 <ChevronLeft className="size-4" />
                 <span>{t('अघिल्लो चरण', 'Previous')}</span>
@@ -1020,7 +470,7 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
                 {t('रद्द गर्नुहोस्', 'Cancel')}
               </button>
@@ -1036,7 +486,7 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
               <button
                 type="button"
                 onClick={handleNext}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition cursor-pointer"
               >
                 <span>{t('पछिल्लो चरण', 'Next Step')}</span>
                 <ChevronRight className="size-4" />
@@ -1045,7 +495,7 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-lg transition"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-lg transition cursor-pointer"
               >
                 <CheckCircle2 className="size-4" />
                 <span>{t('सदस्यता प्रमाणित तथा दर्ता गर्नुहोस्', 'Complete & Register Member')}</span>

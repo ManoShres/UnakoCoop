@@ -119,9 +119,12 @@ export const NEPALI_MONTHS_BS = [
  * Format a BS date string like "2081-11-14" into human-readable Nepali or English
  */
 export function formatBSDate(bsDateString: string, lang: 'np' | 'en' = 'np'): string {
-  if (!bsDateString || !bsDateString.includes('-')) return bsDateString;
-  const [year, monthStr, day] = bsDateString.split('-');
+  if (!bsDateString || typeof bsDateString !== 'string') return '';
+  const parts = bsDateString.split('-');
+  if (parts.length !== 3) return bsDateString;
+  const [year, monthStr, day] = parts;
   const monthNum = parseInt(monthStr, 10);
+  if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) return bsDateString;
   const monthObj = NEPALI_MONTHS_BS.find((m) => m.id === monthNum);
 
   if (lang === 'np') {

@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Temporary build / lint / debug artifacts
+.tmp-*
+
+# Test / preview distributions
+dist-test
+
 # Environment variables
 .env
 .env.local

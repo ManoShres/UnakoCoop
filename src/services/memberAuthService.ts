@@ -1,6 +1,7 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Member } from '../types';
 import { fetchMemberByAuthUserId, ServiceResult } from './operationalService';
+import { LoginSchema } from '../schemas/authSchema';
 
 const NOT_CONFIGURED =
   'Supabase is not configured (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).';
@@ -16,10 +17,17 @@ export const signInMemberWithSupabase = async (
 ): Promise<ServiceResult<Member>> => {
   if (!supabase) return { data: null, error: NOT_CONFIGURED };
 
+  // Validate login input before reaching Supabase Auth.
+  const validation = LoginSchema.safeParse({ email, password });
+  if (!validation.success) {
+    const firstIssue = validation.error.issues[0];
+    return { data: null, error: firstIssue?.message ?? 'Invalid login input.' };
+  }
+
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
+      email: validation.data.email,
+      password: validation.data.password,
     });
     if (error) return { data: null, error: error.message };
 

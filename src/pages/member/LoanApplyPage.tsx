@@ -1,5 +1,32 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  CheckCircle2,
+  ShieldCheck,
+  Sprout,
+  Bookmark,
+  Printer,
+  Check,
+  Star,
+  TrendingDown,
+  Calculator,
+  Landmark,
+  BadgeCheck,
+  MapPin,
+  PawPrint,
+  Truck,
+  FolderOpen,
+  FileText,
+  Receipt,
+  HeartPulse,
+  CloudUpload,
+  Users,
+  CheckCheck,
+  Lock,
+  ArrowRight,
+  Eye,
+  RefreshCw,
+} from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 
 export function LoanApplyPage() {
@@ -25,7 +52,7 @@ export function LoanApplyPage() {
       {/* Toast Notification */}
       {toast && (
         <div className="fixed top-6 right-6 z-50 bg-surface-dark text-white px-5 py-3 rounded-xl shadow-2xl border border-primary/40 flex items-center gap-3 animate-fade-in">
-          <span className="material-symbols-outlined text-status-success text-xl">check_circle</span>
+          <CheckCircle2 className="w-5 h-5 text-status-success" />
           <span className="text-sm font-medium">{toast}</span>
         </div>
       )}
@@ -35,7 +62,7 @@ export function LoanApplyPage() {
 {/*  Dynamic Notification / Policy Bar  */}
 <div className="mb-space-lg bg-surface-container-high rounded-xl p-space-md flex flex-col md:flex-row items-start md:items-center justify-between gap-space-sm">
 <div className="flex items-center gap-space-sm">
-<span className="material-symbols-outlined text-primary text-[22px]">verified_user</span>
+<ShieldCheck className="w-5 h-5 text-primary" />
 <p className="font-body-sm text-body-sm text-on-surface">
 <span className="font-semibold text-primary">
   {t('सहकारी ऐन २०७४ र संस्थाको ऋण विनियमावली बमोजिम:', 'Per Cooperatives Act 2074 & Credit Bylaws:')}{' '}
@@ -54,7 +81,7 @@ export function LoanApplyPage() {
 <div className="mb-space-xl grid grid-cols-1 xl:grid-cols-12 gap-space-lg items-end">
 <div className="xl:col-span-7">
 <div className="flex items-center gap-space-xs text-primary mb-space-xs">
-<span className="material-symbols-outlined text-[18px]">agriculture</span>
+<Sprout className="w-4.5 h-4.5" />
 <span className="font-label-sm text-label-sm uppercase tracking-wider font-semibold">
   {t('उत्पादनमूलक कर्जा सेवा', 'Productive Agro Credit Service')}
 </span>
@@ -71,11 +98,11 @@ export function LoanApplyPage() {
 </div>
 <div className="xl:col-span-5 flex flex-wrap items-center justify-start xl:justify-end gap-space-sm">
 <button className="px-space-md py-space-sm rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center gap-space-xs shadow-sm cursor-pointer">
-<span className="material-symbols-outlined text-[18px]">bookmark_border</span>
+<Bookmark className="w-4.5 h-4.5" />
 <span>{t('मस्यौदा सुरक्षित राख्नुहोस्', 'Save Draft')}</span>
 </button>
 <button className="px-space-md py-space-sm rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center gap-space-xs shadow-sm cursor-pointer">
-<span className="material-symbols-outlined text-[18px]">print</span>
+<Printer className="w-4.5 h-4.5" />
 <span>{t('प्रिन्ट प्रिभ्यू', 'Print Preview')}</span>
 </button>
 </div>
@@ -86,7 +113,7 @@ export function LoanApplyPage() {
 {/*  Step 1: Completed  */}
 <div className="flex items-center gap-space-sm bg-surface-container-low p-space-sm rounded-lg">
 <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-on-primary shrink-0">
-<span className="material-symbols-outlined text-[18px]">check</span>
+<Check className="w-4.5 h-4.5" />
 </div>
 <div className="min-w-0">
 <p className="font-label-sm text-label-sm text-primary font-bold">{t('१. ऋण प्रकार र रकम', '1. Scheme & Amount')}</p>
@@ -133,7 +160,7 @@ export function LoanApplyPage() {
 <div className="bg-surface-card rounded-xl shadow-md p-space-lg flex flex-col">
 <div className="flex items-start justify-between gap-space-sm mb-space-sm">
 <div className="bg-brand-accent-light text-primary font-label-sm text-label-sm px-space-sm py-space-xs rounded-full font-bold inline-flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">stars</span>
+<Star className="w-3.5 h-3.5" />
 <span>{t('प्राथमिकता क्षेत्र कर्जा', 'Priority Agro Scheme')}</span>
 </div>
 <span className="font-tabular-mono text-tabular-mono text-xs text-on-surface-variant">{t('योजना कोड: AGRO-081', 'Scheme Code: AGRO-081')}</span>
@@ -153,7 +180,7 @@ export function LoanApplyPage() {
 <span className="font-label-sm text-label-sm text-on-surface-variant line-through">९.५%</span>
 </div>
 <span className="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-0.5 mt-1">
-<span className="material-symbols-outlined text-[14px]">trending_down</span>
+<TrendingDown className="w-3.5 h-3.5" />
               {t('३.५% सरकारी अनुदान', '3.5% Govt Subsidy')}
             </span>
 </div>
@@ -194,7 +221,7 @@ export function LoanApplyPage() {
 <div className="mt-space-lg bg-surface-dark text-on-primary p-space-md rounded-xl shadow-lg relative overflow-hidden">
 <div className="flex items-center justify-between">
 <span className="font-label-sm text-label-sm text-brand-accent-lime font-bold uppercase tracking-wider">{t('अनुमानित मासिक किस्ता', 'Estimated Monthly Installment (EMI)')}</span>
-<span className="material-symbols-outlined text-brand-accent-lime text-[20px]">calculate</span>
+<Calculator className="w-5 h-5 text-brand-accent-lime" />
 </div>
 <div className="mt-space-xs flex items-baseline gap-2">
 <span className="font-display-stat text-display-stat text-on-primary font-black" id="calculated-emi">९,६१०</span>
@@ -218,7 +245,7 @@ export function LoanApplyPage() {
 {/*  Financial Health & Cooperative Standing Card  */}
 <div className="bg-surface-card rounded-xl shadow-sm p-space-lg">
 <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-space-sm flex items-center gap-space-xs">
-<span className="material-symbols-outlined text-primary text-[20px]">account_balance</span>
+<Landmark className="w-5 h-5 text-primary" />
 <span>{t('संस्थामा सदस्यको वित्तीय हैसियत', "Member's Financial Standing in Cooperative")}</span>
 </h3>
 <div className="space-y-space-sm">
@@ -241,7 +268,7 @@ export function LoanApplyPage() {
 <p className="font-label-md text-label-md font-bold text-on-surface">{t('विगतको ऋण भुक्तानी इतिहास', 'Past Loan Repayment Track Record')}</p>
 <p className="font-label-sm text-label-sm text-status-success font-semibold">{t('उत्कृष्ट (कुनै बक्यौता छैन)', 'Excellent (No Overdue / Zero Default)')}</p>
 </div>
-<span className="material-symbols-outlined text-status-success text-[20px]">verified</span>
+<BadgeCheck className="w-5 h-5 text-status-success" />
 </div>
 </div>
 </div>
@@ -254,7 +281,7 @@ export function LoanApplyPage() {
 <div className="relative h-48 w-full rounded-lg overflow-hidden">
 <img className="w-full h-full object-cover" data-alt="Dairy buffalo farming shed in rural Terai Nepal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBH2GymDg5NjoYH8iafyQ1BbshZ0Q7RIguEUUJQ3oJh5S8u6ex2MyHkVKwZURnpRaIHc2ykesubUYRuAX5A3YJ2JkgZO_tsgtRNqdtd1-jceOHLk-O2Grda9qzZORBhD71vR50drFxtx7q3v8V1bNqHifNfoHQDtAKmPDBHDx4TTEiL9y2Gp6IIiRRa10Afrj5GclDzXNJs9ypswSSzlalPJWquVRo6k01uoruaWeitclikGZu3v1cu"/>
 <div className="absolute bottom-2 left-2 bg-surface-dark/80 backdrop-blur-md px- space-sm py-1 rounded text-on-primary font-label-sm text-label-sm flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">location_on</span>
+<MapPin className="w-3.5 h-3.5" />
 <span>{t('गढवा-५ चैनपुर, दाङ (क्षेत्रफल: १० कट्ठा)', 'Gadhwa-5 Chainpur, Dang (Area: 10 Kattha)')}</span>
 </div>
 </div>
@@ -265,7 +292,7 @@ export function LoanApplyPage() {
 {/*  Section 1: Farming Project Details  */}
 <div className="bg-surface-card rounded-xl shadow-sm p-space-lg">
 <div className="flex items-center gap-space-xs mb-space-md pb-space-xs bg-surface-container-low p-space-sm rounded-lg">
-<span className="material-symbols-outlined text-primary text-[22px]">pets</span>
+<PawPrint className="w-5 h-5 text-primary" />
 <div>
 <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
               {t('परियोजना तथा आम्दानी विवरण', 'Agro Project & Cashflow Details')}
@@ -307,7 +334,7 @@ export function LoanApplyPage() {
                 {t('बिक्री तथा बजार व्यवस्थापन संयन्त्र *', 'Marketing & Sales Offtake Channel *')}
               </label>
 <div className="bg-surface-canvas px-space-md py-space-sm rounded-xl flex items-center gap-space-xs">
-<span className="material-symbols-outlined text-primary text-[18px]">local_shipping</span>
+<Truck className="w-4.5 h-4.5 text-primary" />
 <div className="min-w-0">
 <span className="font-label-md text-label-md font-bold text-on-surface block truncate">{t('चौरी दुग्ध उत्पादक सहकारी संकलन केन्द्र', 'Chauri Dairy Producer Cooperative Chilling Center')}</span>
 <span className="font-label-sm text-label-sm text-status-success font-semibold">{t('औपचारिक सम्झौता भएको', 'Formal Supply Agreement (MOU Active)')}</span>
@@ -341,7 +368,7 @@ export function LoanApplyPage() {
 <div className="bg-surface-card rounded-xl shadow-sm p-space-lg">
 <div className="flex items-center justify-between mb-space-md pb-space-xs bg-surface-container-low p-space-sm rounded-lg">
 <div className="flex items-center gap-space-xs">
-<span className="material-symbols-outlined text-primary text-[22px]">folder_shared</span>
+<FolderOpen className="w-5 h-5 text-primary" />
 <div>
 <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
                 {t('धितो तथा आवश्यक कागजात दाखिला', 'Collateral & Required Documents Submission')}
@@ -360,7 +387,7 @@ export function LoanApplyPage() {
 <div className="bg-surface-canvas p-space-md rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
 <div className="flex items-start gap-space-sm">
 <div className="w-10 h-10 rounded-lg bg-surface-container-high text-primary flex items-center justify-center shrink-0">
-<span className="material-symbols-outlined text-[24px]">description</span>
+<FileText className="w-6 h-6" />
 </div>
 <div>
 <p className="font-label-md text-label-md font-bold text-on-surface">
@@ -368,7 +395,7 @@ export function LoanApplyPage() {
 </p>
 <div className="flex items-center gap-2 mt-0.5">
 <span className="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-0.5">
-<span className="material-symbols-outlined text-[14px]">check_circle</span>
+<CheckCircle2 className="w-3.5 h-3.5" />
                     lalpurja_plot412.pdf (2.4 MB)
                   </span>
 <span className="text-xs text-on-surface-variant font-tabular-mono text-tabular-mono">• {t('कित्ता नं. ४१२ (चैनपुर-५)', 'Plot No. 412 (Chainpur-5)')}</span>
@@ -377,11 +404,11 @@ export function LoanApplyPage() {
 </div>
 <div className="flex items-center gap-space-xs self-end sm:self-auto shrink-0">
 <button className="px-space-sm py-1 bg-surface-card hover:bg-surface-container-high rounded-lg text-primary font-label-sm text-label-sm font-semibold shadow-sm flex items-center gap-1 transition-all cursor-pointer">
-<span className="material-symbols-outlined text-[16px]">visibility</span>
+<Eye className="w-4 h-4" />
 <span>{t('हेर्नुहोस्', 'View')}</span>
 </button>
 <button className="px-space-sm py-1 bg-surface-card hover:bg-surface-container-high rounded-lg text-on-surface-variant hover:text-error font-label-sm text-label-sm shadow-sm transition-all flex items-center gap-1 cursor-pointer">
-<span className="material-symbols-outlined text-[16px]">swap_horiz</span>
+<RefreshCw className="w-4 h-4" />
 <span>{t('बदल्नुहोस्', 'Replace')}</span>
 </button>
 </div>
@@ -390,7 +417,7 @@ export function LoanApplyPage() {
 <div className="bg-surface-canvas p-space-md rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
 <div className="flex items-start gap-space-sm">
 <div className="w-10 h-10 rounded-lg bg-surface-container-high text-primary flex items-center justify-center shrink-0">
-<span className="material-symbols-outlined text-[24px]">receipt_long</span>
+<Receipt className="w-6 h-6" />
 </div>
 <div>
 <p className="font-label-md text-label-md font-bold text-on-surface">
@@ -398,7 +425,7 @@ export function LoanApplyPage() {
 </p>
 <div className="flex items-center gap-2 mt-0.5">
 <span className="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-0.5">
-<span className="material-symbols-outlined text-[14px]">check_circle</span>
+<CheckCircle2 className="w-3.5 h-3.5" />
                     malpot_tax_receipt_2080_81.pdf (1.1 MB)
                   </span>
 <span className="text-xs text-on-surface-variant font-tabular-mono text-tabular-mono">• {t('रसिद नं. ८८३४२', 'Receipt No. 88342')}</span>
@@ -407,11 +434,11 @@ export function LoanApplyPage() {
 </div>
 <div className="flex items-center gap-space-xs self-end sm:self-auto shrink-0">
 <button className="px-space-sm py-1 bg-surface-card hover:bg-surface-container-high rounded-lg text-primary font-label-sm text-label-sm font-semibold shadow-sm flex items-center gap-1 transition-all cursor-pointer">
-<span className="material-symbols-outlined text-[16px]">visibility</span>
+<Eye className="w-4 h-4" />
 <span>{t('हेर्नुहोस्', 'View')}</span>
 </button>
 <button className="px-space-sm py-1 bg-surface-card hover:bg-surface-container-high rounded-lg text-on-surface-variant hover:text-error font-label-sm text-label-sm shadow-sm transition-all flex items-center gap-1 cursor-pointer">
-<span className="material-symbols-outlined text-[16px]">swap_horiz</span>
+<RefreshCw className="w-4 h-4" />
 <span>{t('बदल्नुहोस्', 'Replace')}</span>
 </button>
 </div>
@@ -420,7 +447,7 @@ export function LoanApplyPage() {
 <div className="bg-surface-container-low p-space-md rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
 <div className="flex items-start gap-space-sm">
 <div className="w-10 h-10 rounded-lg bg-surface-card text-on-surface-variant flex items-center justify-center shrink-0 shadow-sm">
-<span className="material-symbols-outlined text-[24px]">health_and_safety</span>
+<HeartPulse className="w-6 h-6" />
 </div>
 <div>
 <p className="font-label-md text-label-md font-bold text-on-surface">
@@ -432,7 +459,7 @@ export function LoanApplyPage() {
 </div>
 </div>
 <button className="px-space-md py-space-xs bg-surface-card hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold rounded-lg shadow-sm flex items-center gap-1 shrink-0 self-end sm:self-auto transition-all cursor-pointer">
-<span className="material-symbols-outlined text-[18px]">cloud_upload</span>
+<CloudUpload className="w-4.5 h-4.5" />
 <span>{t('अपलोड थप्नुहोस्', 'Add Upload')}</span>
 </button>
 </div>
@@ -442,7 +469,7 @@ export function LoanApplyPage() {
 <div className="bg-surface-card rounded-xl shadow-sm p-space-lg">
 <div className="flex items-center justify-between mb-space-md pb-space-xs bg-surface-container-low p-space-sm rounded-lg">
 <div className="flex items-center gap-space-xs">
-<span className="material-symbols-outlined text-primary text-[22px]">groups</span>
+<Users className="w-5 h-5 text-primary" />
 <div>
 <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">
                 {t('दुई जना सदस्य साक्षी / जमानीकर्ता', 'Two Cooperative Member Guarantors')}
@@ -453,7 +480,7 @@ export function LoanApplyPage() {
 </div>
 </div>
 <span className="font-label-sm text-label-sm bg-status-success/10 text-status-success font-bold px-2 py-1 rounded-full flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">done_all</span>
+<CheckCheck className="w-3.5 h-3.5" />
             {t('दुवै प्रमाणीकृत', 'Both Verified')}
           </span>
 </div>
@@ -467,7 +494,7 @@ export function LoanApplyPage() {
 <div className="min-w-0">
 <div className="flex items-center gap-1">
 <h4 className="font-label-md text-label-md font-bold text-on-surface truncate">{t('राम बहादुर चौधरी', 'Ram Bahadur Chaudhary')}</h4>
-<span className="material-symbols-outlined text-status-success text-[16px]">verified</span>
+<BadgeCheck className="w-4 h-4 text-status-success" />
 </div>
 <p className="font-tabular-mono text-tabular-mono text-xs text-on-surface-variant mt-0.5">ID: UKO-2068-01124</p>
 <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{t('ठेगाना: गढवा-५, दाङ', 'Address: Gadhwa-5, Dang')}</p>
@@ -475,7 +502,7 @@ export function LoanApplyPage() {
 </div>
 <div className="mt-space-md pt-space-xs border-t border-slate-200/60 flex items-center justify-between">
 <span className="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">check</span>
+<Check className="w-3.5 h-3.5" />
                 {t('सहमति OTP प्रमाणित', 'Consent OTP Verified')}
               </span>
 <span className="font-label-sm text-label-sm text-on-surface-variant">{t('सेयर: रु. ४०,०००', 'Shares: NPR 40,000')}</span>
@@ -490,7 +517,7 @@ export function LoanApplyPage() {
 <div className="min-w-0">
 <div className="flex items-center gap-1">
 <h4 className="font-label-md text-label-md font-bold text-on-surface truncate">{t('चेत नारायण थारु', 'Chet Narayan Tharu')}</h4>
-<span className="material-symbols-outlined text-status-success text-[16px]">verified</span>
+<BadgeCheck className="w-4 h-4 text-status-success" />
 </div>
 <p className="font-tabular-mono text-tabular-mono text-xs text-on-surface-variant mt-0.5">ID: UKO-2071-05521</p>
 <p className="font-label-sm text-label-sm text-on-surface-variant mt-1">{t('ठेगाना: गढवा-४, दाङ', 'Address: Gadhwa-4, Dang')}</p>
@@ -498,7 +525,7 @@ export function LoanApplyPage() {
 </div>
 <div className="mt-space-md pt-space-xs border-t border-slate-200/60 flex items-center justify-between">
 <span className="font-label-sm text-label-sm text-status-success font-semibold flex items-center gap-1">
-<span className="material-symbols-outlined text-[14px]">check</span>
+<Check className="w-3.5 h-3.5" />
                 {t('सहमति OTP प्रमाणित', 'Consent OTP Verified')}
               </span>
 <span className="font-label-sm text-label-sm text-on-surface-variant">{t('सेयर: रु. २५,०००', 'Shares: NPR 25,000')}</span>
@@ -525,7 +552,7 @@ export function LoanApplyPage() {
 {/*  Call to Action Buttons  */}
 <div className="flex flex-col sm:flex-row items-center justify-between gap-space-md">
 <div className="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
-<span className="material-symbols-outlined text-primary text-[18px]">lock</span>
+<Lock className="w-4.5 h-4.5 text-primary" />
 <span>{t('२५६-बिट इन्क्रिप्टेड सुरक्षित सबमिसन', '256-Bit Encrypted Secure Submission')}</span>
 </div>
 <div className="flex items-center gap-space-sm w-full sm:w-auto">
@@ -534,7 +561,7 @@ export function LoanApplyPage() {
   className="w-full sm:w-auto px-space-xl py-space-sm bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-space-xs cursor-pointer"
 >
 <span>{t('ऋण आवेदन समितिमा पेश गर्नुहोस्', 'Submit Application to Committee')}</span>
-<span className="material-symbols-outlined text-[20px]">arrow_forward</span>
+<ArrowRight className="w-5 h-5" />
 </button>
 </div>
 </div>
