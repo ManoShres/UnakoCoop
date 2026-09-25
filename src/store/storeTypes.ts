@@ -22,6 +22,10 @@ import {
   BankStatementEntry,
   ReconciliationEntry,
   GeneratedReport,
+  DividendDistributionParams,
+  BonusShareDistributionParams,
+  DividendPayoutSummary,
+  BonusSharePayoutSummary,
 } from '../types';
 import { EmployeeSyncStatus } from './initialData';
 import { CollectionPostingResult } from '../utils/collectionPosting';
@@ -87,6 +91,22 @@ export interface OperationsSlice {
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
   updateCoopSettings: (updates: Partial<CoopSettings>) => void;
+
+  // Share & Dividend Distribution actions
+  executeBulkDividendDistribution: (params: DividendDistributionParams) => DividendPayoutSummary;
+  executeSingleMemberDividend: (params: {
+    memberId: string;
+    amount: number;
+    deductTax?: boolean;
+    destination: 'SAVINGS' | 'CASH';
+    savingsAccountNo?: string;
+  }) => { transactionRef: string; netAmount: number; taxDeducted: number };
+  executeBonusShareDistribution: (params: BonusShareDistributionParams) => BonusSharePayoutSummary;
+  claimMemberDividend: (params: {
+    memberId: string;
+    destination: 'SAVINGS' | 'SHARES';
+    savingsAccountNo?: string;
+  }) => { success: boolean; amountClaimed: number; newSharesCount?: number };
 }
 
 export interface MotherGroupSlice {

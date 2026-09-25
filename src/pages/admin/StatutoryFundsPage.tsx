@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { INITIAL_STATUTORY_FUNDS } from '../../data/statutoryFundsMockData';
 import { StatutoryFundRecord } from '../../types';
@@ -11,6 +12,10 @@ import {
   HeartHandshake,
   Users,
   Award,
+  Sparkles,
+  Coins,
+  CheckCircle2,
+  X,
 } from 'lucide-react';
 
 export const StatutoryFundsPage: React.FC = () => {
@@ -22,6 +27,10 @@ export const StatutoryFundsPage: React.FC = () => {
   const [adjustType, setAdjustType] = useState<'ALLOCATE' | 'UTILIZE'>('ALLOCATE');
   const [adjustNote, setAdjustNote] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showAppropriationModal, setShowAppropriationModal] = useState(false);
+  const [surplusNetProfit, setSurplusNetProfit] = useState<number>(1200000);
+  const [surplusFiscalYear, setSurplusFiscalYear] = useState<string>('2081/82');
+  const [toast, setToast] = useState<string | null>(null);
 
   const totalReserves = funds.reduce((sum, f) => sum + f.currentBalance, 0);
   const totalAllocatedThisYear = funds.reduce((sum, f) => sum + f.allocatedThisYear, 0);
@@ -95,6 +104,25 @@ export const StatutoryFundsPage: React.FC = () => {
                 'Official tracking of statutory appropriations from annual net surplus into General Reserve (min 25%), Cooperative Education, Promotion, and Community Relief funds.'
               )}
             </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setShowAppropriationModal(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm shadow-indigo-500/20 cursor-pointer"
+            >
+              <Sparkles className="size-4 text-indigo-200" />
+              <span>{t('+ नाफा तथा लाभांश विनियोजन', '+ Appropriate Net Surplus')}</span>
+            </button>
+
+            <Link
+              to="/admin/shares"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition"
+            >
+              <Coins className="size-4 text-emerald-500" />
+              <span>{t('सेयर तथा लाभांश कन्सोल →', 'Shares & Dividends →')}</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -288,6 +316,140 @@ export const StatutoryFundsPage: React.FC = () => {
                 className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs"
               >
                 {t('पुष्टि गर्नुहोस्', 'Confirm & Post')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* APPROPRIATION MODAL */}
+      {showAppropriationModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="approp-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto"
+          onClick={() => setShowAppropriationModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-4 text-indigo-400" />
+                <h3 id="approp-modal-title" className="font-bold text-sm">
+                  {t('वार्षिक साधारण सभा नाफा बाँडफाँड तथा लाभांश विनियोजन', 'AGM Surplus Appropriation & Dividend Allocation')}
+                </h3>
+              </div>
+              <button onClick={() => setShowAppropriationModal(false)} className="text-slate-400 hover:text-white">
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {t('वार्षिक खुद नाफा (Net Surplus)', 'Annual Net Surplus (NPR)')}
+                  </label>
+                  <input
+                    type="number"
+                    value={surplusNetProfit}
+                    onChange={(e) => setSurplusNetProfit(Math.max(0, parseInt(e.target.value || '0', 10)))}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                    {t('आर्थिक वर्ष', 'Fiscal Year')}
+                  </label>
+                  <input
+                    type="text"
+                    value={surplusFiscalYear}
+                    onChange={(e) => setSurplusFiscalYear(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
+                  />
+                </div>
+              </div>
+
+              {/* Statutory Splits Table */}
+              <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
+                <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 font-bold border-b border-slate-200 dark:border-slate-800 flex justify-between">
+                  <span>{t('दफा ६८ वैधानिक कोष बाँडफाँड (Statutory Split)', 'Section 68 Statutory Splits')}</span>
+                  <span>{t('रकम (NPR)', 'Amount')}</span>
+                </div>
+                <div className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[11px] p-2 space-y-1.5">
+                  <div className="flex justify-between items-center text-indigo-600 dark:text-indigo-400 font-bold">
+                    <span>{t('साधारण जगेडा कोष (२५% न्यूनतम):', 'General Reserve (min 25%):')}</span>
+                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.25), true)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                    <span>{t('सहकारी प्रवर्द्धन कोष (०.५%):', 'Coop Promotion Fund (0.5%):')}</span>
+                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.005), true)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                    <span>{t('सहकारी शिक्षा कोष (५.०%):', 'Coop Education Fund (5.0%):')}</span>
+                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.05), true)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                    <span>{t('सामुदायिक विकास तथा राहत कोष (५.०%):', 'Community Welfare Fund (5.0%):')}</span>
+                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.05), true)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
+                    <span>{t('कर्मचारी बोनस कोष (१०.०%):', 'Employee Bonus Fund (10.0%):')}</span>
+                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.1), true)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-600 font-black border-t border-slate-200 dark:border-slate-700 pt-1.5">
+                    <span>{t('लाभांश तथा संरक्षित पुँजी फिर्ता कोष (५४.५%):', 'Distributable Dividend & Patronage Pool (54.5%):')}</span>
+                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.545), true)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAppropriationModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300"
+              >
+                {t('रद्द गर्नुहोस्', 'Cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFunds((prev) =>
+                    prev.map((f) => {
+                      if (f.fundType === 'GENERAL_RESERVE') {
+                        const added = Math.round(surplusNetProfit * 0.25);
+                        return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
+                      }
+                      if (f.fundType === 'COOP_EDUCATION') {
+                        const added = Math.round(surplusNetProfit * 0.05);
+                        return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
+                      }
+                      if (f.fundType === 'COOP_PROMOTION') {
+                        const added = Math.round(surplusNetProfit * 0.005);
+                        return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
+                      }
+                      if (f.fundType === 'COMMUNITY_DEVELOPMENT') {
+                        const added = Math.round(surplusNetProfit * 0.05);
+                        return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
+                      }
+                      if (f.fundType === 'EMPLOYEE_BONUS') {
+                        const added = Math.round(surplusNetProfit * 0.1);
+                        return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
+                      }
+                      return f;
+                    })
+                  );
+                  setShowAppropriationModal(false);
+                }}
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
+              >
+                <CheckCircle2 className="size-4" />
+                <span>{t('कोषहरूमा दाखिला गर्नुहोस्', 'Allocate to Statutory Reserves')}</span>
               </button>
             </div>
           </div>

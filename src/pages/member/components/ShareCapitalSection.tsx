@@ -1,23 +1,30 @@
 import React from 'react';
-import { Award, PlusCircle, CheckCircle2, ShieldCheck, BadgeCheck } from 'lucide-react';
+import { Award, PlusCircle, CheckCircle2, ShieldCheck, BadgeCheck, Coins } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
 import { useDesignStore } from '../../../store/useDesignStore';
+import { useCoopStore } from '../../../store/useCoopStore';
 
 interface ShareCapitalSectionProps {
   onOpenCertModal: () => void;
   onOpenPurchaseModal: () => void;
+  onOpenClaimModal?: (mode: 'SAVINGS' | 'SHARES') => void;
   shareCapital?: number;
 }
 
 export function ShareCapitalSection({
   onOpenCertModal,
   onOpenPurchaseModal,
-  shareCapital = 50000,
+  onOpenClaimModal,
+  shareCapital: propsShareCapital,
 }: ShareCapitalSectionProps) {
   const { t, fmtCurrency } = useLanguageStore();
   const features = useDesignStore((s) => s.settings.features);
+  const { members } = useCoopStore();
 
-  const shareCount = Math.round(shareCapital / 100);
+  const currentMember = members[0];
+  const shareCapital = propsShareCapital ?? (currentMember?.shareCapital || 50000);
+  const accruedDividend = currentMember?.accruedDividend || 0;
+  const shareCount = currentMember?.shareKitta || Math.round(shareCapital / 100);
 
   return (
     <section className="space-y-4">
@@ -30,7 +37,7 @@ export function ShareCapitalSection({
             {t('सेयर पुँजी तथा लाभांश विवरण', 'Share Capital & Dividend Ledgers')}
           </h2>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
           <button
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-surface-card hover:bg-surface-container text-on-surface shadow-xs transition-all font-label-md text-xs font-bold border border-outline-variant/20 cursor-pointer"
             id="btnViewCert"
@@ -49,8 +56,68 @@ export function ShareCapitalSection({
               <span>{t('थप सेयर खरिद', 'Purchase Additional Shares')}</span>
             </button>
           )}
+          {features.enableDividendClaim && accruedDividend > 0 && (
+            <button
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs transition-all font-label-md text-xs cursor-pointer"
+              id="btnClaimDividend"
+              onClick={() => onOpenClaimModal?.('SAVINGS')}
+            >
+              <Coins className="w-4 h-4 text-emerald-200" />
+              <span>{t('लाभांश दाबी / व्यवस्थापन', 'Claim Dividend')}</span>
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Unclaimed Dividend Banner if accruedDividend > 0 */}
+      {features.enableDividendClaim && accruedDividend > 0 && (
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/30 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">
+              <Coins className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-xs uppercase text-emerald-700 dark:text-emerald-400 tracking-wider">
+                  {t('प्राप्त हुन बाँकी साधारण सभा लाभांश', 'Unclaimed AGM Dividend Available')}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300">
+                  {t('तुरुन्त निकाल्न मिल्ने', 'Ready to Claim')}
+                </span>
+              </div>
+              <div className="font-headline text-2xl font-black text-on-surface mt-0.5 tabular-nums">
+                {fmtCurrency(accruedDividend, true)}
+              </div>
+              <p className="font-body-sm text-xs text-on-surface-variant">
+                {t(
+                  'यो रकम सिधै आफ्नो नियमित बचत खातामा जम्मा गर्न सक्नुहुन्छ वा थप सेयर कित्तामा पुँजीकरण गर्न सक्नुहुन्छ।',
+                  'Transfer this dividend to your savings passbook or reinvest in cooperative equity shares.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => onOpenClaimModal?.('SAVINGS')}
+              className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-label-md text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <Coins className="w-4 h-4 text-emerald-200" />
+              <span>{t('बचत खातामा जम्मा गर्नुहोस्', 'Transfer to Savings')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onOpenClaimModal?.('SHARES')}
+              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-label-md text-xs font-bold transition shadow-xs flex items-center gap-1.5 cursor-pointer"
+            >
+              <Award className="w-4 h-4 text-purple-200" />
+              <span>{t('सेयरमा पुँजीकरण गर्नुहोस्', 'Reinvest in Shares')}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Share Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

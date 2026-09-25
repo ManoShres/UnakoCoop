@@ -17,6 +17,10 @@ import {
 } from 'lucide-react';
 import { ShareCertificateModal } from '../../components/admin/ShareCertificateModal';
 import { OpenFixedDepositModal } from '../../components/admin/OpenFixedDepositModal';
+import { BulkDividendDistributionModal } from '../../components/admin/BulkDividendDistributionModal';
+import { BonusShareDistributionModal } from '../../components/admin/BonusShareDistributionModal';
+import { MemberDividendPayoutModal } from '../../components/admin/MemberDividendPayoutModal';
+import { Member } from '../../types';
 
 export function SharesManagementPage() {
   const { sharePool, updateSharePool, members, savings } = useCoopStore();
@@ -26,6 +30,9 @@ export function SharesManagementPage() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
   const [showFdModal, setShowFdModal] = useState(false);
+  const [showBulkDividendModal, setShowBulkDividendModal] = useState(false);
+  const [showBonusShareModal, setShowBonusShareModal] = useState(false);
+  const [payoutSelectedMember, setPayoutSelectedMember] = useState<Member | null>(null);
   const [preselectedMemberId, setPreselectedMemberId] = useState<string | undefined>(undefined);
   const [preselectedTenure, setPreselectedTenure] = useState<string | undefined>(undefined);
 
@@ -161,15 +168,33 @@ export function SharesManagementPage() {
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <button
+            onClick={() => setShowBulkDividendModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm shadow-blue-500/20 cursor-pointer"
+            type="button"
+          >
+            <Coins className="size-4 text-blue-200" />
+            <span>{t('+ वार्षिक लाभांश वितरण', '+ Distribute AGM Dividends')}</span>
+          </button>
+
+          <button
+            onClick={() => setShowBonusShareModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition shadow-sm shadow-purple-500/20 cursor-pointer"
+            type="button"
+          >
+            <Award className="size-4 text-purple-200" />
+            <span>{t('+ बोनस सेयर बाँडफाँड', '+ Distribute Bonus Shares')}</span>
+          </button>
+
+          <button
             onClick={() => {
               setPreselectedMemberId(undefined);
               setShowCertificateModal(true);
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm shadow-blue-500/20"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
             type="button"
           >
-            <Award className="size-4 text-blue-200" />
-            <span>{t('+ सेयर प्रमाणपत्र जारी', '+ Issue Share Certificate')}</span>
+            <Award className="size-4 text-slate-500" />
+            <span>{t('+ सेयर प्रमाणपत्र', '+ Issue Share Cert')}</span>
           </button>
 
           <button
@@ -177,7 +202,7 @@ export function SharesManagementPage() {
               setPreselectedTenure(undefined);
               setShowFdModal(true);
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm shadow-emerald-500/20"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm shadow-emerald-500/20 cursor-pointer"
             type="button"
           >
             <Lock className="size-4 text-emerald-200" />
@@ -186,11 +211,11 @@ export function SharesManagementPage() {
 
           <button
             onClick={() => setShowShareModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition"
+            className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition cursor-pointer"
             type="button"
           >
             <Sliders className="size-4 text-slate-500" />
-            <span>{t('मापदण्ड अद्यावधिक', 'Update Parameters')}</span>
+            <span>{t('मापदण्ड', 'Parameters')}</span>
           </button>
         </div>
       </div>
@@ -429,14 +454,26 @@ export function SharesManagementPage() {
                       </td>
 
                       <td className="py-3 px-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleIssueShareForMember(member.id)}
-                          className="px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-blue-400 text-xs font-bold transition inline-flex items-center gap-1"
-                        >
-                          <PlusCircle className="size-3" />
-                          <span>{t('थप सेयर', 'Allot More')}</span>
-                        </button>
+                        <div className="flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setPayoutSelectedMember(member)}
+                            className="px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-600 hover:text-white text-emerald-600 dark:text-emerald-400 text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer"
+                            title={t('लाभांश भुक्तानी गर्नुहोस्', 'Disburse Dividend')}
+                          >
+                            <Coins className="size-3" />
+                            <span>{t('लाभांश भुक्तानी', 'Pay Dividend')}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleIssueShareForMember(member.id)}
+                            className="px-2.5 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-600 hover:text-white text-blue-600 dark:text-blue-400 text-xs font-bold transition inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            <PlusCircle className="size-3" />
+                            <span>{t('थप सेयर', 'Allot More')}</span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -547,6 +584,28 @@ export function SharesManagementPage() {
         onClose={() => setShowFdModal(false)}
         onSuccess={showToastMsg}
         preselectedTenure={preselectedTenure}
+      />
+
+      {/* MODAL 3: BULK AGM DIVIDEND DISTRIBUTION */}
+      <BulkDividendDistributionModal
+        isOpen={showBulkDividendModal}
+        onClose={() => setShowBulkDividendModal(false)}
+        onSuccess={showToastMsg}
+      />
+
+      {/* MODAL 4: BONUS SHARE ALLOTMENT */}
+      <BonusShareDistributionModal
+        isOpen={showBonusShareModal}
+        onClose={() => setShowBonusShareModal(false)}
+        onSuccess={showToastMsg}
+      />
+
+      {/* MODAL 5: SINGLE MEMBER DIVIDEND PAYOUT */}
+      <MemberDividendPayoutModal
+        isOpen={!!payoutSelectedMember}
+        onClose={() => setPayoutSelectedMember(null)}
+        onSuccess={showToastMsg}
+        member={payoutSelectedMember}
       />
 
       {/* MODAL 3: UPDATE SHARE PARAMETERS */}

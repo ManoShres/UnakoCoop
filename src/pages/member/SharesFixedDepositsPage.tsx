@@ -9,6 +9,7 @@ import { ShareCertificateModal } from './components/ShareCertificateModal';
 import { SharePurchaseModal } from './components/SharePurchaseModal';
 import { FdCertificateLoanModal } from './components/FdCertificateLoanModal';
 import { MudhatiBookingModal } from './components/MudhatiBookingModal';
+import { MemberDividendClaimModal } from './components/MemberDividendClaimModal';
 
 type SharesTab = 'shares' | 'fd' | 'calculator';
 
@@ -22,6 +23,8 @@ export function SharesFixedDepositsPage() {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const [showFdLoanModal, setShowFdLoanModal] = useState(false);
   const [showMudhatiModal, setShowMudhatiModal] = useState(false);
+  const [showDividendClaimModal, setShowDividendClaimModal] = useState(false);
+  const [dividendClaimMode, setDividendClaimMode] = useState<'SAVINGS' | 'SHARES'>('SAVINGS');
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -109,6 +112,10 @@ export function SharesFixedDepositsPage() {
             <ShareCapitalSection
               onOpenCertModal={() => setShowCertModal(true)}
               onOpenPurchaseModal={() => setShowPurchaseModal(true)}
+              onOpenClaimModal={(mode) => {
+                setDividendClaimMode(mode);
+                setShowDividendClaimModal(true);
+              }}
             />
           </div>
         )}
@@ -155,6 +162,12 @@ export function SharesFixedDepositsPage() {
         isOpen={showMudhatiModal}
         onClose={() => setShowMudhatiModal(false)}
         onSubmit={handleMudhatiSubmit}
+      />
+      <MemberDividendClaimModal
+        isOpen={showDividendClaimModal}
+        onClose={() => setShowDividendClaimModal(false)}
+        onSuccess={showToast}
+        initialMode={dividendClaimMode}
       />
     </div>
   );

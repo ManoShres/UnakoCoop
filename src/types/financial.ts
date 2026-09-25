@@ -174,3 +174,31 @@ export interface SharePool {
   patronageBonusPercent: number;
   sharePurchaseOpen: boolean;
 }
+
+export interface DividendDistributionParams {
+  ratePercent: number;
+  fiscalYear: string;
+  deductTax?: boolean;
+  destination: 'SAVINGS' | 'ACCRUED';
+}
+
+export interface BonusShareDistributionParams {
+  bonusPercent: number;
+  fiscalYear: string;
+  parValue?: number;
+}
+
+export interface DividendPayoutSummary {
+  totalGross: number;
+  totalTaxWithheld: number;
+  totalNet: number;
+  totalShareCapital: number;
+  memberCount: number;
+}
+
+export interface BonusSharePayoutSummary {
+  totalBonusKitta: number;
+  totalAddedCapital: number;
+  memberCount: number;
+}
+
