@@ -1,5 +1,5 @@
 import React from 'react';
-import { Headset, HelpCircle, Phone, RotateCcw, Send, Siren, Smartphone, Store } from 'lucide-react';
+import { ChevronDown, Headset, HelpCircle, Phone, RotateCcw, Send, Siren, Smartphone, Store } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
 
 interface BranchHelpdeskSectionProps {
@@ -188,9 +188,7 @@ export function BranchHelpdeskSection({ onGrievanceSubmit, onOpenGrievanceModal 
           <details className="group bg-surface-canvas rounded-xl p-space-md cursor-pointer transition-all">
             <summary className="font-label-md text-label-md font-bold text-on-surface flex items-center justify-between list-none">
               <span>{t('१. साधारण सभामा लाभांश कसरी भुक्तानी हुन्छ?', '1. How is dividend paid after the AGM?')}</span>
-              <span className="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform">
-                expand_more
-              </span>
+              <ChevronDown className="w-5 h-5 text-on-surface-variant group-open:rotate-180 transition-transform" />
             </summary>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-sm pt-space-xs leading-relaxed">
               {t(
@@ -203,9 +201,7 @@ export function BranchHelpdeskSection({ onGrievanceSubmit, onOpenGrievanceModal 
           <details className="group bg-surface-canvas rounded-xl p-space-md cursor-pointer transition-all">
             <summary className="font-label-md text-label-md font-bold text-on-surface flex items-center justify-between list-none">
               <span>{t('२. कृषि तथा पशुधन कर्जामा बीमा दाबी कसरी गर्ने?', '2. How to file insurance claims for agro & livestock loans?')}</span>
-              <span className="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform">
-                expand_more
-              </span>
+              <ChevronDown className="w-5 h-5 text-on-surface-variant group-open:rotate-180 transition-transform" />
             </summary>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-sm pt-space-xs leading-relaxed">
               {t(
@@ -218,9 +214,7 @@ export function BranchHelpdeskSection({ onGrievanceSubmit, onOpenGrievanceModal 
           <details className="group bg-surface-canvas rounded-xl p-space-md cursor-pointer transition-all">
             <summary className="font-label-md text-label-md font-bold text-on-surface flex items-center justify-between list-none">
               <span>{t('३. मेरो व्यक्तिगत केवाईसी नवीकरण गर्न के कागजात चाहिन्छ?', '3. What documents are required to renew my personal KYC?')}</span>
-              <span className="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform">
-                expand_more
-              </span>
+              <ChevronDown className="w-5 h-5 text-on-surface-variant group-open:rotate-180 transition-transform" />
             </summary>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-space-sm pt-space-xs leading-relaxed">
               {t(

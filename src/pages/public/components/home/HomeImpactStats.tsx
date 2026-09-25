@@ -1,4 +1,5 @@
 import React from 'react';
+import { Landmark, Percent, ShieldCheck, Users } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeImpactStats: React.FC = () => {
@@ -11,7 +12,7 @@ export const HomeImpactStats: React.FC = () => {
           {/* Stat Card 1 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-2 hover:-translate-y-1 transition-transform">
             <div className="w-10 h-10 rounded-lg bg-brand-accent-light flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[24px]">percent</span>
+              <Percent className="w-6 h-6" />
             </div>
             <div>
               <div className="font-display-stat text-display-stat text-primary font-bold">{fmtPercent(8)}</div>
@@ -24,7 +25,7 @@ export const HomeImpactStats: React.FC = () => {
           {/* Stat Card 2 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-2 hover:-translate-y-1 transition-transform">
             <div className="w-10 h-10 rounded-lg bg-brand-accent-light flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[24px]">groups</span>
+              <Users className="w-6 h-6" />
             </div>
             <div>
               <div className="font-display-stat text-display-stat text-on-surface font-bold">{t('१२,०००+', '12K+')}</div>
@@ -37,7 +38,7 @@ export const HomeImpactStats: React.FC = () => {
           {/* Stat Card 3 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-2 hover:-translate-y-1 transition-transform">
             <div className="w-10 h-10 rounded-lg bg-brand-accent-light flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[24px]">verified</span>
+              <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <div className="font-display-stat text-display-stat text-primary font-bold">{fmtPercent(100)}</div>
@@ -50,7 +51,7 @@ export const HomeImpactStats: React.FC = () => {
           {/* Stat Card 4 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-2 hover:-translate-y-1 transition-transform">
             <div className="w-10 h-10 rounded-lg bg-brand-accent-light flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[24px]">account_balance</span>
+              <Landmark className="w-6 h-6" />
             </div>
             <div>
               <div className="font-display-stat text-display-stat text-on-surface font-bold">{t('रु. १५ करोड+', 'NPR 150M+')}</div>

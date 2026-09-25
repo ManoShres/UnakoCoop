@@ -1,4 +1,5 @@
 import React from 'react';
+import { BadgePercent, Handshake, Receipt, Vote, Wallet } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeWhyChooseSection: React.FC = () => {
@@ -27,7 +28,7 @@ export const HomeWhyChooseSection: React.FC = () => {
           <div className="lg:col-span-4 flex lg:justify-end">
             <div className="bg-surface-dark-card p-space-md rounded-xl space-y-2 max-w-xs">
               <div className="flex items-center gap-2 text-brand-accent-lime">
-                <span className="material-symbols-outlined text-[20px]">handshake</span>
+                <Handshake className="w-5 h-5" />
                 <span className="font-label-md text-label-md">{t('लोकतान्त्रिक नियन्त्रण', 'Democratic Control')}</span>
               </div>
               <p className="font-body-sm text-body-sm text-tertiary-fixed-dim">
@@ -45,7 +46,7 @@ export const HomeWhyChooseSection: React.FC = () => {
           {/* Pillar 1 */}
           <div className="bg-surface-dark-card p-space-lg rounded-xl space-y-space-sm hover:bg-surface-dark-card/80 transition-all">
             <div className="w-10 h-10 rounded-lg bg-primary/20 text-brand-accent-lime flex items-center justify-center">
-              <span className="material-symbols-outlined text-[22px]">price_check</span>
+              <BadgePercent className="w-5.5 h-5.5" />
             </div>
             <h4 className="font-headline-sm text-headline-sm text-surface-bright">
               {t('न्यून ब्याजदरको कर्जा', 'Low Interest Loans')}
@@ -60,7 +61,7 @@ export const HomeWhyChooseSection: React.FC = () => {
           {/* Pillar 2 */}
           <div className="bg-surface-dark-card p-space-lg rounded-xl space-y-space-sm hover:bg-surface-dark-card/80 transition-all">
             <div className="w-10 h-10 rounded-lg bg-primary/20 text-brand-accent-lime flex items-center justify-center">
-              <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+              <Wallet className="w-5.5 h-5.5" />
             </div>
             <h4 className="font-headline-sm text-headline-sm text-surface-bright">
               {t('वार्षिक लाभांश वितरण', 'Annual Dividends')}
@@ -75,7 +76,7 @@ export const HomeWhyChooseSection: React.FC = () => {
           {/* Pillar 3 */}
           <div className="bg-surface-dark-card p-space-lg rounded-xl space-y-space-sm hover:bg-surface-dark-card/80 transition-all">
             <div className="w-10 h-10 rounded-lg bg-primary/20 text-brand-accent-lime flex items-center justify-center">
-              <span className="material-symbols-outlined text-[22px]">receipt_long</span>
+              <Receipt className="w-5.5 h-5.5" />
             </div>
             <h4 className="font-headline-sm text-headline-sm text-surface-bright">
               {t('पारदर्शी शुल्क प्रणाली', 'Zero Hidden Fees')}
@@ -90,7 +91,7 @@ export const HomeWhyChooseSection: React.FC = () => {
           {/* Pillar 4 */}
           <div className="bg-surface-dark-card p-space-lg rounded-xl space-y-space-sm hover:bg-surface-dark-card/80 transition-all">
             <div className="w-10 h-10 rounded-lg bg-primary/20 text-brand-accent-lime flex items-center justify-center">
-              <span className="material-symbols-outlined text-[22px]">how_to_vote</span>
+              <Vote className="w-5.5 h-5.5" />
             </div>
             <h4 className="font-headline-sm text-headline-sm text-surface-bright">
               {t('समुदायद्वारा सञ्चालित', 'Community Led')}

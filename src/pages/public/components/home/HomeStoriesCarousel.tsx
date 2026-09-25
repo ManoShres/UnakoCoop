@@ -1,4 +1,5 @@
 import React from 'react';
+import { Star } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeStoriesCarousel: React.FC = () => {
@@ -26,12 +27,10 @@ export const HomeStoriesCarousel: React.FC = () => {
           {/* Story 1 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-space-md flex flex-col justify-between">
             <div className="space-y-space-sm">
-              <div className="flex items-center text-status-warning">
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <div className="flex items-center gap-1 text-amber-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                ))}
               </div>
               <p className="font-body-md text-body-md text-on-surface italic">
                 {t(
@@ -58,12 +57,10 @@ export const HomeStoriesCarousel: React.FC = () => {
           {/* Story 2 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-space-md flex flex-col justify-between">
             <div className="space-y-space-sm">
-              <div className="flex items-center text-status-warning">
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <div className="flex items-center gap-1 text-amber-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                ))}
               </div>
               <p className="font-body-md text-body-md text-on-surface italic">
                 {t(
@@ -90,12 +87,10 @@ export const HomeStoriesCarousel: React.FC = () => {
           {/* Story 3 */}
           <div className="bg-surface-card p-space-lg rounded-xl shadow-sm space-y-space-md flex flex-col justify-between">
             <div className="space-y-space-sm">
-              <div className="flex items-center text-status-warning">
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+              <div className="flex items-center gap-1 text-amber-400">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                ))}
               </div>
               <p className="font-body-md text-body-md text-on-surface italic">
                 {t(

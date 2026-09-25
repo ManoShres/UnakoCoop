@@ -1,7 +1,20 @@
 import React from 'react';
-import { BadgeCheck, BookOpen, CalendarDays, CircleUser, CreditCard, MapPin, Phone, TrendingUp, Users } from 'lucide-react';
+import { BadgeCheck, BookOpen, CalendarDays, CircleUser, CreditCard, Droplet, MapPin, Phone, Sprout, TrendingUp, Users } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { ShgGroup } from './ShgTypes';
+
+const getCategoryIcon = (iconName: string) => {
+  switch (iconName) {
+    case 'local_drink':
+      return <Droplet className="w-3.5 h-3.5 text-sky-500" />;
+    case 'woman':
+      return <Users className="w-3.5 h-3.5 text-rose-500" />;
+    case 'psychiatry':
+      return <Sprout className="w-3.5 h-3.5 text-emerald-600" />;
+    default:
+      return <CircleUser className="w-3.5 h-3.5 text-primary" />;
+  }
+};
 
 interface ShgCardGridProps {
   groups: ShgGroup[];
@@ -103,7 +116,7 @@ export const ShgCardGrid: React.FC<ShgCardGridProps> = ({
                 ) : (
                   <>
                     <span className="px-space-sm py-0.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">{g.categoryIcon}</span>
+                      {getCategoryIcon(g.categoryIcon)}
                       {t(g.categoryLabel.ne, g.categoryLabel.en)}
                     </span>
                     <span className="px-space-sm py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-medium">

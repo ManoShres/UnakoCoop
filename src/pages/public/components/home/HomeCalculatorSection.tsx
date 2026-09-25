@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronDown, Coins, Lock, PiggyBank } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeCalculatorSection: React.FC = () => {
@@ -54,7 +55,7 @@ export const HomeCalculatorSection: React.FC = () => {
             }`}
             id="tab-savings"
           >
-            <span className="material-symbols-outlined text-[18px]">savings</span>
+            <PiggyBank className="w-4.5 h-4.5" />
             <span>{t('बचत योजना', 'Savings Plan')}</span>
           </button>
           <button
@@ -66,7 +67,7 @@ export const HomeCalculatorSection: React.FC = () => {
             }`}
             id="tab-loans"
           >
-            <span className="material-symbols-outlined text-[18px]">payments</span>
+            <Coins className="w-4.5 h-4.5" />
             <span>{t('कर्जा क्यालकुलेटर', 'Loan Estimator')}</span>
           </button>
         </div>
@@ -91,7 +92,7 @@ export const HomeCalculatorSection: React.FC = () => {
                   <option value="9">{t('बाल भविष्य बचत योजना (९.०% वार्षिक)', 'Child Future Growth Scheme (9.0% p.a.)')}</option>
                   <option value="8.5">{t('नारी उत्थान महिला बचत (८.५% वार्षिक)', 'Nari Utthan Mahila Bachat (8.5% p.a.)')}</option>
                 </select>
-                <span className="material-symbols-outlined absolute right-3 top-2.5 sm:top-3 text-tertiary-fixed-dim pointer-events-none text-[20px]">expand_more</span>
+                <ChevronDown className="w-5 h-5 absolute right-3 top-2.5 sm:top-3 text-tertiary-fixed-dim pointer-events-none" />
               </div>
             </div>
 
@@ -192,7 +193,7 @@ export const HomeCalculatorSection: React.FC = () => {
                   <option value="8">{t('उच्च प्राविधिक शिक्षा कर्जा (८.०%)', 'Higher Technical Education (8.0%)')}</option>
                   <option value="12">{t('सामाजिक तथा आकस्मिक कर्जा (१२.०%)', 'Social & Personal Emergency (12.0%)')}</option>
                 </select>
-                <span className="material-symbols-outlined absolute right-3 top-3.5 text-tertiary-fixed-dim pointer-events-none text-[20px]">expand_more</span>
+                <ChevronDown className="w-5 h-5 absolute right-3 top-3.5 text-tertiary-fixed-dim pointer-events-none" />
               </div>
             </div>
 
@@ -275,7 +276,7 @@ export const HomeCalculatorSection: React.FC = () => {
 
         <div className="pt-2 flex items-center justify-between text-xs text-tertiary-fixed-dim">
           <span className="flex items-center gap-1">
-            <span className="material-symbols-outlined text-[16px] text-brand-accent-lime">lock</span>
+            <Lock className="w-4 h-4 text-brand-accent-lime" />
             {t('सदस्य सुरक्षाको पूर्ण प्रत्याभूति', 'Member Security Assured')}
           </span>
           <Link to="/member/apply-loan" className="text-brand-accent-lime hover:underline flex items-center gap-0.5 font-semibold">

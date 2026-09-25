@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BadgeCheck, CheckCircle2, Download, Maximize, Minus, Plus, Printer, RotateCcw, RotateCw, ShieldCheck, X } from 'lucide-react';
+import { BadgeCheck, CheckCircle2, Download, Fingerprint, Landmark, MapPin, Maximize, Maximize2, Minimize2, Minus, Plus, Printer, RotateCcw, RotateCw, ScrollText, ShieldCheck, X } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
 
 export interface KycDocInfo {
@@ -152,9 +152,11 @@ export function KycDocInspectionModal({
               className="w-8 h-8 rounded-lg bg-slate-950 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-800 transition"
               title={docFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
             >
-              <span className="material-symbols-outlined text-base">
-                {docFullscreen ? 'fullscreen_exit' : 'fullscreen'}
-              </span>
+              {docFullscreen ? (
+                <Minimize2 className="w-4 h-4 text-slate-300" />
+              ) : (
+                <Maximize2 className="w-4 h-4 text-slate-300" />
+              )}
             </button>
 
             {/* Close Button */}
@@ -172,29 +174,32 @@ export function KycDocInspectionModal({
         {/* 2. COMPACT DOCUMENT SWITCHER TABS */}
         <div className="px-4 py-1.5 bg-slate-800/60 border-b border-slate-700/80 flex items-center gap-1.5 overflow-x-auto shrink-0">
           {[
-            { key: 'citizenship' as const, label: 'नागरिकता (Citizenship)', icon: 'badge' },
-            { key: 'lalpurja' as const, label: 'जग्गाधनी पुर्जा (Lalpurja)', icon: 'landscape' },
-            { key: 'ward' as const, label: 'वडा सिफारिस तथा विद्युत् (Ward Slip)', icon: 'home_pin' },
-            { key: 'biometric' as const, label: 'बायोमेट्रिक तथा हस्ताक्षर (Biometric)', icon: 'fingerprint' },
-          ].map((docTab) => (
-            <button
-              key={docTab.key}
-              type="button"
-              onClick={() => {
-                onSelectDocKey(docTab.key);
-                setDocZoom(1.0);
-                setDocRotation(0);
-              }}
-              className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                activeDocKey === docTab.key
-                  ? 'bg-emerald-600 text-white shadow-xs font-bold'
-                  : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/60'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[15px]">{docTab.icon}</span>
-              <span>{docTab.label}</span>
-            </button>
-          ))}
+            { key: 'citizenship' as const, label: 'नागरिकता (Citizenship)', icon: ShieldCheck },
+            { key: 'lalpurja' as const, label: 'जग्गाधनी पुर्जा (Lalpurja)', icon: Landmark },
+            { key: 'ward' as const, label: 'वडा सिफारिस तथा विद्युत् (Ward Slip)', icon: MapPin },
+            { key: 'biometric' as const, label: 'बायोमेट्रिक तथा हस्ताक्षर (Biometric)', icon: Fingerprint },
+          ].map((docTab) => {
+            const Icon = docTab.icon;
+            return (
+              <button
+                key={docTab.key}
+                type="button"
+                onClick={() => {
+                  onSelectDocKey(docTab.key);
+                  setDocZoom(1.0);
+                  setDocRotation(0);
+                }}
+                className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                  activeDocKey === docTab.key
+                    ? 'bg-emerald-600 text-white shadow-xs font-bold'
+                    : 'bg-slate-800/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700/60'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{docTab.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* 3. DOCUMENT CANVAS */}

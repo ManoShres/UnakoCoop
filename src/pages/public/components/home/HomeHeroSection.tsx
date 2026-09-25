@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { useCoopStore } from '../../../../store/useCoopStore';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
@@ -11,7 +12,7 @@ export const HomeHeroSection: React.FC = () => {
     <div className="lg:col-span-6 space-y-3.5 sm:space-y-4 lg:space-y-5">
       {/* Trust badge */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface-dark-card shadow-sm text-xs">
-        <span className="material-symbols-outlined text-brand-accent-lime text-[18px]">verified_user</span>
+        <ShieldCheck className="w-4.5 h-4.5 text-brand-accent-lime shrink-0" />
         <span className="font-label-sm text-label-sm text-surface-bright">
           {t('दाङ र देउखुरी उपत्यकाका १,०००+ सक्रिय सदस्यहरूको विश्वास', 'Trusted by +1,000 active members in Dang & Deukhuri Valley')}
         </span>
@@ -37,7 +38,7 @@ export const HomeHeroSection: React.FC = () => {
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm text-surface-dark bg-surface-bright hover:bg-surface-container-high transition-all shadow-md font-bold"
         >
           <span>{t('नयाँ खाता खोल्नुहोस्', 'Open Member Account')}</span>
-          <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+          <ArrowRight className="w-4.5 h-4.5" />
         </Link>
 
         <Link

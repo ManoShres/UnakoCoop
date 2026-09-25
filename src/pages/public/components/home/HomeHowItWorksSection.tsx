@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { CheckCircle2, Clock, CreditCard, TrendingUp, UserPlus, Zap } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeHowItWorksSection: React.FC = () => {
@@ -26,7 +27,7 @@ export const HomeHowItWorksSection: React.FC = () => {
             <div className="space-y-space-sm">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-xl bg-brand-accent-light flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[28px]">person_add</span>
+                  <UserPlus className="w-7 h-7" />
                 </div>
                 <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">{fmtDigits('01')}</span>
               </div>
@@ -43,7 +44,7 @@ export const HomeHowItWorksSection: React.FC = () => {
             <div className="pt-space-md border-t-0 mt-space-md">
               <Link to="/member/verification" className="inline-flex items-center text-primary font-label-md text-label-md hover:underline font-bold">
                 <span>{t('अनलाइन ई-केवाईसी उपलब्ध', 'Online e-KYC available')}</span>
-                <span className="material-symbols-outlined text-[18px] ml-1">verified</span>
+                <CheckCircle2 className="w-4.5 h-4.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -53,7 +54,7 @@ export const HomeHowItWorksSection: React.FC = () => {
             <div className="space-y-space-sm">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-xl bg-brand-accent-light flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[28px]">schedule</span>
+                  <Clock className="w-7 h-7" />
                 </div>
                 <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">{fmtDigits('02')}</span>
               </div>
@@ -70,7 +71,7 @@ export const HomeHowItWorksSection: React.FC = () => {
             <div className="pt-space-md border-t-0 mt-space-md">
               <Link to="/login" className="inline-flex items-center text-primary font-label-md text-label-md hover:underline font-bold">
                 <span>{t('डिजिटल तथा पासबुक सुविधा', 'Automated bank debits')}</span>
-                <span className="material-symbols-outlined text-[18px] ml-1">trending_up</span>
+                <TrendingUp className="w-4.5 h-4.5 ml-1" />
               </Link>
             </div>
           </div>
@@ -80,7 +81,7 @@ export const HomeHowItWorksSection: React.FC = () => {
             <div className="space-y-space-sm">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-xl bg-brand-accent-light flex items-center justify-center text-primary">
-                  <span className="material-symbols-outlined text-[28px]">credit_card</span>
+                  <CreditCard className="w-7 h-7" />
                 </div>
                 <span className="font-headline-2xl text-headline-2xl text-surface-container-highest font-black group-hover:text-primary-container/20 transition-colors">{fmtDigits('03')}</span>
               </div>
@@ -97,7 +98,7 @@ export const HomeHowItWorksSection: React.FC = () => {
             <div className="pt-space-md border-t-0 mt-space-md">
               <Link to="/member/apply-loan" className="inline-flex items-center text-primary font-label-md text-label-md hover:underline font-bold">
                 <span>{t('कुनै लुकेको सेवा शुल्क छैन', 'No hidden appraisal fees')}</span>
-                <span className="material-symbols-outlined text-[18px] ml-1">speed</span>
+                <Zap className="w-4.5 h-4.5 ml-1" />
               </Link>
             </div>
           </div>

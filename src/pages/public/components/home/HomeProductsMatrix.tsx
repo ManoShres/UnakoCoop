@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight, Check } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeProductsMatrix: React.FC = () => {
@@ -26,7 +27,7 @@ export const HomeProductsMatrix: React.FC = () => {
           <div className="flex items-center gap-space-sm">
             <Link to="/about" className="font-label-md text-label-md text-primary hover:text-secondary flex items-center gap-1 font-semibold">
               <span>{t('हाम्रो बारेमा विस्तृत हेर्नुहोस्', 'View All 8 Savings Plans')}</span>
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+              <ArrowRight className="w-4.5 h-4.5" />
             </Link>
           </div>
         </div>
@@ -55,15 +56,15 @@ export const HomeProductsMatrix: React.FC = () => {
               </p>
               <ul className="space-y-2 pt-2 font-body-sm text-body-sm text-on-surface-variant">
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('निःशुल्क पासबुक तथा एसएमएस अलर्ट', 'Free passbook & SMS balance alerts')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('त्रैमासिक रूपमा खातामै ब्याज जम्मा', 'Interest credited quarterly')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('काउन्टरबाट तत्काल भुक्तानी', 'Instant counter withdrawals')}
                 </li>
               </ul>
@@ -98,15 +99,15 @@ export const HomeProductsMatrix: React.FC = () => {
               </p>
               <ul className="space-y-2 pt-2 font-body-sm text-body-sm text-on-surface-variant">
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('मुद्दतीको ९०% सम्म कर्जा सुविधा', 'Loan against deposit up to 90%')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('ज्येष्ठ नागरिकलाई थप ०.५% ब्याज', 'Senior citizen +0.5% incentive')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('बजार जोखिमबाट पूर्ण सुरक्षित', 'Safe from market volatility')}
                 </li>
               </ul>
@@ -141,15 +142,15 @@ export const HomeProductsMatrix: React.FC = () => {
               </p>
               <ul className="space-y-2 pt-2 font-body-sm text-body-sm text-on-surface-variant">
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('रु. ३,००,००० सम्म विना धितो समूह जमानी', 'No mortgage up to NPR 300,000')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('बाली भित्र्याउने समय अनुसार लचिलो किस्ता', 'Flexible harvest seasonal repayment')}
                 </li>
                 <li className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">check</span>
+                  <Check className="w-4.5 h-4.5 text-primary shrink-0" />
                   {t('४८ घण्टाभित्र छिटो कर्जा स्वीकृति', 'Fast approval within 48 hours')}
                 </li>
               </ul>

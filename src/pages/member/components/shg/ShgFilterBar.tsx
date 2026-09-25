@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutGridTableProperties SlidersHorizontal } from 'lucide-react';
+import { LayoutGrid, Search, SlidersHorizontal, TableProperties } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { ShgCategory, ShgWard } from './ShgTypes';
 
@@ -51,9 +51,7 @@ export const ShgFilterBar: React.FC<ShgFilterBarProps> = ({
         {/* Search and Views Top Strip */}
         <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-space-md">
           <div className="relative flex-1">
-            <span className="material-symbols-outlined absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant">
-              search
-            </span>
+            <Search className="w-5 h-5 absolute left-space-md top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none" />
             <input
               className="w-full h-12 pl-12 pr-space-md rounded-xl bg-surface-canvas text-on-surface font-body-md text-body-md focus:bg-surface-card focus:outline-none transition-all"
               id="shgSearchInput"

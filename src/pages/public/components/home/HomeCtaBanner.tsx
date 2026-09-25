@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 export const HomeCtaBanner: React.FC = () => {
@@ -29,7 +30,7 @@ export const HomeCtaBanner: React.FC = () => {
                 className="inline-flex items-center gap-space-xs px-space-xl py-3.5 rounded-full font-label-md text-label-md text-surface-bright bg-surface-dark hover:bg-surface-dark/90 transition-all shadow-lg font-bold"
               >
                 <span>{t('रु. १०० मा आजै सदस्यता लिनुहोस्', 'Join Now For NPR 100')}</span>
-                <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                <ArrowRight className="w-4.5 h-4.5" />
               </Link>
               <Link
                 to="/contact"
