@@ -4,7 +4,8 @@ import {
   Wallet,
   ShieldCheck,
   CheckCircle2,
-  Sparkles,
+  Users,
+  ReceiptText,
 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -18,6 +19,8 @@ import { TransferReviewModal } from './components/TransferReviewModal';
 import { TransferAddBeneficiaryModal } from './components/TransferAddBeneficiaryModal';
 import { TransferReceiptModal } from './components/TransferReceiptModal';
 
+type TransferTab = 'transfer' | 'wallet' | 'beneficiaries' | 'history';
+
 export function TransfersPaymentsPage() {
   const { t, fmtCurrency } = useLanguageStore();
   const currentMember = useAuthStore(s => s.currentMember);
@@ -25,7 +28,7 @@ export function TransfersPaymentsPage() {
   const adjustSavingsBalance = useCoopStore(s => s.adjustSavingsBalance);
   const addTransaction = useCoopStore(s => s.addTransaction);
 
-  const [mode, setMode] = useState<'transfer' | 'wallet'>('transfer');
+  const [activeTab, setActiveTab] = useState<TransferTab>('transfer');
   const [memberId, setMemberId] = useState('UKO-2072-04419');
   const [amount, setAmount] = useState('10000');
   const [verifiedMember, setVerifiedMember] = useState<VerifiedMember | null>({
@@ -64,6 +67,7 @@ export function TransfersPaymentsPage() {
       job: b.job,
       loc: b.loc,
     });
+    setActiveTab('transfer');
   };
 
   const handleConfirmTransfer = () => {
@@ -142,6 +146,33 @@ export function TransfersPaymentsPage() {
     setReceiptModal(newRecord);
   };
 
+  const tabItems: Array<{ id: TransferTab; label: string; icon: React.ReactNode; desc: string }> = [
+    {
+      id: 'transfer',
+      label: t('अन्तर-सदस्य स्थानान्तरण', 'Member Transfer'),
+      icon: <ArrowLeftRight className="w-4 h-4" />,
+      desc: t('०% शुल्कमा तत्काल रकम पठाउनुहोस्', '0% fee instant cooperative transfer'),
+    },
+    {
+      id: 'wallet',
+      label: t('डिजिटल वालेट / बैंक लोड', 'Load Wallet & Deposit'),
+      icon: <Wallet className="w-4 h-4" />,
+      desc: t('eSewa, Khalti, ConnectIPS मार्फत जम्मा', 'Direct deposit via gateways'),
+    },
+    {
+      id: 'beneficiaries',
+      label: t('बचत लाभार्थीहरू', 'Saved Beneficiaries'),
+      icon: <Users className="w-4 h-4" />,
+      desc: t('नियमित प्राप्तकर्ता सदस्य डाइरेक्टरी', 'Frequent recipient directory'),
+    },
+    {
+      id: 'history',
+      label: t('रसिद तथा कारोबार इतिहास', 'History & CBS Receipts'),
+      icon: <ReceiptText className="w-4 h-4" />,
+      desc: t('विस्तृत विवरण तथा डिजिटल रसिद', 'Audit log and verified vouchers'),
+    },
+  ];
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6">
       <div className="flex flex-col gap-6 w-full max-w-[1280px] mx-auto pb-12">
@@ -177,8 +208,8 @@ export function TransfersPaymentsPage() {
             <div className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
               {t('उपलब्ध बचत मौज्दात', 'Available Liquidity')}
             </div>
-            <div className="font-display-stat text-[22px] font-bold text-primary tracking-tight mt-0.5">
-              NPR {fmtCurrency(regularSavings.balance, true)}.00
+            <div className="font-display-stat text-[22px] font-bold text-primary tracking-tight mt-0.5 tabular-nums">
+              {fmtCurrency(regularSavings.balance, true)}.00
             </div>
             <div className="font-label-sm text-xs text-on-surface-variant flex items-center md:justify-end gap-1.5 mt-0.5">
               <span className="w-2 h-2 rounded-full bg-status-success inline-block"></span>
@@ -187,38 +218,39 @@ export function TransfersPaymentsPage() {
           </div>
         </div>
 
-        {/* MODE SELECTOR TABS */}
-        <div className="flex items-center gap-3 border-b border-outline-variant/15 pb-2">
-          <button
-            onClick={() => setMode('transfer')}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-label-md text-label-md font-semibold transition-all cursor-pointer ${
-              mode === 'transfer'
-                ? 'bg-primary text-on-primary shadow-sm'
-                : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
-            }`}
-            type="button"
-          >
-            <ArrowLeftRight className="w-4 h-4" />
-            <span>{t('सदस्य-देखि-सदस्य स्थानान्तरण', 'Member-to-Member Transfer')}</span>
-          </button>
-          <button
-            onClick={() => setMode('wallet')}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-label-md text-label-md font-semibold transition-all cursor-pointer ${
-              mode === 'wallet'
-                ? 'bg-primary text-on-primary shadow-sm'
-                : 'bg-surface-container-low text-on-surface-variant hover:text-on-surface hover:bg-surface-container'
-            }`}
-            type="button"
-          >
-            <Wallet className="w-4 h-4" />
-            <span>{t('डिजिटल वालेट / बैंक लोड', 'Load Wallet & Deposit')}</span>
-          </button>
+        {/* CALM SEGMENTED NAVIGATION TABS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 bg-surface-container-low p-1.5 rounded-2xl border border-outline-variant/15">
+          {tabItems.map(item => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                type="button"
+                className={`flex flex-col text-left px-4 py-3 rounded-xl transition-all cursor-pointer ${
+                  isActive
+                    ? 'bg-surface-card text-on-surface shadow-sm border border-outline-variant/20'
+                    : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-card/50'
+                }`}
+              >
+                <div className="flex items-center gap-2 font-bold text-xs sm:text-sm">
+                  <span className={isActive ? 'text-primary' : 'text-on-surface-variant'}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+                </div>
+                <span className="text-[11px] text-on-surface-variant/80 mt-1 line-clamp-1">
+                  {item.desc}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* BENTO GRID: TRANSFER/WALLET FORM (7 COLS) & BENEFICIARIES (5 COLS) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
-          <div className="lg:col-span-7 flex flex-col justify-between gap-6">
-            {mode === 'transfer' ? (
+        {/* TAB 1: MEMBER TRANSFER */}
+        {activeTab === 'transfer' && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="lg:col-span-7">
               <TransferMemberForm
                 memberId={memberId}
                 setMemberId={setMemberId}
@@ -234,30 +266,51 @@ export function TransfersPaymentsPage() {
                 sourceAccountNo={regularSavings.accountNo}
                 sourceBalance={regularSavings.balance}
               />
-            ) : (
-              <TransferWalletForm
-                selectedGateway={selectedGateway}
-                setSelectedGateway={setSelectedGateway}
-                walletAmount={walletAmount}
-                setWalletAmount={setWalletAmount}
-                sourceAccountNo={regularSavings.accountNo}
-                sourceBalance={regularSavings.balance}
-                onDepositSuccess={handleDepositSuccess}
+            </div>
+            <div className="lg:col-span-5">
+              <TransferBeneficiariesSection
+                onSelectBeneficiary={handleSelectBeneficiary}
+                onAddBeneficiary={() => setAddBeneficiaryModal(true)}
               />
-            )}
+            </div>
           </div>
+        )}
 
-          <TransferBeneficiariesSection
-            onSelectBeneficiary={handleSelectBeneficiary}
-            onAddBeneficiary={() => setAddBeneficiaryModal(true)}
-          />
-        </div>
+        {/* TAB 2: WALLET & DIRECT DEPOSIT */}
+        {activeTab === 'wallet' && (
+          <div className="max-w-2xl mx-auto w-full">
+            <TransferWalletForm
+              selectedGateway={selectedGateway}
+              setSelectedGateway={setSelectedGateway}
+              walletAmount={walletAmount}
+              setWalletAmount={setWalletAmount}
+              sourceAccountNo={regularSavings.accountNo}
+              sourceBalance={regularSavings.balance}
+              onDepositSuccess={handleDepositSuccess}
+            />
+          </div>
+        )}
 
-        {/* BOTTOM SECTION: TRANSACTION LEDGER */}
-        <TransferHistorySection
-          onViewReceipt={record => setReceiptModal(record)}
-          customRecords={customRecords}
-        />
+        {/* TAB 3: SAVED BENEFICIARIES */}
+        {activeTab === 'beneficiaries' && (
+          <div className="w-full">
+            <TransferBeneficiariesSection
+              className="w-full"
+              onSelectBeneficiary={handleSelectBeneficiary}
+              onAddBeneficiary={() => setAddBeneficiaryModal(true)}
+            />
+          </div>
+        )}
+
+        {/* TAB 4: TRANSACTION HISTORY & RECEIPTS */}
+        {activeTab === 'history' && (
+          <div className="w-full">
+            <TransferHistorySection
+              onViewReceipt={record => setReceiptModal(record)}
+              customRecords={customRecords}
+            />
+          </div>
+        )}
 
         {/* MODALS */}
         <TransferReviewModal

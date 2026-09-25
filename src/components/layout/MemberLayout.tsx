@@ -16,7 +16,6 @@ import {
   Bell,
   User,
   LogOut,
-  Headphones,
 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -222,29 +221,12 @@ export function MemberLayout() {
             })}
           </nav>
 
-          {/* Member Helpdesk & Support Card */}
-          <div className="p-3 border-t border-slate-100 dark:border-slate-800 space-y-2 shrink-0 bg-white dark:bg-slate-900">
-            <div className="p-3 bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/80 dark:border-emerald-800/40 rounded-xl flex items-center gap-3">
-              <div className="size-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0">
-                <Headphones className="size-4" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{t('सदस्य सहायता कक्ष', 'Member Desk')}</p>
-                <p className="text-[11px] text-slate-500 font-mono">082-412055</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new CustomEvent('open-support-chat'))}
-                className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0 cursor-pointer"
-              >
-                {t('च्याट', 'Chat')}
-              </button>
-            </div>
-
+          {/* Sidebar Footer with Logout */}
+          <div className="p-3 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
             {/* Prominent Sidebar Logout Button */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 rounded-xl border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer shadow-xs"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 rounded-xl border border-rose-200 dark:border-rose-900/60 transition-colors cursor-pointer shadow-xs"
             >
               <LogOut className="size-4" />
               <span>{t('खाताबाट बाहिरिनुहोस्', 'Log Out of Account')}</span>

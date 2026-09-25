@@ -1,6 +1,7 @@
 import React from 'react';
 import { BadgeCheck, Banknote, Landmark, Printer, QrCode, ShieldCheck, X, Zap } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
+import { printElement } from '../../../utils/printHelper';
 
 interface FdCertificateLoanModalProps {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
       <div onClick={(e) => e.stopPropagation()}>
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-dark/70 backdrop-blur-sm p-space-md overflow-y-auto" id="fdCertificateLoanModal">
           <div className="bg-surface-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col my-auto border-2 border-primary/20">
-            <div className="bg-surface-dark text-surface-canvas p-space-md flex items-center justify-between border-b border-primary/30">
+            <div className="bg-surface-dark text-surface-canvas p-space-md flex items-center justify-between border-b border-primary/30 print:hidden">
               <div className="flex items-center gap-space-sm">
                 <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-brand-accent-lime">
                   <Landmark className="w-6 h-6" />
@@ -41,7 +42,7 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
               </button>
             </div>
 
-            <div className="bg-surface-container-low px-space-md pt-space-xs border-b border-surface-container flex items-center gap-2">
+            <div className="bg-surface-container-low px-space-md pt-space-xs border-b border-surface-container flex items-center gap-2 print:hidden">
               <button className="px-space-md py-2.5 font-label-md text-label-md font-bold text-primary border-b-2 border-primary flex items-center gap-1.5 bg-surface-card rounded-t-lg cursor-pointer">
                 <BadgeCheck className="w-4.5 h-4.5" />
                 <span>{t('मुद्दती प्रमाणपत्र', 'E-Certificate View')}</span>
@@ -56,7 +57,7 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
             </div>
 
             <div className="p-space-lg overflow-y-auto max-h-[72vh] space-y-space-md bg-surface-canvas">
-              <div className="bg-[#FBFDF9] p-space-lg rounded-xl border-4 border-double border-primary/40 shadow-sm relative">
+              <div id="fd-certificate-document" data-printable="certificate" className="bg-[#FBFDF9] p-space-lg rounded-xl border-4 border-double border-primary/40 shadow-sm relative print:border-4">
                 <div className="flex items-start justify-between border-b-2 border-primary/20 pb-space-sm mb-space-md">
                   <div className="flex items-center gap-space-sm">
                     <img alt="Unako SACCOS Logo" className="h-12 w-auto object-contain" src="/unako-logo.png" />
@@ -152,7 +153,7 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
                 </div>
               </div>
 
-              <div className="bg-surface-dark text-surface-canvas p-space-md rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-lg">
+              <div className="bg-surface-dark text-surface-canvas p-space-md rounded-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md shadow-lg print:hidden">
                 <div className="space-y-1">
                   <div className="flex items-center gap-1.5 text-brand-accent-lime font-label-sm text-label-sm font-bold">
                     <Zap className="w-5 h-5" />
@@ -175,13 +176,13 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
               </div>
             </div>
 
-            <div className="p-space-md bg-surface-card border-t border-surface-container flex flex-wrap items-center justify-between gap-space-sm">
+            <div className="p-space-md bg-surface-card border-t border-surface-container flex flex-wrap items-center justify-between gap-space-sm print:hidden">
               <div className="flex items-center gap-space-xs text-xs text-on-surface-variant">
                 <ShieldCheck className="w-4 h-4 text-status-success" />
                 <span>Nepal Cooperative Act 2074 Recognized Digital Security</span>
               </div>
               <div className="flex items-center gap-space-sm">
-                <button className="px-space-md py-2 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors cursor-pointer" onClick={() => window.print()}>
+                <button className="px-space-md py-2 rounded-xl bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md flex items-center gap-1.5 transition-colors cursor-pointer" onClick={() => printElement('fd-certificate-document')}>
                   <Printer className="w-4.5 h-4.5" />
                   <span>{t('प्रिन्ट', 'Print')}</span>
                 </button>

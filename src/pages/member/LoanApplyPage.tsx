@@ -28,6 +28,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { printElement } from '../../utils/printHelper';
 
 export function LoanApplyPage() {
   const { t } = useLanguageStore();
@@ -58,7 +59,7 @@ export function LoanApplyPage() {
       )}
 
       {/* Main Loan Application Form View */}
-      <div className="flex flex-col w-full pb-space-2xl">
+      <div id="loan-application-form" data-printable="statement" className="flex flex-col w-full pb-space-2xl">
 {/*  Dynamic Notification / Policy Bar  */}
 <div className="mb-space-lg bg-surface-container-high rounded-xl p-space-md flex flex-col md:flex-row items-start md:items-center justify-between gap-space-sm">
 <div className="flex items-center gap-space-sm">
@@ -96,12 +97,15 @@ export function LoanApplyPage() {
         )}
       </p>
 </div>
-<div className="xl:col-span-5 flex flex-wrap items-center justify-start xl:justify-end gap-space-sm">
+<div className="xl:col-span-5 flex flex-wrap items-center justify-start xl:justify-end gap-space-sm print:hidden">
 <button className="px-space-md py-space-sm rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center gap-space-xs shadow-sm cursor-pointer">
 <Bookmark className="w-4.5 h-4.5" />
 <span>{t('मस्यौदा सुरक्षित राख्नुहोस्', 'Save Draft')}</span>
 </button>
-<button className="px-space-md py-space-sm rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center gap-space-xs shadow-sm cursor-pointer">
+<button 
+  onClick={() => printElement('loan-application-form')}
+  className="px-space-md py-space-sm rounded-xl bg-surface-card text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-all flex items-center gap-space-xs shadow-sm cursor-pointer"
+>
 <Printer className="w-4.5 h-4.5" />
 <span>{t('प्रिन्ट प्रिभ्यू', 'Print Preview')}</span>
 </button>
@@ -550,7 +554,7 @@ export function LoanApplyPage() {
 </label>
 </div>
 {/*  Call to Action Buttons  */}
-<div className="flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<div className="flex flex-col sm:flex-row items-center justify-between gap-space-md print:hidden">
 <div className="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
 <Lock className="w-4.5 h-4.5 text-primary" />
 <span>{t('२५६-बिट इन्क्रिप्टेड सुरक्षित सबमिसन', '256-Bit Encrypted Secure Submission')}</span>
@@ -564,6 +568,22 @@ export function LoanApplyPage() {
 <ArrowRight className="w-5 h-5" />
 </button>
 </div>
+</div>
+
+{/* Printable Signatures */}
+<div className="hidden print:flex justify-between items-end pt-12 pb-4 px-4 text-xs text-slate-900 font-semibold">
+  <div className="text-center">
+    <div className="w-40 border-b border-slate-800 mb-1"></div>
+    <span>ऋण आवेदकको दस्तखत (Applicant)</span>
+  </div>
+  <div className="text-center">
+    <div className="w-40 border-b border-slate-800 mb-1"></div>
+    <span>जमानीकर्ताहरूको दस्तखत (Guarantors)</span>
+  </div>
+  <div className="text-center">
+    <div className="w-40 border-b border-slate-800 mb-1"></div>
+    <span>ऋण उपसमिति / अधिकृत (Credit Officer)</span>
+  </div>
 </div>
 </div>
 </div>

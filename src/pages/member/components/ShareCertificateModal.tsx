@@ -11,6 +11,7 @@ import {
   Printer,
   Download,
 } from 'lucide-react';
+import { printElement } from '../../../utils/printHelper';
 
 interface ShareCertificateModalProps {
   isOpen: boolean;
@@ -29,7 +30,7 @@ export function ShareCertificateModal({ isOpen, onClose, logoUrl }: ShareCertifi
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-dark/80 backdrop-blur-md p-3 sm:p-6 overflow-y-auto" id="shareCertModal">
           <div className="bg-surface-card w-full max-w-4xl rounded-2xl shadow-2xl relative overflow-hidden flex flex-col my-auto border border-emerald-900/20 animate-modal-in">
             {/* Modal Top Control Bar */}
-            <div className="flex items-center justify-between px-space-lg py-space-sm bg-surface-container-low border-b border-outline-variant/30">
+            <div className="flex items-center justify-between px-space-lg py-space-sm bg-surface-container-low border-b border-outline-variant/30 print:hidden">
               <div className="flex items-center gap-space-sm">
                 <ShieldCheck className="w-5 h-5 text-primary shrink-0" />
                 <div>
@@ -58,9 +59,13 @@ export function ShareCertificateModal({ isOpen, onClose, logoUrl }: ShareCertifi
             </div>
 
             {/* Scrollable Certificate Canvas Container */}
-            <div className="p-4 sm:p-8 bg-slate-100 overflow-y-auto max-h-[78vh]">
+            <div className="p-4 sm:p-8 bg-slate-100 overflow-y-auto max-h-[78vh] print:p-0 print:overflow-visible">
               {/* Ornate Certificate Surface */}
-              <div className="relative bg-[#fffdf9] p-4 sm:p-7 rounded-xl shadow-md border-8 border-[#0c4a34]/15 overflow-hidden">
+              <div
+                id="share-certificate-document"
+                data-printable="certificate"
+                className="relative bg-[#fffdf9] p-4 sm:p-7 rounded-xl shadow-md border-8 border-[#0c4a34]/15 overflow-hidden print:border-4 print:shadow-none"
+              >
                 {/* Decorative Guilloche/Pattern & Inner Border */}
                 <div className="cert-guilloche-pattern p-4 sm:p-6 rounded-lg cert-border-double relative">
                   {/* Corner Cornerpiece Embellishments */}
@@ -249,7 +254,7 @@ export function ShareCertificateModal({ isOpen, onClose, logoUrl }: ShareCertifi
             </div>
 
             {/* Modal Action Footer */}
-            <div className="px-space-lg py-space-md bg-surface-card border-t border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="px-space-lg py-space-md bg-surface-card border-t border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-3 print:hidden">
               <div className="flex items-center gap-2 text-xs text-on-surface-variant">
                 <span className="inline-flex items-center gap-1 text-primary bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200/60 font-semibold cursor-help" title="Blockchain/CBS cryptographic hash verified">
                   <ShieldCheck className="w-4 h-4 text-status-success" />
@@ -259,7 +264,10 @@ export function ShareCertificateModal({ isOpen, onClose, logoUrl }: ShareCertifi
                 <span className="md:inline">{t('सहकारी आधिकारिक अभिलेख अनुसार मान्य', 'Valid for Official Cooperative Disclosures')}</span>
               </div>
               <div className="flex items-center gap-space-sm w-full sm:w-auto justify-end">
-                <button className="px-space-md py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm inline-flex items-center gap-1.5 transition-colors cursor-pointer" onClick={() => window.print()}>
+                <button
+                  className="px-space-md py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold text-xs sm:text-sm inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                  onClick={() => printElement('share-certificate-document')}
+                >
                   <Printer className="w-4 h-4" />
                   <span>{t('प्रिन्ट प्रमाणपत्र', 'Print Certificate')}</span>
                 </button>

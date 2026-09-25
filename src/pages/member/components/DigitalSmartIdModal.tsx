@@ -1,6 +1,7 @@
 import React from 'react';
 import { Cpu, IdCard, Printer, X } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
+import { printElement } from '../../../utils/printHelper';
 
 interface DigitalSmartIdModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ export function DigitalSmartIdModal({ isOpen, onClose }: DigitalSmartIdModalProp
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-4 bg-emerald-700 text-white flex items-center justify-between">
+        <div className="px-6 py-4 bg-emerald-700 text-white flex items-center justify-between print:hidden">
           <div className="flex items-center gap-2">
             <IdCard className="w-5 h-5 text-emerald-200" />
             <h3 className="font-bold text-sm font-headline">{t('स्मार्ट सदस्य परिचयपत्र', 'Digital Member Smart ID')}</h3>
@@ -36,8 +37,12 @@ export function DigitalSmartIdModal({ isOpen, onClose }: DigitalSmartIdModalProp
         </div>
 
         {/* Smart ID Card Layout */}
-        <div className="p-6 space-y-6">
-          <div className="relative bg-gradient-to-br from-emerald-800 via-emerald-900 to-slate-950 text-white rounded-2xl p-6 shadow-xl border border-emerald-500/30 overflow-hidden">
+        <div className="p-6 space-y-6 print:p-0">
+          <div
+            id="digital-smart-id-card"
+            data-printable="card"
+            className="relative bg-gradient-to-br from-emerald-800 via-emerald-900 to-slate-950 text-white rounded-2xl p-6 shadow-xl border border-emerald-500/30 overflow-hidden"
+          >
             {/* Chip & Logo Header */}
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -90,18 +95,18 @@ export function DigitalSmartIdModal({ isOpen, onClose }: DigitalSmartIdModalProp
           </div>
 
           {/* Modal Actions */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 print:hidden">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition"
+              className="flex-1 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition cursor-pointer"
             >
               {t('बन्द गर्नुहोस्', 'Close')}
             </button>
             <button
               type="button"
-              onClick={() => window.print()}
-              className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5"
+              onClick={() => printElement('digital-smart-id-card')}
+              className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <Printer className="w-5 h-5 text-base" />
               {t('प्रिन्ट गर्नुहोस्', 'Print ID')}

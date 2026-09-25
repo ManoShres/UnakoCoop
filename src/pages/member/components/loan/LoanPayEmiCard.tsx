@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { Loan } from '../../../../types';
+import { printElement } from '../../../../utils/printHelper';
 
 interface LoanPayEmiCardProps {
   onOpenEmiModal: () => void;
@@ -64,20 +65,19 @@ export const LoanPayEmiCard: React.FC<LoanPayEmiCardProps> = ({
             </span>
           </div>
           <div className="font-display-stat text-3xl font-extrabold text-white my-1 tracking-tight">
-            <span className="text-xl font-normal text-white/70 mr-1.5">NPR</span>
             {fmtCurrency(monthlyEmi, true)}
           </div>
           <div className="grid grid-cols-2 gap-2 pt-2 text-xs text-white/70">
             <div className="flex justify-between bg-surface-dark/60 px-3 py-2 rounded-lg border border-white/5">
               <span>{t('साँवा:', 'Principal:')}</span>
               <span className="text-white font-tabular-mono font-bold">
-                NPR {fmtCurrency(principalComponent, true)}
+                {fmtCurrency(principalComponent, true)}
               </span>
             </div>
             <div className="flex justify-between bg-surface-dark/60 px-3 py-2 rounded-lg border border-white/5">
               <span>{t('ब्याज:', 'Interest:')}</span>
               <span className="text-white font-tabular-mono font-bold">
-                NPR {fmtCurrency(interestComponent, true)}
+                {fmtCurrency(interestComponent, true)}
               </span>
             </div>
           </div>
@@ -121,7 +121,7 @@ export const LoanPayEmiCard: React.FC<LoanPayEmiCardProps> = ({
                     {t('नियमित बचत', 'Regular Savings')} (CBS Passbook)
                   </p>
                   <p className="font-tabular-mono text-xs text-brand-accent-lime font-bold">
-                    Available: NPR {fmtCurrency(savingsBalance, true)}
+                    Available: {fmtCurrency(savingsBalance, true)}
                   </p>
                 </div>
               </div>
@@ -193,8 +193,8 @@ export const LoanPayEmiCard: React.FC<LoanPayEmiCardProps> = ({
           <CheckCircle2 className="w-4 h-4" />
           <span>
             {t(
-              `रु. ${fmtCurrency(monthlyEmi, true)} अहिले तिर्नुहोस्`,
-              `Pay NPR ${fmtCurrency(monthlyEmi, true)} Now`
+              `${fmtCurrency(monthlyEmi, true)} अहिले भुक्तानी गर्नुहोस्`,
+              `Pay ${fmtCurrency(monthlyEmi, true)} Now`
             )}
           </span>
         </button>
@@ -221,11 +221,11 @@ export const LoanPayEmiCard: React.FC<LoanPayEmiCardProps> = ({
           </div>
         </div>
         <button
-          onClick={() => window.print()}
+          onClick={() => printElement('schedule')}
           className="text-primary hover:text-primary/80 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-all flex items-center gap-1.5 font-label-sm text-xs font-bold cursor-pointer"
         >
           <Download className="w-3.5 h-3.5" />
-          PDF
+          PDF / Print
         </button>
       </div>
     </div>

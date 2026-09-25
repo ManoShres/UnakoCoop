@@ -38,8 +38,7 @@ export function SharesEquityHero({ totalEquityAndDeposits = 250000 }: SharesEqui
               {t('कुल शेयर तथा मुद्दती बचत', 'Total Equity & Deposits')}
             </span>
             <div className="flex items-baseline gap-1 my-0.5">
-              <span className="font-label-md text-xs text-brand-accent-lime font-bold">NPR</span>
-              <span className="font-headline text-2xl font-extrabold text-white tracking-tight">
+              <span className="font-headline text-2xl font-extrabold text-white tracking-tight tabular-nums">
                 {fmtCurrency(totalEquityAndDeposits, true)}
               </span>
             </div>

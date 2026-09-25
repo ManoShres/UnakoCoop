@@ -1,6 +1,7 @@
 import React from 'react';
 import { BadgeCheck, Banknote, CheckCircle2, Coffee, Gift, IdCard, Printer, Ticket, Wallet, X } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
+import { printElement } from '../../../utils/printHelper';
 
 interface AgmPassModalProps {
   isOpen: boolean;
@@ -17,23 +18,27 @@ export function AgmPassModal({ isOpen, onClose, logoUrl }: AgmPassModalProps) {
     <div onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()}>
         <div aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-space-md bg-surface-dark/80 backdrop-blur-sm overflow-y-auto" id="agm-pass-modal" role="dialog">
-          <div className="relative w-full max-w-2xl bg-surface-card rounded-2xl shadow-xl overflow-hidden my-auto border border-outline-variant/30 flex flex-col">
-            <div className="bg-gradient-to-r from-primary to-primary-container p-space-md md:p-space-lg text-on-primary flex items-start justify-between relative overflow-hidden">
+          <div
+            id="agm-pass-card"
+            data-printable="slip"
+            className="relative w-full max-w-2xl bg-white text-slate-900 rounded-2xl shadow-xl overflow-hidden my-auto border border-slate-200 flex flex-col"
+          >
+            <div className="bg-gradient-to-r from-emerald-800 to-emerald-950 p-space-md md:p-space-lg text-white flex items-start justify-between relative overflow-hidden">
               <div className="absolute -right-6 -bottom-10 opacity-15 pointer-events-none">
                 <BadgeCheck className="w-5 h-5" />
               </div>
               <div className="flex items-center gap-space-sm z-10">
-                <img alt="Unako SACCOS Logo" className="h-10 w-auto object-contain bg-surface-card p-1 rounded-lg" src={logoUrl}/>
+                <img alt="Unako SACCOS Logo" className="h-10 w-auto object-contain bg-white p-1 rounded-lg" src={logoUrl}/>
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <span className="bg-brand-accent-lime/20 text-brand-accent-lime font-label-sm text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{t('आधिकारिक प्रवेश पास', 'Official Entry Pass')}</span>
-                    <span className="text-xs text-on-primary/80 font-tabular-mono">{t('सुरक्षित टोकन #AGM31-8842', 'Secure Token #AGM31-8842')}</span>
+                    <span className="bg-emerald-400/20 text-emerald-300 font-label-sm text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">{t('आधिकारिक प्रवेश पास', 'Official Entry Pass')}</span>
+                    <span className="text-xs text-white/80 font-tabular-mono">{t('सुरक्षित टोकन #AGM31-8842', 'Secure Token #AGM31-8842')}</span>
                   </div>
-                  <h3 className="font-headline-sm text-headline-sm font-bold text-on-primary mt-0.5">{t('३१औं वार्षिक साधारण सभा प्रवेश पास तथा डिजिटल टोकन', '31st AGM Digital Entry Pass & QR Token')}</h3>
-                  <p className="font-body-sm text-xs text-on-primary/90">{t('आधिकारिक साधारण सभा प्रवेश पास र गेट स्क्यानर भौचर', 'Official 31st AGM Digital Entry Pass & Gate Scanner Voucher')}</p>
+                  <h3 className="font-headline-sm text-headline-sm font-bold text-white mt-0.5">{t('३१औं वार्षिक साधारण सभा प्रवेश पास तथा डिजिटल टोकन', '31st AGM Digital Entry Pass & QR Token')}</h3>
+                  <p className="font-body-sm text-xs text-white/90">{t('आधिकारिक साधारण सभा प्रवेश पास र गेट स्क्यानर भौचर', 'Official 31st AGM Digital Entry Pass & Gate Scanner Voucher')}</p>
                 </div>
               </div>
-              <button onClick={onClose} aria-label="Close modal" className="text-on-primary/80 hover:text-on-primary p-1 rounded-full hover:bg-surface-card/20 transition-colors z-10">
+              <button onClick={onClose} aria-label="Close modal" className="text-white/80 hover:text-white p-1 rounded-full hover:bg-white/20 transition-colors z-10 print:hidden cursor-pointer">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -112,18 +117,21 @@ export function AgmPassModal({ isOpen, onClose, logoUrl }: AgmPassModalProps) {
                 <p><strong>{t('सुरक्षा जाँच:', 'Security Notice:')}</strong> {t('यो डिजिटल पास स्क्रिनसट वा मोबाइलमै देखाएर प्रवेश गर्न सकिनेछ। पासको दुरुपयोग कानुनतः दण्डनीय हुनेछ।', 'Present this digital pass on your mobile screen at the entrance gate.')}</p>
               </div>
             </div>
-            <div className="bg-surface-canvas p-space-md flex flex-wrap items-center justify-between gap-space-sm border-t border-outline-variant/20">
+            <div className="bg-surface-canvas p-space-md flex flex-wrap items-center justify-between gap-space-sm border-t border-outline-variant/20 print:hidden">
               <div className="flex flex-wrap items-center gap-space-xs">
-                <button onClick={() => alert(t("मोबाइल वालेटमा पास सेभ गरियो!", "Pass saved to mobile wallet!"))} className="bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold px-space-md py-space-sm rounded-xl transition-all shadow-sm flex items-center gap-1.5">
+                <button onClick={() => alert(t("मोबाइल वालेटमा पास सेभ गरियो!", "Pass saved to mobile wallet!"))} className="bg-primary hover:bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold px-space-md py-space-sm rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
                   <Wallet className="w-4.5 h-4.5" />
                   <span>{t('मोबाइल वालेटमा सेभ गर्नुहोस्', 'Save to Mobile Wallet')}</span>
                 </button>
-                <button className="bg-surface-card hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold px-space-md py-space-sm rounded-xl transition-all border border-outline-variant/40 flex items-center gap-1.5" onClick={() => window.print()}>
+                <button
+                  className="bg-surface-card hover:bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold px-space-md py-space-sm rounded-xl transition-all border border-outline-variant/40 flex items-center gap-1.5 cursor-pointer"
+                  onClick={() => printElement('agm-pass-card')}
+                >
                   <Printer className="w-4.5 h-4.5" />
                   <span>{t('प्रवेश पास प्रिन्ट गर्नुहोस्', 'Print Entry Pass')}</span>
                 </button>
               </div>
-              <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold px-space-md py-space-sm rounded-xl transition-all">
+              <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold px-space-md py-space-sm rounded-xl transition-all cursor-pointer">
                 {t('बन्द गर्नुहोस्', 'Close')}
               </button>
             </div>

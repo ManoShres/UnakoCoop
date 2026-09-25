@@ -3,6 +3,7 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
 import { Landmark, Printer, Award, ShieldCheck } from 'lucide-react';
+import { printElement } from '../../utils/printHelper';
 
 export const AnnualStatementPage: React.FC = () => {
   const { currentMember } = useAuthStore();
@@ -10,7 +11,7 @@ export const AnnualStatementPage: React.FC = () => {
   const { coopSettings } = useCoopStore();
 
   const handlePrint = () => {
-    window.print();
+    printElement('annual-statement-document');
   };
 
   return (
@@ -29,7 +30,7 @@ export const AnnualStatementPage: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={handlePrint}
-            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm"
+            className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition-colors shadow-sm cursor-pointer"
           >
             <Printer className="size-4" />
             <span>{t('विवरण छाप्नुहोस्', 'Print Statement')}</span>
@@ -38,7 +39,7 @@ export const AnnualStatementPage: React.FC = () => {
       </div>
 
       {/* Official Certificate / Statement Canvas */}
-      <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-8 bg-white dark:bg-[#0c1a0e] shadow-lg print:shadow-none print:border-none">
+      <div id="annual-statement-document" data-printable="statement" className="glass-panel p-8 sm:p-12 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-8 bg-white dark:bg-[#0c1a0e] shadow-lg print:shadow-none print:border-none">
         {/* Cooperative Header */}
         <div className="flex items-start justify-between border-b-2 border-emerald-500 pb-6 flex-wrap gap-4">
           <div className="flex items-center gap-3">

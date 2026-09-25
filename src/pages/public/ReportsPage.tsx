@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Download, CheckCircle2, Eye, Printer, X, ShieldCheck, Landmark } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
+import { printElement } from '../../utils/printHelper';
 
 interface ReportItem {
   title: string;
@@ -209,8 +210,8 @@ export const ReportsPage: React.FC = () => {
 
       {/* Official Certified Report Modal & Single-Page Printable Document */}
       {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs print:static print:inset-auto print:bg-transparent print:p-0 print:m-0 print:block print:w-full print:h-auto print:backdrop-blur-none">
-          <div className="bg-white dark:bg-[#0c1a0e] rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto max-h-[90vh] print:max-w-none print:w-full print:p-0 print:m-0 print:border-none print:shadow-none print:rounded-none print:bg-white print:text-slate-900 print:max-h-none print:overflow-visible print:space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div id="certified-report-document" data-printable="statement" className="bg-white dark:bg-[#0c1a0e] rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 border border-slate-200 dark:border-slate-800 shadow-2xl overflow-y-auto max-h-[90vh] print:max-w-none print:w-full print:p-0 print:m-0 print:border-none print:shadow-none print:rounded-none print:bg-white print:text-slate-900 print:max-h-none print:overflow-visible print:space-y-4">
             
             {/* Printable Official Header (Matches user photo) */}
             <div className="hidden print:flex items-center justify-between border-b-2 border-slate-900 pb-4 mb-3">
@@ -341,8 +342,8 @@ export const ReportsPage: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => window.print()}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+                onClick={() => printElement('certified-report-document')}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs cursor-pointer"
               >
                 <Printer className="size-4" />
                 <span>{t('प्रिन्ट गर्नुहोस्', 'Print Official Copy')}</span>

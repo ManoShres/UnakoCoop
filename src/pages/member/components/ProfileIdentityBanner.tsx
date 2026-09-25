@@ -1,17 +1,19 @@
 import React from 'react';
-import { BadgeCheck, Landmark, MapPin, ShieldCheck, IdCard, Download, FileEdit } from 'lucide-react';
+import { BadgeCheck, Landmark, MapPin, ShieldCheck, IdCard, Download, FileEdit, Printer } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
 
 interface ProfileIdentityBannerProps {
   onOpenSmartId: () => void;
   onDownloadDossier: () => void;
   onOpenUpdateModal: () => void;
+  onPrintDossier?: () => void;
 }
 
 export function ProfileIdentityBanner({
   onOpenSmartId,
   onDownloadDossier,
   onOpenUpdateModal,
+  onPrintDossier,
 }: ProfileIdentityBannerProps) {
   const { t } = useLanguageStore();
 
@@ -78,19 +80,19 @@ export function ProfileIdentityBanner({
         <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0 pt-2 xl:pt-0">
           <button
             type="button"
+            onClick={onPrintDossier || onDownloadDossier}
+            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 sm:px-4 rounded-xl bg-slate-900 dark:bg-emerald-600 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm shadow-sm transition whitespace-nowrap cursor-pointer"
+          >
+            <Printer className="w-4.5 h-4.5" />
+            <span>{t('खाता विवरण प्रिन्ट', 'Print Account Dossier')}</span>
+          </button>
+          <button
+            type="button"
             onClick={onOpenSmartId}
             className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 sm:px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.98] text-white font-semibold text-xs sm:text-sm shadow-sm transition whitespace-nowrap cursor-pointer"
           >
             <IdCard className="w-4.5 h-4.5" />
             <span>{t('डिजिटल परिचयपत्र', 'Digital Smart ID')}</span>
-          </button>
-          <button
-            type="button"
-            onClick={onDownloadDossier}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 sm:px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 active:scale-[0.98] text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm transition whitespace-nowrap cursor-pointer border border-slate-200 dark:border-slate-700"
-          >
-            <Download className="w-4.5 h-4.5" />
-            <span>{t('केवाईसी डसियर', 'KYC Dossier')}</span>
           </button>
           <button
             type="button"

@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { CheckCircle2, Check, Zap, Calculator } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { formatNPR } from '../../../../utils/nepaliDate';
+import { printElement } from '../../../../utils/printHelper';
 
 interface LoanTopUpCalculatorProps {
   onApplyInstant: () => void;
 }
 
 export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onApplyInstant }) => {
-  const { t } = useLanguageStore();
+  const { t, fmtCurrency } = useLanguageStore();
   const [topUpAmount, setTopUpAmount] = useState(100000);
   const [tenorMonths, setTenorMonths] = useState(18);
 
@@ -21,7 +22,7 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
   const rebateRelief = Math.round(topUpAmount * 0.015 * (tenorMonths / 12));
 
   return (
-    <div className="bg-surface-card rounded-2xl p-6 shadow-sm border border-outline-variant/15" id="calculator-section">
+    <div className="bg-surface-card rounded-2xl p-6 shadow-sm border border-outline-variant/15" id="calculator-section" data-printable="statement">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Banner Details */}
         <div className="lg:col-span-5 flex flex-col justify-between h-full">
@@ -78,7 +79,7 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
                   {t('इच्छित टप-अप रकम', 'Desired Top-Up Amount')}
                 </span>
                 <span className="text-base sm:text-lg font-bold font-tabular-mono text-primary" id="topup-amount-display">
-                  NPR {formatNPR(topUpAmount, true)}
+                  {fmtCurrency(topUpAmount, true)}
                 </span>
               </div>
               <input
@@ -92,8 +93,8 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
                 onChange={(e) => setTopUpAmount(Number(e.target.value))}
               />
               <div className="flex justify-between font-label-sm text-xs text-on-surface-variant mt-1.5 font-semibold">
-                <span>NPR 30,000 (Min)</span>
-                <span>NPR 1,50,000 (Max Limit)</span>
+                <span>{fmtCurrency(30000, true)} (Min)</span>
+                <span>{fmtCurrency(150000, true)} (Max Limit)</span>
               </div>
             </div>
 
@@ -127,7 +128,7 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
                   {t('अनुमानित मासिक किस्ता', 'Estimated Monthly EMI')}
                 </span>
                 <p className="text-base sm:text-lg font-bold font-tabular-mono text-primary mt-0.5" id="calc-emi">
-                  NPR {formatNPR(estimatedEmi, true)}
+                  {fmtCurrency(estimatedEmi, true)}
                 </p>
                 <span className="font-label-sm text-[10px] text-on-surface-variant">Principal + Int.</span>
               </div>
@@ -143,14 +144,14 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
                   {t('सरकारी अनुदान राहत', 'Govt. Rebate Relief')}
                 </span>
                 <p className="text-base sm:text-lg font-bold font-tabular-mono text-status-success mt-0.5" id="calc-rebate">
-                  NPR {formatNPR(rebateRelief, true)}
+                  {fmtCurrency(rebateRelief, true)}
                 </p>
                 <span className="font-label-sm text-[10px] text-on-surface-variant">Total subsidy</span>
               </div>
             </div>
 
             {/* Trigger Instant Apply Modal/Action */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
+            <div className="flex flex-col sm:flex-row items-center gap-3 pt-1 print:hidden">
               <button
                 onClick={onApplyInstant}
                 className="w-full sm:w-auto flex-1 bg-primary hover:bg-primary/90 text-on-primary py-3 px-5 rounded-xl font-label-md text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
@@ -160,7 +161,7 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
               </button>
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => printElement('calculator-section')}
                 className="w-full sm:w-auto bg-surface-card hover:bg-surface-container px-4 py-3 rounded-xl font-label-md text-xs sm:text-sm text-on-surface font-semibold transition-all flex items-center justify-center gap-1.5 border border-outline-variant/30 cursor-pointer"
               >
                 <Calculator className="w-4 h-4 text-primary" />

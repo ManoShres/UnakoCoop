@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useAuthStore } from '../../store/useAuthStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { DigitalSmartIdModal } from './components/DigitalSmartIdModal';
 import { KycDocInspectionModal, type KycDocInfo } from './components/KycDocInspectionModal';
 import { KycUpdateModal } from './components/KycUpdateModal';
+import { MemberAccountProfilePrintModal } from '../../components/common/MemberAccountProfilePrintModal';
 import { ProfileIdentityBanner } from './components/ProfileIdentityBanner';
 import { ProfileMetricStats } from './components/ProfileMetricStats';
 import { ProfileVaultSection } from './components/ProfileVaultSection';
@@ -11,9 +14,14 @@ import { ProfileNomineeSection } from './components/ProfileNomineeSection';
 
 export function ProfileSettingsPage() {
   const { t } = useLanguageStore();
+  const { currentMember } = useAuthStore();
+  const { members } = useCoopStore();
+  const activeMember = currentMember || members[0];
+
   const [showIdModal, setShowIdModal] = useState(false);
   const [showDocModal, setShowDocModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
   const [activeDocKey, setActiveDocKey] = useState<'citizenship' | 'lalpurja' | 'ward' | 'biometric'>('citizenship');
   const [toast, setToast] = useState<string | null>(null);
 
@@ -107,7 +115,8 @@ export function ProfileSettingsPage() {
       {/* 1. TOP IDENTITY & VERIFICATION BANNER */}
       <ProfileIdentityBanner
         onOpenSmartId={() => setShowIdModal(true)}
-        onDownloadDossier={handleDownloadDossier}
+        onDownloadDossier={() => setShowPrintModal(true)}
+        onPrintDossier={() => setShowPrintModal(true)}
         onOpenUpdateModal={() => setShowUpdateModal(true)}
       />
 
@@ -134,6 +143,12 @@ export function ProfileSettingsPage() {
       <DigitalSmartIdModal
         isOpen={showIdModal}
         onClose={() => setShowIdModal(false)}
+      />
+
+      <MemberAccountProfilePrintModal
+        isOpen={showPrintModal}
+        onClose={() => setShowPrintModal(false)}
+        member={activeMember}
       />
 
       <KycDocInspectionModal

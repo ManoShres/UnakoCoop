@@ -90,8 +90,8 @@ export function ShareCapitalSection({
                 <span className="font-body-sm text-xs text-on-surface-variant">
                   {t('कुल सेयर पुँजी:', 'Total Share Capital:')}
                 </span>
-                <span className="font-headline text-lg font-extrabold text-primary">
-                  NPR {fmtCurrency(shareCapital, true)}
+                <span className="font-headline text-lg font-extrabold text-primary tabular-nums">
+                  {fmtCurrency(shareCapital, true)}
                 </span>
               </div>
               <div className="flex justify-between items-baseline py-1.5 px-3">

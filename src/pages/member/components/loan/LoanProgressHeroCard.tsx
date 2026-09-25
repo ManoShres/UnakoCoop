@@ -105,7 +105,6 @@ export const LoanProgressHeroCard: React.FC<LoanProgressHeroCardProps> = ({ acti
               </span>
             </div>
             <div className="font-display-stat text-2xl text-on-surface font-bold tracking-tight">
-              <span className="text-base font-normal text-on-surface-variant mr-1">NPR</span>
               {fmtCurrency(remaining, true)}
             </div>
             <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden mt-2">
@@ -122,7 +121,7 @@ export const LoanProgressHeroCard: React.FC<LoanProgressHeroCardProps> = ({ acti
                 {t('स्वीकृत साँवा', 'Sanctioned')}
               </span>
               <p className="text-xs sm:text-sm font-bold font-tabular-mono text-on-surface whitespace-nowrap mt-0.5">
-                NPR {fmtCurrency(sanctioned, true)}
+                {fmtCurrency(sanctioned, true)}
               </p>
               <span className="font-label-sm text-[10px] text-on-surface-variant">
                 {t('प्रारम्भिक साँवा', 'Initial Principal')}
@@ -133,7 +132,7 @@ export const LoanProgressHeroCard: React.FC<LoanProgressHeroCardProps> = ({ acti
                 {t('कुल भुक्तानी', 'Total Paid')}
               </span>
               <p className="text-xs sm:text-sm font-bold font-tabular-mono text-status-success whitespace-nowrap mt-0.5">
-                NPR {fmtCurrency(paid, true)}
+                {fmtCurrency(paid, true)}
               </p>
               <span className="font-label-sm text-[10px] text-on-surface-variant">
                 {paidTenure} {t('किस्ताहरू', 'Installments')}

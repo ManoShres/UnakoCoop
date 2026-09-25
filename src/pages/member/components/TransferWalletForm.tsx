@@ -47,7 +47,7 @@ export const TransferWalletForm: React.FC<TransferWalletFormProps> = ({
       onDepositSuccess(num, selectedGateway);
     } else {
       alert(
-        `Redirecting to ${selectedGateway.toUpperCase()} secure payment gateway for NPR ${fmtCurrency(
+        `Redirecting to ${selectedGateway.toUpperCase()} secure payment gateway for ${fmtCurrency(
           num,
           true
         )}...`
@@ -117,7 +117,7 @@ export const TransferWalletForm: React.FC<TransferWalletFormProps> = ({
                 {t('साधारण सदस्य बचत', 'Regular Member Savings')} ({sourceAccountNo})
               </div>
               <div className="font-label-sm text-[11px] text-on-surface-variant">
-                Available balance: NPR {fmtCurrency(sourceBalance, true)}.00
+                Available balance: {fmtCurrency(sourceBalance, true)}.00
               </div>
             </div>
             <CheckCircle2 className="w-5 h-5 text-status-success" />
@@ -127,11 +127,10 @@ export const TransferWalletForm: React.FC<TransferWalletFormProps> = ({
         {/* Deposit Amount */}
         <div>
           <label className="font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider block mb-1">
-            {t('जम्मा गर्ने रकम (रु.)', 'Deposit Amount (NPR)')}
+            {t('जम्मा गर्ने रकम', 'Deposit Amount')}
           </label>
           <div className="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
-            <div className="font-display-stat text-xl font-bold font-headline text-on-surface">
-              <span className="text-primary mr-1 text-base">{t('रु.', 'NPR')}</span>
+            <div className="font-display-stat text-xl font-bold font-headline text-on-surface tabular-nums">
               {fmtCurrency(parseInt(walletAmount || '0'), true)}
             </div>
             <input
@@ -154,7 +153,7 @@ export const TransferWalletForm: React.FC<TransferWalletFormProps> = ({
                 }`}
                 type="button"
               >
-                +NPR {fmtCurrency(parseInt(a), true)}
+                +{fmtCurrency(parseInt(a), true)}
               </button>
             ))}
           </div>
@@ -184,8 +183,8 @@ export const TransferWalletForm: React.FC<TransferWalletFormProps> = ({
           <ExternalLink className="w-4 h-4" />
           <span>
             {t(
-              `गेटवे मार्फत जम्मा गर्नुहोस् (रु. ${fmtCurrency(parseInt(walletAmount || '0'), true)})`,
-              `Load via Gateway (NPR ${fmtCurrency(parseInt(walletAmount || '0'), true)})`
+              `गेटवे मार्फत जम्मा गर्नुहोस् (${fmtCurrency(parseInt(walletAmount || '0'), true)})`,
+              `Load via Gateway (${fmtCurrency(parseInt(walletAmount || '0'), true)})`
             )}
           </span>
         </button>

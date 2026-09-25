@@ -549,7 +549,7 @@ table td {
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm 15mm;
+    margin: 10mm 12mm;
   }
 
   .min-h-screen,
@@ -563,14 +563,14 @@ table td {
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #0f172a !important;
-    font-size: 11pt !important;
-    line-height: 1.5 !important;
+    font-size: 10pt !important;
+    line-height: 1.4 !important;
     height: auto !important;
     min-height: 0 !important;
     overflow: visible !important;
   }
 
-  /* Force exact color adjustment if background badges are printed */
+  /* Force exact color adjustment so badges, borders, and watermarks print crisply */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -594,17 +594,113 @@ table td {
     display: none !important;
   }
 
-  /* Neutralize dark mode in print */
+  /* Neutralize dark mode in print without breaking white cards */
   .dark {
     color-scheme: light !important;
   }
-  .dark * {
+
+  .dark .bg-slate-900,
+  .dark .bg-slate-950,
+  .dark [class*='bg-slate-800'],
+  .dark [class*='bg-slate-950'] {
     background-color: transparent !important;
-    color: #0f172a !important;
-    border-color: #cbd5e1 !important;
   }
 
-  /* Avoid page breaks inside key report blocks */
+  /* ==========================================================================
+     TARGETED PRINT ISOLATION (Vouchers, Slips, Certificates, ID Cards)
+     ========================================================================== */
+  /* Ensure main content container is always visible and unconstrained */
+  main {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    overflow: visible !important;
+  }
+
+  /* Remove dark modal overlay frames, blurs, and centered flex backdrops during print */
+  [role='dialog'],
+  [role='dialog'] > div,
+  .fixed.inset-0 {
+    position: static !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* Target element styling: Pure white paper, dark text, clean borders */
+  [data-printable] {
+    display: block !important;
+    visibility: visible !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    position: relative !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    margin: 0 auto !important;
+  }
+
+  [data-printable] * {
+    visibility: visible !important;
+    color-scheme: light !important;
+  }
+
+  /* 1. Slip / Counter Voucher Format */
+  [data-printable='slip'] {
+    max-width: 145mm !important;
+    width: 100% !important;
+    padding: 6mm 8mm !important;
+    border: 1.5px dashed #475569 !important;
+    border-radius: 4px !important;
+    margin: 4mm auto !important;
+    background: #ffffff !important;
+    font-size: 9pt !important;
+    color: #0f172a !important;
+  }
+
+  /* 2. Certificate Format (A4 landscape or portrait) */
+  [data-printable='certificate'] {
+    max-width: 270mm !important;
+    width: 100% !important;
+    padding: 8mm 12mm !important;
+    margin: 0 auto !important;
+    border: 3px double #065f46 !important;
+    background: #ffffff !important;
+  }
+
+  /* 3. Smart ID Card Format (Front & Back) */
+  [data-printable='card'] {
+    max-width: 180mm !important;
+    width: 100% !important;
+    margin: 10mm auto !important;
+    padding: 8mm !important;
+    border: 1px dashed #94a3b8 !important;
+    background: #ffffff !important;
+  }
+
+  /* 4. Full Statement / Passbook Ledger Format */
+  [data-printable='statement'] {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    background: #ffffff !important;
+  }
+
+  /* Avoid page breaks inside key report rows */
   tr,
   td,
   th,

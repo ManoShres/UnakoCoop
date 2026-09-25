@@ -32,6 +32,11 @@ export const KeyboardShortcutGuide: React.FC<KeyboardShortcutGuideProps> = ({ is
 
   const globalShortcuts: ShortcutItem[] = [
     {
+      keys: ['F2'],
+      descNe: 'द्रुत बैंकिङ कन्सोल खोल्नुहोस् / बन्द गर्नुहोस् (किबोर्ड-आधारित)',
+      descEn: 'Toggle Fast Banking Terminal (Keyboard-First CBS)',
+    },
+    {
       keys: ['?'],
       descNe: 'किबोर्ड सर्टकट निर्देशिका खोल्नुहोस् / बन्द गर्नुहोस्',
       descEn: 'Toggle Keyboard Shortcut Guide',
@@ -64,6 +69,11 @@ export const KeyboardShortcutGuide: React.FC<KeyboardShortcutGuideProps> = ({ is
   ];
 
   const adminShortcuts: ShortcutItem[] = [
+    {
+      keys: ['F2'],
+      descNe: 'द्रुत बैंकिङ टर्मिनल (Fast CBS Action Terminal)',
+      descEn: 'Fast Action CBS Banking Terminal (F2)',
+    },
     {
       keys: ['Alt', 'D'],
       descNe: 'कार्यकारी ड्यासबोर्ड (Executive Dashboard)',

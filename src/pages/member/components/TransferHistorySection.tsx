@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
 import { PaymentRecord, RECENT_PAYMENTS } from './TransferTypes';
+import { printElement } from '../../../utils/printHelper';
 
 interface TransferHistorySectionProps {
   onViewReceipt: (record: PaymentRecord) => void;
@@ -52,9 +53,29 @@ export const TransferHistorySection: React.FC<TransferHistorySectionProps> = ({
   };
 
   return (
-    <div className="bg-surface-card rounded-2xl p-6 shadow-sm border border-outline-variant/15 space-y-4">
+    <div id="transfer-history-statement" data-printable="statement" className="bg-surface-card rounded-2xl p-6 shadow-sm border border-outline-variant/15 space-y-4 print:border-none print:shadow-none">
+      {/* Official Cooperative Header (Print Only) */}
+      <div className="hidden print:block pb-4 mb-3 border-b-2 border-slate-900 bg-white">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <img src="/unako-logo.png" alt="Unako Logo" className="h-12 w-auto object-contain" />
+            <div>
+              <h2 className="font-headline-sm font-extrabold text-slate-900">उनको बचत तथा ऋण सहकारी संस्था लि.</h2>
+              <p className="text-xs text-slate-700 font-semibold">Unako Savings & Credit Cooperative Society Ltd.</p>
+              <p className="text-[11px] text-slate-600">गढवा-५, देउखुरी, दाङ • दर्ता नं: २०७०-०१ | PAN: ३००९१२८३७</p>
+            </div>
+          </div>
+          <div className="text-right text-xs">
+            <span className="inline-block px-2.5 py-0.5 rounded bg-slate-100 font-bold border border-slate-300">
+              स्थानान्तरण तथा भुक्तानी लेजर (Transfer Ledger)
+            </span>
+            <p className="text-[10px] text-slate-500 font-mono mt-1">मुद्रण मिति: {new Date().toLocaleDateString('ne-NP')}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Table Header & Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/15 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/15 pb-4 print:hidden">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-headline text-headline-sm font-bold text-on-surface">
@@ -98,13 +119,13 @@ export const TransferHistorySection: React.FC<TransferHistorySectionProps> = ({
           </div>
 
           <button
-            onClick={() => window.print()}
+            onClick={() => printElement('transfer-history-statement')}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-outline-variant/30 text-on-surface hover:bg-surface-container-low text-xs font-bold transition-all cursor-pointer"
             type="button"
             title="Export Full Statement"
           >
             <Download className="w-3.5 h-3.5 text-primary" />
-            <span>Export (.CSV / PDF)</span>
+            <span>Export / Print</span>
           </button>
         </div>
       </div>
@@ -120,7 +141,7 @@ export const TransferHistorySection: React.FC<TransferHistorySectionProps> = ({
               <th className="py-3 px-3.5 w-[16%]">{t('खाता', 'Account')}</th>
               <th className="py-3 px-3.5 text-right w-[11%]">{t('रकम (रु.)', 'Amount (NPR)')}</th>
               <th className="py-3 px-3.5 text-center w-[9%]">{t('स्थिति', 'Status')}</th>
-              <th className="py-3 px-3.5 text-right rounded-r-xl w-[4%]">{t('रसिद', 'Receipt')}</th>
+              <th className="py-3 px-3.5 text-right rounded-r-xl w-[4%] print:hidden">{t('रसिद', 'Receipt')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10 font-tabular-mono">
@@ -176,7 +197,7 @@ export const TransferHistorySection: React.FC<TransferHistorySectionProps> = ({
                 </td>
 
                 {/* Receipt Action */}
-                <td className="py-3 px-3.5 text-right whitespace-nowrap">
+                <td className="py-3 px-3.5 text-right whitespace-nowrap print:hidden">
                   <button
                     type="button"
                     onClick={() => onViewReceipt(p)}

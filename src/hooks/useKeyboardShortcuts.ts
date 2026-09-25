@@ -4,6 +4,7 @@ import { useLanguageStore } from '../store/useLanguageStore';
 
 export type ShortcutAction =
   | 'TOGGLE_GUIDE'
+  | 'TOGGLE_TERMINAL'
   | 'TOGGLE_LANG'
   | 'FOCUS_SEARCH'
   | 'CLOSE_MODALS'
@@ -60,6 +61,11 @@ export function resolveShortcutAction(
   // Global Escape: close modals / guides
   if (e.key === 'Escape') {
     return 'CLOSE_MODALS';
+  }
+
+  // Fast Banking Terminal: F2 (global/admin CBS fast terminal)
+  if (e.key === 'F2') {
+    return 'TOGGLE_TERMINAL';
   }
 
   // Language toggle: Ctrl+Shift+L (works globally)
@@ -136,6 +142,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
   const navigate = useNavigate();
   const toggleLang = useLanguageStore((s) => s.toggleLang);
   const [showShortcutGuide, setShowShortcutGuide] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
 
   const toggleShortcutGuide = useCallback(() => {
     setShowShortcutGuide((prev) => !prev);
@@ -143,6 +150,14 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
 
   const closeShortcutGuide = useCallback(() => {
     setShowShortcutGuide(false);
+  }, []);
+
+  const toggleTerminal = useCallback(() => {
+    setShowTerminal((prev) => !prev);
+  }, []);
+
+  const closeTerminal = useCallback(() => {
+    setShowTerminal(false);
   }, []);
 
   useEffect(() => {
@@ -168,6 +183,11 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
           setShowShortcutGuide((prev) => !prev);
           break;
 
+        case 'TOGGLE_TERMINAL':
+          e.preventDefault();
+          setShowTerminal((prev) => !prev);
+          break;
+
         case 'TOGGLE_LANG':
           e.preventDefault();
           toggleLang();
@@ -189,6 +209,9 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
           if (showShortcutGuide) {
             e.preventDefault();
             setShowShortcutGuide(false);
+          } else if (showTerminal) {
+            e.preventDefault();
+            setShowTerminal(false);
           } else if (onCloseModals) {
             onCloseModals();
           }
@@ -251,12 +274,16 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [context, navigate, onCloseModals, showShortcutGuide, toggleLang]);
+  }, [context, navigate, onCloseModals, showShortcutGuide, showTerminal, toggleLang]);
 
   return {
     showShortcutGuide,
     setShowShortcutGuide,
     toggleShortcutGuide,
     closeShortcutGuide,
+    showTerminal,
+    setShowTerminal,
+    toggleTerminal,
+    closeTerminal,
   };
 }

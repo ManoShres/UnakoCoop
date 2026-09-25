@@ -20,6 +20,7 @@ interface FixedDepositsSectionProps {
   onOpenMudhatiModal: () => void;
   fixedDeposit?: SavingsAccount;
   regularSavingsBalance?: number;
+  viewMode?: 'fd' | 'calculator' | 'all';
 }
 
 export function FixedDepositsSection({
@@ -27,6 +28,7 @@ export function FixedDepositsSection({
   onOpenMudhatiModal,
   fixedDeposit,
   regularSavingsBalance = 184500,
+  viewMode = 'all',
 }: FixedDepositsSectionProps) {
   const { t } = useLanguageStore();
 
@@ -68,11 +70,12 @@ export function FixedDepositsSection({
         </div>
 
         {/* Mudhati Bento Grid: Left Active Certificate, Right Interactive Calculator */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+        <div className={viewMode === 'all' ? 'grid grid-cols-1 lg:grid-cols-12 gap-space-lg' : 'w-full'}>
           {/* Current Active FD Certificate */}
-          <div className="lg:col-span-5 bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-space-sm">
+          {(viewMode === 'all' || viewMode === 'fd') && (
+            <div className={`${viewMode === 'fd' ? 'max-w-2xl mx-auto w-full' : 'lg:col-span-5'} bg-surface-card rounded-xl p-space-lg shadow-sm flex flex-col justify-between`}>
+              <div>
+                <div className="flex items-center justify-between pb-space-sm">
                 <div className="flex items-center gap-space-xs">
                   <Building2 className="w-6 h-6 text-primary shrink-0" />
                   <div>
@@ -149,10 +152,12 @@ export function FixedDepositsSection({
                 {t('ऋण लिनुहोस् →', 'Apply Loan →')}
               </button>
             </div>
-          </div>
+            </div>
+          )}
 
           {/* Interactive 'Open New Mudhati Fixed Deposit' Module */}
-          <div className="lg:col-span-7 bg-surface-dark text-on-primary-container rounded-xl p-space-lg shadow-xl relative flex flex-col justify-between">
+          {(viewMode === 'all' || viewMode === 'calculator') && (
+            <div className={`${viewMode === 'calculator' ? 'max-w-3xl mx-auto w-full' : 'lg:col-span-7'} bg-surface-dark text-on-primary-container rounded-xl p-space-lg shadow-xl relative flex flex-col justify-between`}>
             <div>
               {/* Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-sm">
@@ -321,11 +326,13 @@ export function FixedDepositsSection({
               </span>
             </div>
           </div>
+          )}
         </div>
       </section>
 
       {/* SECTION 3: COOPERATIVE CAPITAL BENEFIT & GOVERNANCE TILES */}
-      <section className="space-y-space-md pt-space-md">
+      {(viewMode === 'all' || viewMode === 'calculator') && (
+        <section className="space-y-space-md pt-space-md">
         <div>
           <span className="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">
             {t('खण्ड ०३ • सदस्य सुविधा तथा अधिकार', 'Part 03 • Member Privileges & Rights')}
@@ -411,6 +418,7 @@ export function FixedDepositsSection({
           </div>
         </div>
       </section>
+      )}
     </>
   );
 }

@@ -62,7 +62,7 @@ export const TransferReviewModal: React.FC<TransferReviewModalProps> = ({
 
         <div className="space-y-2 mb-5 text-xs">
           {[
-            { l: t('स्थानान्तरण रकम', 'Transfer Amount'), v: `NPR ${fmtCurrency(parseInt(amount || '0'), true)}.00` },
+            { l: t('स्थानान्तरण रकम', 'Transfer Amount'), v: `${fmtCurrency(parseInt(amount || '0'), true)}.00` },
             { l: t('निकासी शुल्क', 'Clearing Fee'), v: t('रु. ०.०० (०% अधिभार)', 'NPR 0.00 (0% Surcharge)'), green: true },
             { l: t('स्रोत खाता', 'Debit Account'), v: `${t('साधारण बचत', 'Regular Savings')} - ${sourceAccountNo}` },
             { l: t('प्राप्तकर्ता', 'Recipient'), v: `${verifiedMember?.name || 'Cooperative Member'} (${memberId})` },
@@ -118,7 +118,7 @@ export const TransferReviewModal: React.FC<TransferReviewModalProps> = ({
             onClick={onConfirmSuccess}
           >
             <span>
-              {t('रकम पठाउनुहोस्', 'Send Funds')} ({t('रु.', 'NPR')} {fmtCurrency(parseInt(amount || '0'), true)})
+              {t('रकम पठाउनुहोस्', 'Send Funds')} ({fmtCurrency(parseInt(amount || '0'), true)})
             </span>
             <ArrowRight className="w-4 h-4" />
           </button>

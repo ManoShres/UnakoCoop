@@ -18,6 +18,7 @@ import {
   RotateCcw,
   Sparkles,
 } from 'lucide-react';
+import { printElement } from '../../utils/printHelper';
 
 export const TellerCounterPage: React.FC = () => {
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
@@ -365,52 +366,84 @@ export const TellerCounterPage: React.FC = () => {
       {/* Print Slip Modal */}
       {showPrintModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
-            <div className="text-center pb-3 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="font-black text-slate-900 dark:text-white text-base">
+          <div
+            id="teller-closing-slip"
+            data-printable="slip"
+            className="bg-white text-slate-900 rounded-3xl max-w-md w-full p-6 border border-slate-200 shadow-xl space-y-4"
+          >
+            <div className="text-center pb-3 border-b-2 border-slate-800">
+              <h3 className="font-black text-slate-900 text-base uppercase">
                 उनको बचत तथा ऋण सहकारी संस्था लि.
               </h3>
-              <p className="text-xs text-slate-500">चाबहिल, काठमाडौं • दैनिक काउन्टर नगद मिलान भौचर</p>
-            </div>
-
-            <div className="space-y-2 text-xs font-mono">
-              <div className="flex justify-between">
-                <span className="text-slate-400">मिति (BS):</span>
-                <span className="font-bold">{session.sessionDate}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">क्यासियर (Teller):</span>
-                <span className="font-bold">{session.tellerName.split('(')[0]}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">सफ्टवेयर मौज्दात:</span>
-                <span className="font-bold">{fmtCurrency(reconciliation.expectedBalance, true)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">गनेको भौतिक नगद:</span>
-                <span className="font-bold text-emerald-600">{fmtCurrency(reconciliation.actualBalance, true)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">फरक रकम (Variance):</span>
-                <span className="font-bold">{reconciliation.variance === 0 ? 'NPR 0.00' : fmtCurrency(reconciliation.variance, true)}</span>
+              <p className="text-xs font-bold text-slate-700">UNAKO SACCOS LIMITED</p>
+              <p className="text-[10px] text-slate-600 mt-0.5">चाबहिल, काठमाडौं • दैनिक काउन्टर नगद मिलान भौचर</p>
+              <div className="mt-1.5 inline-block px-2.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-[10px] font-bold text-slate-800 uppercase">
+                भल्ट दाखिला तथा काउन्टर क्लोजिङ स्लिप
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-2">
+            <div className="space-y-2 text-xs font-mono border-b border-slate-200 pb-3">
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-sans">कारोबार मिति (BS):</span>
+                <span className="font-bold text-slate-900">{session.sessionDate}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-sans">क्यासियर (Teller):</span>
+                <span className="font-bold text-slate-900">{session.tellerName.split('(')[0]}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-sans">सफ्टवेयर मौज्दात:</span>
+                <span className="font-bold text-slate-900">{fmtCurrency(reconciliation.expectedBalance, true)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-sans">गनेको भौतिक नगद:</span>
+                <span className="font-bold text-emerald-700">{fmtCurrency(reconciliation.actualBalance, true)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-sans">फरक रकम (Variance):</span>
+                <span className="font-bold text-slate-900">
+                  {reconciliation.variance === 0 ? 'NPR 0.00' : fmtCurrency(reconciliation.variance, true)}
+                </span>
+              </div>
+              {witnessName && (
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-sans">रोहवर प्रबन्धक (Witness):</span>
+                  <span className="font-bold text-slate-900">{witnessName}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Dual Signatures for Vault Reconcile */}
+            <div className="pt-6 pb-2 grid grid-cols-2 gap-6 text-[10px] text-center">
+              <div>
+                <div className="border-t border-slate-400 pt-1.5">
+                  <p className="font-bold text-slate-800">क्यासियरको दस्तखत</p>
+                  <p className="text-slate-500 font-sans">(Teller Cashier)</p>
+                </div>
+              </div>
+              <div>
+                <div className="border-t border-slate-400 pt-1.5">
+                  <p className="font-bold text-slate-800">प्रमाणित गर्ने प्रबन्धक</p>
+                  <p className="text-slate-500 font-sans">(Branch Manager Witness)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-200 flex items-center justify-end gap-2 print:hidden">
               <button
                 type="button"
                 onClick={() => setShowPrintModal(false)}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
               >
                 {t('बन्द गर्नुहोस्', 'Close')}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  window.print();
+                  printElement('teller-closing-slip');
                   setShowPrintModal(false);
                 }}
-                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm cursor-pointer"
               >
                 {t('प्रिन्ट गर्नुहोस्', 'Print Now')}
               </button>

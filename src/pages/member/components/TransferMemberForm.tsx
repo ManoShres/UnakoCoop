@@ -78,7 +78,7 @@ export const TransferMemberForm: React.FC<TransferMemberFormProps> = ({
               </div>
               <div>
                 <div className="font-label-md text-xs sm:text-sm font-bold text-on-surface">
-                  Regular Member Savings - NPR {fmtCurrency(sourceBalance, true)}.00
+                  Regular Member Savings - {fmtCurrency(sourceBalance, true)}.00
                 </div>
                 <div className="font-label-sm text-[11px] text-on-surface-variant">
                   A/C: {sourceAccountNo} · Unako Core CBS Ledger
@@ -199,15 +199,14 @@ export const TransferMemberForm: React.FC<TransferMemberFormProps> = ({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="font-label-sm text-label-sm font-bold text-on-surface-variant uppercase tracking-wider">
-              {t('स्थानान्तरण रकम (रु.)', 'Transfer Amount (NPR)')}
+              {t('स्थानान्तरण रकम', 'Transfer Amount')}
             </label>
             <span className="font-label-sm text-[11px] text-on-surface-variant">
               {t('प्रति कारोबार सीमा: रु. १,००,०००', 'Limit per txn: NPR 100,000')}
             </span>
           </div>
           <div className="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
-            <div className="font-display-stat text-xl font-bold font-headline text-on-surface">
-              <span className="text-primary mr-1 text-base">NPR</span>
+            <div className="font-display-stat text-xl font-bold font-headline text-on-surface tabular-nums">
               {fmtCurrency(parseInt(amount || '0'), true)}
             </div>
             <input
@@ -229,7 +228,7 @@ export const TransferMemberForm: React.FC<TransferMemberFormProps> = ({
                 }`}
                 type="button"
               >
-                +{t('रु.', 'NPR')} {fmtCurrency(parseInt(a), true)}
+                +{fmtCurrency(parseInt(a), true)}
               </button>
             ))}
           </div>

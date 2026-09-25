@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Printer, Check, Download, FileSpreadsheet } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { Loan } from '../../../../types';
+import { printElement } from '../../../../utils/printHelper';
 
 interface LoanAmortizationTableProps {
   onPayNow: () => void;
@@ -17,8 +18,29 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
   const tenure = activeLoan?.tenureMonths ?? 24;
 
   return (
-    <div className="bg-surface-card rounded-2xl p-6 shadow-sm border border-outline-variant/15" id="schedule">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div className="bg-surface-card rounded-2xl p-6 shadow-sm border border-outline-variant/15 print:border-none print:shadow-none" id="schedule" data-printable="statement">
+      {/* Official Cooperative Header (Print Only) */}
+      <div className="hidden print:block pb-4 mb-3 border-b-2 border-slate-900 bg-white">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <img src="/unako-logo.png" alt="Unako Logo" className="h-12 w-auto object-contain" />
+            <div>
+              <h2 className="font-headline-sm font-extrabold text-slate-900">उनको बचत तथा ऋण सहकारी संस्था लि.</h2>
+              <p className="text-xs text-slate-700 font-semibold">Unako Savings & Credit Cooperative Society Ltd.</p>
+              <p className="text-[11px] text-slate-600">गढवा-५, देउखुरी, दाङ • दर्ता नं: २०७०-०१ | PAN: ३००९१२८३७</p>
+            </div>
+          </div>
+          <div className="text-right text-xs">
+            <span className="inline-block px-2.5 py-0.5 rounded bg-slate-100 font-bold border border-slate-300">
+              ऋण चुक्ता तथा किस्ता तालिका (Amortization Schedule)
+            </span>
+            <p className="font-mono text-slate-800 font-bold mt-1">खाता / ऋण नं: {loanNo}</p>
+            <p className="text-[10px] text-slate-500 font-mono">मुद्रण मिति: {new Date().toLocaleDateString('ne-NP')}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 print:hidden">
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-headline text-lg sm:text-xl text-on-surface font-bold">
@@ -71,7 +93,7 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
             </button>
           </div>
           <button
-            onClick={() => window.print()}
+            onClick={() => printElement('schedule')}
             className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all border border-outline-variant/20 cursor-pointer"
             title="Print Statement"
           >
@@ -92,7 +114,7 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
               <th className="py-3 px-3.5">{t('कुल किस्ता', 'Total Installment')}</th>
               <th className="py-3 px-3.5">{t('बाँकी साँवा', 'Remaining Principal')}</th>
               <th className="py-3 px-3.5">{t('स्थिति', 'Status')}</th>
-              <th className="py-3 px-3.5 text-right rounded-r-xl">{t('रसिद', 'Receipt')}</th>
+              <th className="py-3 px-3.5 text-right rounded-r-xl print:hidden">{t('रसिद', 'Receipt')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/10 font-tabular-mono" id="amortization-table-body">
@@ -111,7 +133,7 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
                     {t('भुक्तानी गर्नुपर्ने', 'Action Due')}
                   </span>
                 </td>
-                <td className="py-3 px-3.5 text-right">
+                <td className="py-3 px-3.5 text-right print:hidden">
                   <button
                     onClick={onPayNow}
                     className="bg-primary hover:bg-primary/90 text-on-primary text-xs font-label-sm px-3 py-1 rounded-lg transition-all font-bold shadow-2xs cursor-pointer"
@@ -137,11 +159,11 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
                     {t('चुक्ता (समयमै)', 'Paid (On Time)')}
                   </span>
                 </td>
-                <td className="py-3 px-3.5 text-right">
+                <td className="py-3 px-3.5 text-right print:hidden">
                   <button
-                    onClick={() => window.print()}
+                    onClick={() => printElement('schedule')}
                     className="text-primary hover:text-primary/80 p-1.5 rounded hover:bg-surface-container transition-all cursor-pointer"
-                    title="Download Official Receipt"
+                    title="Print Statement"
                   >
                     <Download className="w-3.5 h-3.5" />
                   </button>
@@ -164,9 +186,9 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
                     {t('चुक्ता (समयमै)', 'Paid (On Time)')}
                   </span>
                 </td>
-                <td className="py-3 px-3.5 text-right">
+                <td className="py-3 px-3.5 text-right print:hidden">
                   <button
-                    onClick={() => window.print()}
+                    onClick={() => printElement('schedule')}
                     className="text-primary hover:text-primary/80 p-1.5 rounded hover:bg-surface-container transition-all cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -189,17 +211,29 @@ export const LoanAmortizationTable: React.FC<LoanAmortizationTableProps> = ({ on
                     {t('आगामी तालिका', 'Scheduled')}
                   </span>
                 </td>
-                <td className="py-3 px-3.5 text-right text-on-surface-variant/60 text-xs">Pending</td>
+                <td className="py-3 px-3.5 text-right text-on-surface-variant/60 text-xs print:hidden">Pending</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <div className="flex items-center justify-between pt-4 mt-2 border-t border-outline-variant/15 text-xs text-on-surface-variant">
+      {/* Signatures for Print */}
+      <div className="hidden print:flex justify-between items-end pt-12 pb-4 px-4 text-xs text-slate-900 font-semibold">
+        <div className="text-center">
+          <div className="w-36 border-b border-slate-800 mb-1"></div>
+          <span>ऋणीको दस्तखत (Borrower)</span>
+        </div>
+        <div className="text-center">
+          <div className="w-36 border-b border-slate-800 mb-1"></div>
+          <span>ऋण अधिकृत / छाप (Credit Officer)</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-4 mt-2 border-t border-outline-variant/15 text-xs text-on-surface-variant print:hidden">
         <span>Showing schedule for active facility {loanNo}</span>
         <button
-          onClick={() => window.print()}
+          onClick={() => printElement('schedule')}
           className="font-label-sm text-xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 cursor-pointer"
         >
           {t('तालिका निकासा (.CSV / PDF)', 'Export Full Schedule (.CSV / PDF)')}

@@ -13,10 +13,12 @@ import {
   Clock,
   AlertTriangle,
   X,
+  Printer,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { MemberOnboardingWizard } from '../../components/admin/MemberOnboardingWizard';
+import { MemberAccountProfilePrintModal } from '../../components/common/MemberAccountProfilePrintModal';
 
 export function MemberManagementPage() {
   const { members, updateMemberDetails } = useCoopStore();
@@ -24,6 +26,7 @@ export function MemberManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | VerificationStatus>('ALL');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
+  const [printMember, setPrintMember] = useState<Member | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -242,13 +245,23 @@ export function MemberManagementPage() {
 
                   {/* Actions */}
                   <td className="py-3.5 px-4 text-right">
-                    <button
-                      onClick={() => setEditingMember(m)}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 font-bold transition"
-                    >
-                      <Edit className="size-3.5" />
-                      <span>{t('सम्पादन', 'Edit')}</span>
-                    </button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => setPrintMember(m)}
+                        title={t('खाता विवरण छाप्नुहोस्', 'Print Account Dossier')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 font-bold transition text-xs"
+                      >
+                        <Printer className="size-3.5" />
+                        <span className="hidden sm:inline">{t('प्रिन्ट', 'Print')}</span>
+                      </button>
+                      <button
+                        onClick={() => setEditingMember(m)}
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 hover:bg-blue-100 font-bold transition text-xs"
+                      >
+                        <Edit className="size-3.5" />
+                        <span>{t('सम्पादन', 'Edit')}</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -372,7 +385,16 @@ export function MemberManagementPage() {
                 />
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setPrintMember(editingMember)}
+                  className="px-3.5 py-2.5 rounded-xl border border-emerald-300 dark:border-emerald-800 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition flex items-center justify-center gap-1.5"
+                  title={t('सदस्य खाता तथा विवरण छाप्नुहोस्', 'Print Member Account Profile & Dossier')}
+                >
+                  <Printer className="size-3.5" />
+                  <span className="hidden sm:inline">{t('खाता विवरण प्रिन्ट', 'Print Dossier')}</span>
+                </button>
                 <button
                   type="button"
                   onClick={() => setEditingMember(null)}
@@ -405,6 +427,13 @@ export function MemberManagementPage() {
             )
           );
         }}
+      />
+
+      {/* MEMBER ACCOUNT & DOSSIER PRINT MODAL */}
+      <MemberAccountProfilePrintModal
+        isOpen={!!printMember}
+        onClose={() => setPrintMember(null)}
+        member={printMember}
       />
     </div>
   );

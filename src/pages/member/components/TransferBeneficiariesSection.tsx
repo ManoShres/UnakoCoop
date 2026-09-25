@@ -6,11 +6,13 @@ import { Beneficiary, BENEFICIARIES } from './TransferTypes';
 interface TransferBeneficiariesSectionProps {
   onSelectBeneficiary: (b: Beneficiary) => void;
   onAddBeneficiary: () => void;
+  className?: string;
 }
 
 export const TransferBeneficiariesSection: React.FC<TransferBeneficiariesSectionProps> = ({
   onSelectBeneficiary,
   onAddBeneficiary,
+  className = '',
 }) => {
   const { t } = useLanguageStore();
 
@@ -19,7 +21,7 @@ export const TransferBeneficiariesSection: React.FC<TransferBeneficiariesSection
   };
 
   return (
-    <div className="lg:col-span-5 flex flex-col justify-between gap-6">
+    <div className={`flex flex-col justify-between gap-6 ${className}`}>
       {/* FREQUENT BENEFICIARIES CARD */}
       <div className="bg-surface-card rounded-2xl shadow-sm border border-outline-variant/15 p-5 flex flex-col justify-between flex-1">
         <div>

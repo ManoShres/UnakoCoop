@@ -28,6 +28,7 @@ import {
   ShieldAlert,
   Banknote,
   Keyboard,
+  Terminal,
 } from 'lucide-react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -38,11 +39,19 @@ import { LanguageToggle } from '../ui/LanguageToggle';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { useKeyboardShortcuts } from '../../hooks/useKeyboardShortcuts';
 import { KeyboardShortcutGuide } from '../ui/KeyboardShortcutGuide';
+import { FastBankingTerminalModal } from '../admin/FastBankingTerminal';
 
 export const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
-  const { showShortcutGuide, toggleShortcutGuide, closeShortcutGuide } = useKeyboardShortcuts({ context: 'ADMIN' });
+  const { 
+    showShortcutGuide, 
+    toggleShortcutGuide, 
+    closeShortcutGuide,
+    showTerminal,
+    toggleTerminal,
+    closeTerminal
+  } = useKeyboardShortcuts({ context: 'ADMIN' });
   const { members, applications, inquiries } = useCoopStore();
   const openMismatches = useCoopStore((s) =>
     s.reconciliationEntries.filter((entry) => entry.status === 'MISMATCH').length
@@ -259,6 +268,20 @@ export const AdminLayout: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* Fast Banking Terminal Button (F2) */}
+              <button
+                type="button"
+                onClick={toggleTerminal}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-600 hover:to-indigo-600 rounded-lg shadow-sm border border-blue-500/50 transition-all cursor-pointer animate-pulse-subtle"
+                title={t('द्रुत बैंकिङ कन्सोल (F2)', 'Fast Banking Terminal (F2)')}
+              >
+                <Terminal className="size-3.5 text-blue-200" />
+                <span>{t('द्रुत टर्मिनल', 'Fast Terminal')}</span>
+                <kbd className="hidden sm:inline px-1 py-0.2 bg-blue-900/80 border border-blue-400/40 rounded text-[10px] font-mono text-blue-200">
+                  F2
+                </kbd>
+              </button>
+
               {/* Public Website Button */}
               <Link
                 to="/"
@@ -315,6 +338,9 @@ export const AdminLayout: React.FC = () => {
 
       {/* Keyboard Shortcut Guide Modal */}
       <KeyboardShortcutGuide isOpen={showShortcutGuide} onClose={closeShortcutGuide} />
+
+      {/* Fast Banking Terminal Modal (F2) */}
+      <FastBankingTerminalModal isOpen={showTerminal} onClose={closeTerminal} />
     </div>
   );
 };
