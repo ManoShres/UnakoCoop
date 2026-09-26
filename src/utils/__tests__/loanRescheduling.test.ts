@@ -3,6 +3,11 @@
  * Unako SACCOS (गढवा-५, दाङ) - Cooperative Act 2074
  */
 import { describe, it, expect } from 'vitest';
+import type {
+  DistressReasonCategory,
+  ReschedulingTerms,
+  RescheduledLoanRecord,
+} from '../loanRescheduling';
 import {
   MIN_OVERDUE_INTEREST_PAYMENT_RATIO,
   calculateMinInterestPayment,
@@ -11,9 +16,6 @@ import {
   generateReschedulingDeed,
   calculateRestructuredProvision,
   exportRescheduledLoansCsv,
-  DistressReasonCategory,
-  ReschedulingTerms,
-  RescheduledLoanRecord,
 } from '../loanRescheduling';
 import { Loan, Member } from '../../types';
 
