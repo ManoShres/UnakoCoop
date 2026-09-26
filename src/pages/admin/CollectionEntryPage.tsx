@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useOfflineSync } from '../../hooks/useOfflineSync';
 import { buildCollectionSheet, isDuplicateCollection } from '../../utils/collectionPosting';
 import { triggerBrowserDownload } from '../../utils/copomisExport';
 import {
@@ -11,6 +12,7 @@ import {
   CollectionSheetTable,
   CollectionRecentTable,
   CollectionVoidModal,
+  OfflineSyncBanner,
   MemberCollectionBreakdown,
 } from './components/collection';
 
@@ -42,6 +44,19 @@ export function CollectionEntryPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [voidingId, setVoidingId] = useState<string | null>(null);
   const [voidReason, setVoidReason] = useState('');
+
+  const {
+    isOnline,
+    isFieldMode,
+    isEffectivelyOffline,
+    queue: offlineQueue,
+    pendingCount: offlinePendingCount,
+    toggleFieldMode,
+    addOfflineEntry,
+    removeEntry: removeOfflineEntry,
+    clearQueue: clearOfflineQueue,
+    syncQueue,
+  } = useOfflineSync();
 
   useEffect(() => {
     if (!voidingId) return;
@@ -177,9 +192,57 @@ export function CollectionEntryPage() {
   };
 
   const handleSave = (postAfter: boolean) => {
-    const targetMeetingId = ensureMeeting();
     let saved = 0;
     let skipped = 0;
+
+    // If offline or in rural Field Mode, queue locally with immediate feedback
+    if (isEffectivelyOffline) {
+      sheet.forEach((row) => {
+        const raw = amounts[row.groupMemberId];
+        const amount = Number(raw);
+        if (!raw || !Number.isFinite(amount) || amount <= 0) return;
+
+        const breakdown = breakdowns[row.groupMemberId] || {
+          attendance: 'PRESENT',
+          mandatorySavings: amount,
+          optionalSavings: 0,
+          loanPrincipal: 0,
+          loanInterest: 0,
+          fine: 0,
+        };
+
+        addOfflineEntry({
+          motherGroupId: groupId,
+          groupMemberId: row.groupMemberId,
+          memberId: row.memberId,
+          memberName: row.memberName,
+          meetingDate: today(),
+          collectorNo: conductorNo || 'STAFF',
+          collectorName: employees.find((e) => e.employeeNo === conductorNo)?.name ?? 'Staff',
+          totalAmount: amount,
+          breakdown: {
+            mandatorySavings: breakdown.mandatorySavings || 0,
+            optionalSavings: breakdown.optionalSavings || 0,
+            loanPrincipal: breakdown.loanPrincipal || 0,
+            loanInterest: breakdown.loanInterest || 0,
+            fine: breakdown.fine || 0,
+          },
+          attendance: breakdown.attendance || 'PRESENT',
+          slipNo: slipNo.trim() || undefined,
+        });
+        saved += 1;
+      });
+
+      showToast(
+        t(
+          `फिल्ड अफलाइन मोड: ${saved} संकलन स्थानीय भण्डारणमा सुरक्षित गरियो।`,
+          `Field Offline Mode: ${saved} collections queued in local storage.`
+        )
+      );
+      return;
+    }
+
+    const targetMeetingId = ensureMeeting();
 
     sheet.forEach((row) => {
       const raw = amounts[row.groupMemberId];
@@ -242,6 +305,33 @@ export function CollectionEntryPage() {
     }
   };
 
+  const handleSyncAllOffline = () => {
+    const targetMeetingId = ensureMeeting();
+    const summary = syncQueue((offlineItem) => {
+      const created = recordDeposit({
+        meetingId: targetMeetingId,
+        motherGroupId: offlineItem.motherGroupId,
+        memberId: offlineItem.memberId,
+        memberName: offlineItem.memberName,
+        memberNo: offlineItem.groupMemberId,
+        amount: offlineItem.totalAmount,
+        recordedBy: offlineItem.collectorNo,
+        recordedByName: offlineItem.collectorName,
+        status: 'PENDING',
+        bankDepositSlipNo: offlineItem.slipNo,
+      });
+      postMeetingCollections(targetMeetingId);
+      return { success: true, depositId: created.id };
+    });
+
+    showToast(
+      t(
+        `अफलाइन सिंक सम्पन्न: ${summary.syncedCount} संकलन केन्द्रीय प्रणालीमा पोस्ट गरियो।`,
+        `Offline Sync Complete: ${summary.syncedCount} collections posted to central CBS.`
+      )
+    );
+  };
+
   const handleExportSheet = () => {
     const header = 'Group,Member No,Member Name,Linked Account,Amount (NPR),Status,Transaction Ref';
     const rows = sheet.map((row) =>
@@ -283,6 +373,19 @@ export function CollectionEntryPage() {
 
       {/* Header banner */}
       <CollectionHeaderBanner onExportSheet={handleExportSheet} />
+
+      {/* Field Offline-First PWA Mode & Synchronization Hub */}
+      <OfflineSyncBanner
+        isOnline={isOnline}
+        isFieldMode={isFieldMode}
+        isEffectivelyOffline={isEffectivelyOffline}
+        pendingCount={offlinePendingCount}
+        queue={offlineQueue}
+        onToggleFieldMode={toggleFieldMode}
+        onSyncAll={handleSyncAllOffline}
+        onRemoveEntry={removeOfflineEntry}
+        onClearQueue={clearOfflineQueue}
+      />
 
       {/* Meeting controls */}
       <CollectionControls

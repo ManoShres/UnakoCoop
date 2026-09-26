@@ -5,3 +5,4 @@ export { CollectionStatsStrip } from './CollectionStatsStrip';
 export { CollectionSheetTable } from './CollectionSheetTable';
 export { CollectionRecentTable } from './CollectionRecentTable';
 export { CollectionVoidModal } from './CollectionVoidModal';
+export { OfflineSyncBanner } from './OfflineSyncBanner';

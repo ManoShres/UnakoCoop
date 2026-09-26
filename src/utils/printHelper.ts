@@ -273,3 +273,62 @@ export function printElement(elementId?: string, options?: PrintOptions): void {
     }
   }, 350);
 }
+
+/**
+ * Print raw HTML or formatted text directly without needing an existing element ID
+ */
+export function printRawHtml(htmlContent: string, options?: PrintOptions): void {
+  if (typeof window === 'undefined') return;
+
+  const format = options?.format || 'a4';
+
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute(
+    'style',
+    'position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;pointer-events:none;z-index:-9999;'
+  );
+  iframe.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow?.document;
+  if (!doc) {
+    iframe.remove();
+    return;
+  }
+
+  doc.open();
+  doc.write(`
+    <!DOCTYPE html>
+    <html lang="ne">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${options?.title || 'Unako SACCOS Document'}</title>
+        <style>
+          ${getPrintStyles(format)}
+        </style>
+      </head>
+      <body class="bg-white text-slate-900 p-2">
+        <div data-printable>
+          ${htmlContent}
+        </div>
+      </body>
+    </html>
+  `);
+  doc.close();
+
+  setTimeout(() => {
+    try {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    } catch (e) {
+      console.error('[printRawHtml] Print failed', e);
+    } finally {
+      setTimeout(() => {
+        try {
+          iframe.remove();
+        } catch {}
+      }, 2500);
+    }
+  }, 250);
+}
