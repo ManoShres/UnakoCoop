@@ -5,6 +5,7 @@ import { generateCopomisXml, generateCopomisCsv, generateCopomisJson, triggerBro
 import { validateCopomisData } from '../../utils/copomisValidator';
 import { generateReportsForPeriod, summariseReport, generateReportCsv } from '../../services/reportService';
 import { AmlComplianceCard } from '../../components/admin/AmlComplianceCard';
+import { IrdETdsManagerModal } from '../../components/admin/IrdETdsManagerModal';
 import {
   ShieldCheck,
   FileText,
@@ -70,6 +71,7 @@ export const AdminAuditReportsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'REPORTS' | 'LOGS' | 'COMPLIANCE'>('REPORTS');
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
+  const [isEtdsModalOpen, setIsEtdsModalOpen] = useState(false);
 
   const [showValidationIssues, setShowValidationIssues] = useState(false);
 
@@ -276,6 +278,16 @@ export const AdminAuditReportsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onClick={() => setIsEtdsModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm transition cursor-pointer"
+            title={t('आन्तरिक राजस्व विभाग ई-टिडीएस विवरण तथा कर कट्टी दाखिला', 'Inland Revenue Department e-TDS Gateway')}
+          >
+            <Building className="size-4" />
+            <span>{t('IRD e-TDS दाखिला', 'IRD e-TDS Gateway')}</span>
+          </button>
+
           <button
             type="button"
             onClick={handleExportCopomisXml}
@@ -843,6 +855,12 @@ export const AdminAuditReportsPage: React.FC = () => {
           />
         </div>
       )}
+
+      {/* IRD e-TDS Return & Withholding Gateway Modal */}
+      <IrdETdsManagerModal
+        isOpen={isEtdsModalOpen}
+        onClose={() => setIsEtdsModalOpen(false)}
+      />
     </div>
   );
 };
