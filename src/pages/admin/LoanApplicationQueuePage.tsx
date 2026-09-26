@@ -19,7 +19,11 @@ import {
   User,
   Building,
   PlusCircle,
+  Scale,
+  AlertTriangle,
+  ShieldAlert,
 } from 'lucide-react';
+import { evaluateLoanSafetyGate } from '../../utils/loanLtvCalculator';
 
 export const LoanApplicationQueuePage: React.FC = () => {
   const { applications, updateApplicationStatus, members } = useCoopStore();
@@ -45,6 +49,23 @@ export const LoanApplicationQueuePage: React.FC = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedApp, previewDoc]);
+
+  const safetyEval = React.useMemo(() => {
+    if (!selectedApp) return null;
+    const colVal = selectedApp.collateralEstimatedValue || 1200000;
+    const colType = selectedApp.collateralType || 'LAND_LALPURJA';
+    const rate = selectedApp.interestRate || 11.5;
+    return evaluateLoanSafetyGate({
+      requestedAmount: selectedApp.requestedAmount,
+      tenureMonths: selectedApp.tenureMonths || 36,
+      annualInterestRate: rate,
+      monthlyIncome: selectedApp.monthlyIncome,
+      existingDebtMonthlyEmi: selectedApp.existingDebt ? Math.round(selectedApp.existingDebt * 0.03) : 0,
+      collateralType: colType,
+      collateralEstimatedValue: colVal,
+      hasInsurancePolicy: true,
+    });
+  }, [selectedApp]);
 
   const handleDecision = (status: LoanApplication['status']) => {
     if (!selectedApp) return;
@@ -230,6 +251,87 @@ export const LoanApplicationQueuePage: React.FC = () => {
                   <p className="text-slate-800 dark:text-slate-200 font-semibold mt-0.5 leading-relaxed">{selectedApp.collateralDetails}</p>
                 </div>
               </div>
+
+              {/* ─── STATUTORY LTV & REPAYMENT CAPACITY AUDIT GATE (सहकारी ऐन २०७४) ─── */}
+              {safetyEval && (
+                <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 dark:border-slate-700/60 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Scale className="size-4 text-blue-600 dark:text-blue-400" />
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                        {t('धितो सुरक्षण तथा LTV सुरक्षा गेटवे (सहकारी ऐन २०७४)', 'Collateral Valuation & LTV Safety Gate')}
+                      </h4>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {safetyEval.overallRiskRating === 'LOW_RISK' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+                          <CheckCircle2 className="size-3" />
+                          {t('वैधानिक सीमा भित्र (कम जोखिम)', 'LTV & DSTI Compliant (Low Risk)')}
+                        </span>
+                      ) : safetyEval.overallRiskRating === 'MODERATE_RISK' ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800">
+                          <AlertTriangle className="size-3" />
+                          {t('मध्यम जोखिम (थप परीक्षण आवश्यक)', 'Moderate Risk (Review Required)')}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400 border border-rose-300 dark:border-rose-800 animate-pulse">
+                          <ShieldAlert className="size-3" />
+                          {t('मापदण्ड उल्लंघन (उच्च जोखिम)', 'Regulatory Cap Breach (High Risk)')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Metric gauges */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">{t('धितो सुरक्षा अनुपात (LTV)', 'Actual LTV Ratio')}</span>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className={`text-sm font-black font-mono ${safetyEval.isLtvCompliant ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {safetyEval.actualLtvPercent}%
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">/ {safetyEval.statutoryMaxLtvPercent}% Max</span>
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">{t('अनुमानित मासिक किस्ता (EMI)', 'Calculated Monthly EMI')}</span>
+                      <p className="text-sm font-black text-slate-900 dark:text-white mt-0.5 font-mono">
+                        NPR {fmtCurrency(safetyEval.monthlyEmi, true)}
+                      </p>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">{t('आम्दानी-किस्ता अनुपात (DSTI)', 'Debt-to-Income (DSTI)')}</span>
+                      <div className="flex items-baseline gap-1 mt-0.5">
+                        <span className={`text-sm font-black font-mono ${safetyEval.isDstiCompliant ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                          {safetyEval.dstiPercent}%
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-mono">/ 50% Max</span>
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                      <span className="text-[10px] text-slate-400 block font-medium">{t('धितो अनुसार अधिकतम सीमा', 'Collateral Loan Cap')}</span>
+                      <p className="text-sm font-black text-blue-600 dark:text-blue-400 mt-0.5 font-mono">
+                        NPR {fmtCurrency(safetyEval.suggestedMaxLoanAmount, true)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Breach Warnings if any */}
+                  {safetyEval.breachReasons.length > 0 && (
+                    <div className="p-2.5 rounded-lg bg-rose-50/80 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 space-y-1">
+                      {safetyEval.breachReasons.map((b, idx) => (
+                        <div key={idx} className="flex items-start gap-1.5 text-[11px] text-rose-700 dark:text-rose-300 font-medium">
+                          <AlertCircle className="size-3.5 shrink-0 mt-0.5" />
+                          <span>{t(b.messageNepali, b.messageEnglish)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* ─── MANDATORY LOAN VERIFICATION DOCUMENTS ─── */}
               <div className="space-y-2.5">
