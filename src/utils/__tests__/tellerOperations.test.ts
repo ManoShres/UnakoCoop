@@ -91,4 +91,26 @@ describe('Teller Operations & Denomination Calculations', () => {
     expect(result.variance).toBe(1000);
     expect(result.status).toBe('DISCREPANCY');
   });
+
+  describe('Day-End Handover CSV Export', () => {
+    it('generates compliant CSV with denomination rows and headers', async () => {
+      const { generateDayEndHandoverCsv, MOCK_TELLER_SESSION } = await import('../tellerOperations');
+      const mockSettings = {
+        name: 'Unako SACCOS Ltd',
+        nameNepali: 'उनको बचत तथा ऋण सहकारी संस्था लि.',
+        address: 'Gadhwa-5, Dang',
+        regNo: '234/065/066',
+        panNo: '302847591',
+      };
+
+      const csv = generateDayEndHandoverCsv(MOCK_TELLER_SESSION, mockSettings);
+
+      expect(csv).toContain('उनको बचत तथा ऋण सहकारी संस्था लि.');
+      expect(csv).toContain('234/065/066');
+      expect(csv).toContain('रु. १००० नोट');
+      expect(csv).toContain('350000');
+      expect(csv).toContain('425000');
+      expect(csv).toContain('BALANCED');
+    });
+  });
 });

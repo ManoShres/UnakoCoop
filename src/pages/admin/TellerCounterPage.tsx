@@ -5,8 +5,10 @@ import {
   DENOMINATION_MULTIPLIERS,
   calculatePhysicalTotal,
   reconcileDrawerSession,
+  downloadDayEndHandoverCsv,
 } from '../../utils/tellerOperations';
 import { DenominationBreakdown, DrawerStatus } from '../../types';
+import { useCoopStore } from '../../store/useCoopStore';
 import {
   Banknote,
   Coins,
@@ -18,12 +20,14 @@ import {
   RotateCcw,
   Sparkles,
   Building2,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { printElement } from '../../utils/printHelper';
 import { MultiBranchVaultMonitor } from './components/vault/MultiBranchVaultMonitor';
 
 export const TellerCounterPage: React.FC = () => {
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
+  const { coopSettings } = useCoopStore();
 
   const [activeView, setActiveView] = useState<'DRAWER' | 'VAULT_MONITOR'>('DRAWER');
   const [session, setSession] = useState(MOCK_TELLER_SESSION);
@@ -93,6 +97,21 @@ export const TellerCounterPage: React.FC = () => {
     }));
   };
 
+  const handleExportCsv = () => {
+    downloadDayEndHandoverCsv(
+      {
+        ...session,
+        actualBalance: reconciliation.actualBalance,
+        expectedBalance: reconciliation.expectedBalance,
+        variance: reconciliation.variance,
+        status: reconciliation.variance === 0 ? 'BALANCED' : 'DISCREPANCY',
+        denominations: denoms,
+        vaultHandoverWitness: witnessName,
+      },
+      coopSettings
+    );
+  };
+
   return (
     <div className="space-y-8">
       {/* Header Banner */}
@@ -127,6 +146,16 @@ export const TellerCounterPage: React.FC = () => {
             >
               <Sparkles className="size-3.5 text-amber-500" />
               <span>{t('नमूना लोड', 'Load Demo')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all shadow-sm"
+              title={t('काउन्टर मिलान विवरण एक्सेल/सीएसभीमा डाउनलोड गर्नुहोस्', 'Download Day-End closing sheet as CSV/Excel')}
+            >
+              <FileSpreadsheet className="size-3.5" />
+              <span>{t('CSV / Excel डाउनलोड', 'Export CSV')}</span>
             </button>
 
             <button
