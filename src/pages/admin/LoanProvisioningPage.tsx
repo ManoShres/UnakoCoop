@@ -18,9 +18,11 @@ import {
   Download,
   Gavel,
   Scale,
+  Building2,
 } from 'lucide-react';
 import { BadDebtRecoveryModal } from '../../components/admin/BadDebtRecoveryModal';
 import { LoanReschedulingModal } from '../../components/admin/LoanReschedulingModal';
+import { NbaAcquisitionModal } from '../../components/admin/NbaAcquisitionModal';
 
 export const LoanProvisioningPage: React.FC = () => {
   const { loans, members } = useCoopStore();
@@ -33,6 +35,8 @@ export const LoanProvisioningPage: React.FC = () => {
   const [selectedRecoveryLoanId, setSelectedRecoveryLoanId] = useState<string | undefined>(undefined);
   const [isReschedulingModalOpen, setIsReschedulingModalOpen] = useState(false);
   const [selectedReschedulingLoanId, setSelectedReschedulingLoanId] = useState<string | undefined>(undefined);
+  const [isNbaModalOpen, setIsNbaModalOpen] = useState(false);
+  const [selectedNbaLoanId, setSelectedNbaLoanId] = useState<string | undefined>(undefined);
 
   // Build classified loans list with member linkages and interactive overdue days
   const classifiedLoans: ClassifiedLoan[] = useMemo(() => {
@@ -142,6 +146,19 @@ export const LoanProvisioningPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedNbaLoanId(undefined);
+                setIsNbaModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-sm"
+              title={t('लिलाम हुन नसकेको धितो सकार गरी गैर-बैंकिङ्ग सम्पत्ति कायम गर्ने', 'Acquire collateral as Non-Banking Asset under Sec 84')}
+            >
+              <Building2 className="size-4" />
+              <span>{t('गैर-बैंकिङ्ग सम्पत्ति (NBA)', 'Non-Banking Assets (NBA)')}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -468,6 +485,19 @@ export const LoanProvisioningPage: React.FC = () => {
                         <Gavel className="size-3" />
                         <span>{t('असुली/लिलाम', 'Recovery')}</span>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedNbaLoanId(l.loanId);
+                          setIsNbaModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 transition-all border border-indigo-500/20 shadow-2xs"
+                        title={t('धितो सकार गरी गैर-बैंकिङ्ग सम्पत्ति (NBA) कायम गर्ने (दफा ८४)', 'Acquire collateral as NBA under Sec 84')}
+                      >
+                        <Building2 className="size-3 text-indigo-600 dark:text-indigo-400" />
+                        <span>{t('NBA सकार', 'NBA')}</span>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -493,6 +523,15 @@ export const LoanProvisioningPage: React.FC = () => {
         loans={loans}
         members={members}
         initialLoanId={selectedReschedulingLoanId}
+      />
+
+      {/* Non-Banking Assets (NBA) Acquisition & Management Modal */}
+      <NbaAcquisitionModal
+        isOpen={isNbaModalOpen}
+        onClose={() => setIsNbaModalOpen(false)}
+        loans={loans}
+        members={members}
+        initialLoanId={selectedNbaLoanId}
       />
     </div>
   );
