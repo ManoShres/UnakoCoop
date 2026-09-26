@@ -16,7 +16,9 @@ import {
   Filter,
   FileSpreadsheet,
   Download,
+  Gavel,
 } from 'lucide-react';
+import { BadDebtRecoveryModal } from '../../components/admin/BadDebtRecoveryModal';
 
 export const LoanProvisioningPage: React.FC = () => {
   const { loans, members } = useCoopStore();
@@ -25,6 +27,8 @@ export const LoanProvisioningPage: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState<LoanProvisionCategory | 'ALL'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [simulatedOverdueDays, setSimulatedOverdueDays] = useState<Record<string, number>>({});
+  const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
+  const [selectedRecoveryLoanId, setSelectedRecoveryLoanId] = useState<string | undefined>(undefined);
 
   // Build classified loans list with member linkages and interactive overdue days
   const classifiedLoans: ClassifiedLoan[] = useMemo(() => {
@@ -134,6 +138,18 @@ export const LoanProvisioningPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedRecoveryLoanId(undefined);
+                setIsRecoveryModalOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-sm"
+            >
+              <Gavel className="size-4" />
+              <span>{t('कानूनी असुली तथा अपलेखन', 'Legal Recovery & Write-off')}</span>
+            </button>
+
             <button
               type="button"
               onClick={exportCsv}
@@ -365,7 +381,8 @@ export const LoanProvisioningPage: React.FC = () => {
                 <th className="px-4 py-3">{t('बाँकी साँवा', 'Balance')}</th>
                 <th className="px-4 py-3">{t('भाखा नाघेको दिन (Days)', 'Overdue Days')}</th>
                 <th className="px-4 py-3">{t('वर्ग (Category)', 'Category')}</th>
-                <th className="px-4 py-3 text-right rounded-r-lg">{t('नोक्सानी जगेडा', 'Provision (NPR)')}</th>
+                <th className="px-4 py-3 text-right">{t('नोक्सानी जगेडा', 'Provision (NPR)')}</th>
+                <th className="px-4 py-3 text-center rounded-r-lg">{t('कानूनी कार्य', 'Legal Action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -416,12 +433,39 @@ export const LoanProvisioningPage: React.FC = () => {
                   <td className="px-4 py-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">
                     {fmtCurrency(l.requiredProvisionAmount, true)}
                   </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedRecoveryLoanId(l.loanId);
+                        setIsRecoveryModalOpen(true);
+                      }}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-xs ${
+                        l.category === 'BAD' || l.category === 'DOUBTFUL'
+                          ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                      }`}
+                      title={t('३५ दिने लिलाम सूचना वा अपलेखन प्रक्रिया', '35-day auction notice or write-off process')}
+                    >
+                      <Gavel className="size-3" />
+                      <span>{t('असुली / लिलाम', 'Recovery')}</span>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Bad Debt Legal Recovery & Write-off Modal */}
+      <BadDebtRecoveryModal
+        isOpen={isRecoveryModalOpen}
+        onClose={() => setIsRecoveryModalOpen(false)}
+        loans={loans}
+        members={members}
+        initialLoanId={selectedRecoveryLoanId}
+      />
     </div>
   );
 };
