@@ -10,6 +10,7 @@ import { EmployeeTableSection } from './components/employee/EmployeeTableSection
 import { EmployeeAddModal } from './components/employee/EmployeeAddModal';
 import { EmployeeEditModal } from './components/employee/EmployeeEditModal';
 import { EmployeeDeleteModal } from './components/employee/EmployeeDeleteModal';
+import { StaffRetirementFundModal } from '../../components/admin/StaffRetirementFundModal';
 
 export function EmployeeManagementPage() {
   const { employees, addEmployee, updateEmployee, removeEmployee, employeeSync, syncEmployees } =
@@ -23,6 +24,7 @@ export function EmployeeManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | EmployeeStatus>('ALL');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [isRetirementModalOpen, setIsRetirementModalOpen] = useState(false);
   const [draft, setDraft] = useState<EmployeeDraft>(createEmptyDraft());
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
@@ -162,6 +164,7 @@ export function EmployeeManagementPage() {
       {/* Header Banner */}
       <EmployeeHeaderBanner
         onAddEmployee={() => setShowAddModal(true)}
+        onOpenRetirementFund={() => setIsRetirementModalOpen(true)}
         employeeSync={employeeSync}
       />
 
@@ -205,6 +208,12 @@ export function EmployeeManagementPage() {
         employeeToDelete={employeeToDelete}
         onClose={() => setEmployeeToDelete(null)}
         onConfirmDelete={handleDeleteEmployee}
+      />
+
+      <StaffRetirementFundModal
+        isOpen={isRetirementModalOpen}
+        onClose={() => setIsRetirementModalOpen(false)}
+        employees={employees}
       />
     </div>
   );

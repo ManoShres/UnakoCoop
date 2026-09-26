@@ -1,14 +1,16 @@
 import React from 'react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
-import { IdCard, UserPlus } from 'lucide-react';
+import { IdCard, UserPlus, PiggyBank } from 'lucide-react';
 
 interface EmployeeHeaderBannerProps {
   onAddEmployee: () => void;
+  onOpenRetirementFund?: () => void;
   employeeSync: { state: string; source: string; message?: string };
 }
 
 export const EmployeeHeaderBanner: React.FC<EmployeeHeaderBannerProps> = ({
   onAddEmployee,
+  onOpenRetirementFund,
   employeeSync,
 }) => {
   const { t } = useLanguageStore();
@@ -71,14 +73,30 @@ export const EmployeeHeaderBanner: React.FC<EmployeeHeaderBannerProps> = ({
         </div>
       </div>
 
-      <button
-        onClick={onAddEmployee}
-        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition shrink-0 cursor-pointer"
-        type="button"
-      >
-        <UserPlus className="size-4" />
-        <span>{t('+ नयाँ कर्मचारी दर्ता', '+ Add New Employee')}</span>
-      </button>
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
+        {onOpenRetirementFund && (
+          <button
+            onClick={onOpenRetirementFund}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold shadow-sm transition shrink-0 cursor-pointer"
+            type="button"
+            title={t(
+              'श्रम ऐन २०७४ दफा ५२ र ५३ बमोजिम कर्मचारी सञ्चय कोष तथा उपदान व्यवस्थापन',
+              'Labor Act 2074 Sec 52 & 53 Staff Provident Fund & Gratuity Segregation'
+            )}
+          >
+            <PiggyBank className="size-4" />
+            <span>{t('सञ्चय कोष र उपदान (PF & Gratuity)', 'PF & Gratuity Fund')}</span>
+          </button>
+        )}
+        <button
+          onClick={onAddEmployee}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition shrink-0 cursor-pointer"
+          type="button"
+        >
+          <UserPlus className="size-4" />
+          <span>{t('+ नयाँ कर्मचारी दर्ता', '+ Add New Employee')}</span>
+        </button>
+      </div>
     </div>
   );
 };
