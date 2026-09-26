@@ -32,6 +32,7 @@ export function MotherGroupsPage() {
     motherGroupDeposits,
     employees,
     members,
+    loans,
     addMotherGroup,
     deleteMotherGroup,
     addMotherGroupMember,
@@ -388,6 +389,8 @@ export function MotherGroupsPage() {
         <MotherGroupMeetingsTab
           motherGroupMeetings={motherGroupMeetings}
           motherGroups={motherGroups}
+          loans={loans}
+          groupMembers={groupMembers}
         />
       )}
 
