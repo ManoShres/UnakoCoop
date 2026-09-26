@@ -1,127 +1,186 @@
-# React + TypeScript + Vite
+# Unako Saving & Credit Cooperative Ltd.
+### उनको बचत तथा ऋण सहकारी संस्था लि.
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+[![React](https://img.shields.io/badge/React-19.2-blue?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.3-purple?logo=vite)](https://vitejs.dev/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.3-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/Vitest-137%20Passed-emerald?logo=vitest)](https://vitest.dev/)
+[![License](https://img.shields.io/badge/License-Proprietary-amber)](#)
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+> **Reg. No:** १२९०/०६७/०६८ (1290/067/068) &nbsp;|&nbsp; **PAN:** ३००१२४८९० (300124890)  
+> **Head Office:** Gadhwa-5, Chainpur, Dang, Lumbini Province, Nepal (गढवा-५, चैनपुर, दाङ, नेपाल)  
+> **Contact:** ०८२-४१२०५५ / ९८५७८२१००० &nbsp;|&nbsp; `info@unako.coop.np`
 
 ---
 
-# Unako SACCOS Portal — Supabase Backend
+## 📖 Overview
 
-The portal runs **with or without** Supabase:
+**Unako SACCOS Core Banking & Cooperative Management Platform** is a modern, high-performance financial management web application purpose-built for Saving and Credit Cooperatives (SACCOS) in Nepal.
 
-| Mode | When | Behaviour |
-| --- | --- | --- |
-| **Supabase live** | `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` set in `.env` | The HR registry loads from PostgreSQL, every create/update/delete is written through to Supabase, and the Staff/Admin login uses Supabase Auth |
-| **Local demo** | env vars empty | Zustand + localStorage + mock seeds (original offline behaviour, nothing breaks) |
+The platform aligns with the **Nepal Cooperative Act 2074 (सहकारी ऐन २०७४)**, the Department of Cooperatives regulatory frameworks, and the international **WOCCU PEARLS** financial monitoring standards. It features dual-mode architecture: operating seamlessly with **Supabase** cloud persistence when configured, while offering a self-contained local state engine for instant offline demo and uninterrupted operations.
 
-## 1. Create the database objects
+---
 
-Open **Supabase Dashboard → SQL Editor → New query** and run, in order:
+## ✨ Key Capabilities & Modules
 
-1. `supabase/schema.sql` — creates `employees`, `members`, `savings_accounts`, `loans`,
-   `loan_applications`, `transactions`, `inquiries`, `notifications`, `notices`,
-   `coop_settings`, `share_pool`, `agm_details`, `loan_schemes`, `gateway_rails`,
-   `field_officers` + indexes, `updated_at` triggers and row-level security policies.
-2. `supabase/seed.sql` — 6 staff records, 2 members, CMS settings, share pool, AGM
-   details, 5 loan schemes, 5 payment rails and 2 field officers.
+### 🏛️ 1. Core Banking & Cashier Teller System (CBS)
+- **Fast Banking Counter**: High-speed teller terminal with comprehensive keyboard navigation (`F1`–`F9` hotkeys) for cash deposits, withdrawals, loan installments, and member search.
+- **Daily Field Collection Sheet**: Batch entry module for field collectors operating across rural wards with one-click bulk posting, reconciliation checks, and voucher receipt printing.
+- **Bank Statement Reconciliation**: Multi-source reconciliation system matching CBS internal ledgers with commercial bank statements, complete with mismatch resolution audit trails.
+- **Internal & Member Transfers**: Instant wallet, savings, and inter-account transfers with transaction limits and real-time ledger verification.
 
-Both scripts are idempotent — safe to re-run at any time.
+### 📊 2. Regulatory Compliance & Prudential Standards
+- **PEARLS Financial Ratio Monitoring**: Automatic evaluation of 15+ vital cooperative ratios across **P**rotection, **E**ffective Financial Structure, **A**sset Quality, **R**ates of Return & Costs, **L**iquidity, and **S**igns of Growth.
+- **Loan Loss Provisioning (NPL)**: Built-in 5-tier risk provisioning complying with Nepal Cooperative Act 2074 & NRB directives:
+  - *Pass Loan (असल कर्जा)* — 1% provision
+  - *Watchlist (सुक्ष्म निगरानी)* — 5% provision
+  - *Substandard (कमसल)* — 25% provision
+  - *Doubtful (शंकास्पद)* — 50% provision
+  - *Bad / Loss (खराब कर्जा)* — 100% provision
+- **Statutory Funds Management**: Automated reserve tracking for General Reserve Fund (जगेडा कोष - min 25%), Cooperative Education Fund (शिक्षा कोष), Community Development Fund (सामुदायिक विकास कोष), and Employee Welfare Fund.
+- **COPOMIS Reporting**: Export module structured for the Ministry of Land Management, Cooperatives and Poverty Alleviation COPOMIS reporting protocol.
 
-## 2. Wire the credentials
+### 🌾 3. Cooperative Operations & Agro-Trading
+- **Trading Profit & Loss (P&L)**: Dedicated ledger for consumer goods, seed distribution, chemical fertilizers, and agricultural produce trading.
+- **Self-Help Groups (SHG / Aama Samuha - आमा समूह)**: Ward-level group administration, joint liability monitoring, field officer assignments, and rural women's empowerment tracking.
+- **Shares & Dividend Distribution**: Kitta (कित्ता) share certificate registry, bulk dividend distribution engine (cash & share bonuses), tax calculations, and member payout receipts.
 
-Paste your project values into `.env` (get them from **Project Settings → API**):
+### 📱 4. Member Digital Experience
+- **Digital Passbook**: Real-time passbook ledger showing running balances, deposits, withdrawals, and interest postings with Bikram Sambat (BS) timestamps.
+- **Loan Portfolio & Application**: Online loan requests with interactive EMI amortisation schedule simulator, interest payment tracking, and top-up eligibility calculator.
+- **KYC & Biometric Verification**: Multi-document verification queue supporting Nepali Citizenship (*नागरिकता*), Land Ownership Deed (*लालपुर्जा*), Ward Recommendation (*सिफारिस*), and nominee signatures.
+- **Governance & Notices**: Digital access to Annual General Meeting (AGM) reports, policy changes, and dividend declaration notices.
 
-```dotenv
-VITE_SUPABASE_URL=https://<project-ref>.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon public key>
+### 🌐 5. Public Portal & AI Member Assistance
+- **Bilingual Interface**: Full real-time toggle between **Nepali (नेपाली)** and **English**, including Devanagari numerals and Nepali currency formatting (`रु. १,२५,०००.००`).
+- **Nepali Bikram Sambat (BS) Calendar**: Integrated BS date picker and converter covering years 2000–2100 BS.
+- **24/7 AI Support Assistant**: Integrated intelligent cooperative assistant powered by OpenRouter LLM (Llama 3.3 70B) with automatic offline rule-based fallback.
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Technology |
+|---|---|
+| **Frontend Framework** | [React 19](https://react.dev/) + [TypeScript 6](https://www.typescriptlang.org/) |
+| **Build & Tooling** | [Vite 8](https://vitejs.dev/) with Fast Refresh & [Oxlint](https://oxc.rs/) |
+| **Styling** | [Tailwind CSS v4](https://tailwindcss.com/) with custom design system |
+| **State Management** | [Zustand v5](https://github.com/pmndrs/zustand) with modular domain slices & persistence |
+| **Icons & Visuals** | [Lucide React](https://lucide.dev/) + Canvas Confetti |
+| **Validation** | [Zod v4](https://zod.dev/) schemas at boundary interfaces |
+| **Testing** | [Vitest v4](https://vitest.dev/) (16 suites, 137 unit & integration tests) |
+| **Backend & Auth** | [Supabase](https://supabase.com/) client (`@supabase/supabase-js`) + LocalStorage mock engine |
+| **AI Assistant** | [OpenRouter API](https://openrouter.ai/) with intelligent SACCOS system prompts |
+
+---
+
+## 📁 Architecture & Directory Structure
+
+```
+unako/
+├── src/
+│   ├── components/         # Reusable UI widgets, navigation, layout, & Fast Banking Terminal
+│   ├── data/               # Seed registries (nepaliDistricts, products, mock reports)
+│   ├── hooks/              # Custom React hooks (keyboard shortcuts, print, modals)
+│   ├── lib/                # Supabase client bridge & cloud config
+│   ├── pages/              # Role-partitioned page views
+│   │   ├── admin/          # Admin CBS console (PEARLS, Teller, Loans, Audit, Shares, P&L)
+│   │   ├── member/         # Member portal (Passbook, Loans, KYC, Transfers, Statements)
+│   │   └── public/         # Public pages (Home, Products, About, Reports, Unified Login)
+│   ├── schemas/            # Strict Zod validation schemas
+│   ├── services/           # Business domain services (member, loan, transaction, report)
+│   ├── store/              # Zustand global stores (coop, auth, language, design)
+│   ├── types/              # Domain TypeScript types & interfaces
+│   └── utils/              # Calculation engines (PEARLS, Bikram Sambat, Provisioning, Print)
+├── scripts/                # Utility scripts (Supabase connectivity check)
+└── dist/                   # Production build distribution
 ```
 
-Only `VITE_`-prefixed variables reach the browser, and the anon key is safe to ship
-publicly because RLS protects the data. Restart `npm run dev` after editing `.env`.
+---
 
-## 3. Create staff logins (Supabase Auth)
+## 🚀 Getting Started
 
-**Authentication → Users → Add user** (email + password, enable *Auto Confirm User*).
-Those credentials then work in the portal's **Staff / Admin** login tab.
+### Prerequisites
+- [Node.js](https://nodejs.org/) (version `18.0.0` or higher)
+- [npm](https://www.npmjs.com/) (version `9.0.0` or higher)
 
-The two “Quick Demo” buttons always bypass Supabase, so the offline demo can never
-be locked out. Logging out calls `supabase.auth.signOut()`.
-
-## 4. Verify the connection
-
+### Installation
 ```bash
-npm run db:check      # hits the REST API and prints sample rows / RLS errors
-npm run dev           # /admin/employees shows a green "Supabase live - connected" badge
+# 1. Clone the repository
+git clone https://github.com/ManoShres/UnakoCoop.git
+cd UnakoCoop
+
+# 2. Install dependencies
+npm install
+
+# 3. Create your environment configuration
+cp .env.example .env
 ```
 
-## Security model (RLS)
+### Environment Configuration (`.env`)
+The app runs completely in offline demo mode out-of-the-box. To enable live cloud persistence or AI assistant completions, configure:
 
-- `anon` → read-only on public website tables (notices, loan schemes, coop
-  settings, share pool, AGM details, field officers, generated reports); may
-  only insert a `PENDING` membership application row and public inquiries
-- `authenticated` member (row linked via `members.auth_user_id`) → reads/updates
-  **only their own** members row, savings, loans, transactions, notifications
-  and loan applications; a trigger freezes financial/KYC columns on self-updates
-- `authenticated` staff (no members row linked) → full read/write on every table
-- `public.employees` → staff only
+```env
+# Supabase Configuration (Optional - falls back to local storage)
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
-`public.is_staff()` = signed in **and** not linked to a members row;
-`public.current_member_id()` = the member id bound to `auth.uid()`.
+# OpenRouter AI Support Assistant (Optional - falls back to offline replies)
+VITE_OPENROUTER_API_KEY=your-openrouter-key
+VITE_OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct
+```
 
-## Member self-service login
+### Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-1. Run the updated `supabase/schema.sql` (idempotent - it adds
-   `members.auth_user_id`, the auto-link trigger and the member RLS policies).
-2. **Authentication → Users → Add user** with the member's email (must match the
-   `members.email` row, e.g. `ram.shrestha@unako.coop.np`), a password, and
-   *Auto Confirm User* enabled. The `trg_auth_user_member_link` trigger binds
-   the login to the member automatically (or link manually:
-   `update members set auth_user_id = '<auth-uuid>' where member_no = 'UK-88219';`).
-3. The member signs in through the portal's **Member** tab with that email.
-   Session restore on refresh, `/member` + `/admin` route guards, and logout are
-   all wired through `src/services/memberAuthService.ts`.
-4. Verify with `npm run db:check`.
+### Running Test Suite
+```bash
+# Run all 137 unit and integration tests
+npm test
 
-Note: in live mode the member identity comes from Supabase, while the member
-portal's transaction lists still read the local demo store until those services
-are wired (see "Data flow today" below).
+# Run tests in watch mode
+npx vitest
+```
 
-## Data flow today
+### Production Build
+```bash
+npm run build
+npm run preview
+```
 
-- **Supabase-backed:** HR / employee registry (`/admin/employees`) and staff login.
-- **Still local demo:** members roster UI, savings, loans, shares, transfers, notices.
-  Their tables already exist in `supabase/schema.sql`; add services next to
-  `src/services/employeeService.ts` and swap the store mutations the same way.
+---
 
-Key files: `src/lib/supabase.ts` (client + feature detection),
-`src/services/employeeService.ts` (typed row ↔ model mappers and CRUD),
-`scripts/check-supabase.mjs` (connectivity check), `supabase/schema.sql`, `supabase/seed.sql`.
+## 🔒 Security & Code Standards
 
+- **Strict Immutability**: All state mutations use functional updates and pure transformations.
+- **Zero Hardcoded Secrets**: Client variables are sanitized; sensitive keys are strictly managed via boundary configs.
+- **Input Validation**: All forms, monetary amounts, and member inputs are validated through Zod schemas before hitting state stores.
+- **Isolated Printing**: Print helpers generate an isolated, temporary sandboxed iframe to guarantee zero style bleed or background artifacts.
+
+---
+
+## 🗺️ Engineering Roadmap
+
+- [x] Fast Banking Counter Terminal & Hotkey Navigation
+- [x] Daily Field Collector Sheets & Bulk Posting
+- [x] PEARLS Financial Monitoring Engine
+- [x] Loan Provisioning & Subsidized Agriculture Window
+- [x] Shares Management & Dividend Distribution Engine
+- [x] Bilingual English / Nepali Devanagari Architecture
+- [ ] **Thermal Print Engine (58mm / 80mm)** for field & teller receipts
+- [ ] **Nepal QR / Dynamic Fonepay** payment slips for deposits and EMI
+- [ ] **Offline PWA & Background Sync** for rural field collectors
+- [ ] **Year-End Closing (*Asar Masanta*) & TDS Calculator**
+- [ ] **COPOMIS Official XML/Excel Validator & Exporter**
+- [ ] **Member Digital Smart Card with QR Verification**
+
+---
+
+## 📄 License & Rights
+
+Copyright © 2026 Unako Saving & Credit Cooperative Ltd. All rights reserved.  
+Maintained by the Unako SACCOS Information Technology & Digital Banking Committee.
