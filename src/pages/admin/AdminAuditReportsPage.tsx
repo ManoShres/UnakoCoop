@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
-import { generateCopomisXml, generateCopomisCsv, triggerBrowserDownload } from '../../utils/copomisExport';
+import { generateCopomisXml, generateCopomisCsv, generateCopomisJson, triggerBrowserDownload } from '../../utils/copomisExport';
+import { validateCopomisData } from '../../utils/copomisValidator';
 import { generateReportsForPeriod, summariseReport, generateReportCsv } from '../../services/reportService';
 import {
   ShieldCheck,
@@ -10,11 +11,17 @@ import {
   Upload,
   Search,
   CheckCircle2,
+  AlertTriangle,
+  AlertOctagon,
+  Info,
+  ChevronDown,
+  ChevronUp,
   History,
   Lock,
   FileCheck,
   Building,
   Layers,
+  Users,
 } from 'lucide-react';
 
 interface AuditReport {
@@ -63,6 +70,18 @@ export const AdminAuditReportsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
 
+  const [showValidationIssues, setShowValidationIssues] = useState(false);
+
+  const copomisValidation = useMemo(() => {
+    return validateCopomisData({
+      coopSettings,
+      members,
+      savings,
+      loans,
+      fiscalYear: '2081/82',
+    });
+  }, [coopSettings, members, savings, loans]);
+
   const handleExportCopomisXml = () => {
     const xml = generateCopomisXml({
       coopSettings,
@@ -75,6 +94,21 @@ export const AdminAuditReportsPage: React.FC = () => {
       xml,
       `COPOMIS_${coopSettings.regNo.replace(/[^0-9]/g, '')}_FY2081_82.xml`,
       'application/xml'
+    );
+  };
+
+  const handleExportCopomisJson = () => {
+    const jsonStr = generateCopomisJson({
+      coopSettings,
+      members,
+      savings,
+      loans,
+      fiscalYear: '2081/82',
+    });
+    triggerBrowserDownload(
+      jsonStr,
+      `COPOMIS_${coopSettings.regNo.replace(/[^0-9]/g, '')}_FY2081_82.json`,
+      'application/json'
     );
   };
 
@@ -607,71 +641,197 @@ export const AdminAuditReportsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* COPOMIS Card */}
-          <div className="md:col-span-2 p-6 rounded-2xl bg-gradient-to-br from-emerald-950 to-slate-900 border border-emerald-800/50 shadow-md text-white space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold">
-                  <ShieldCheck className="size-3.5" />
-                  <span>{t('नेपाल सरकार • सहकारी विभाग', 'Government of Nepal • Dept. of Cooperatives')}</span>
+          {/* COPOMIS Card & Pre-Submission Audit Hub */}
+          <div className="md:col-span-2 p-6 rounded-2xl bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-950 border border-emerald-800/60 shadow-xl text-white space-y-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[11px] font-bold border border-emerald-500/30">
+                    <ShieldCheck className="size-3.5" />
+                    <span>{t('नेपाल सरकार • सहकारी विभाग', 'Government of Nepal • Dept. of Cooperatives')}</span>
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                      copomisValidation.isValid
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                    }`}
+                  >
+                    {copomisValidation.isValid ? (
+                      <>
+                        <CheckCircle2 className="size-3.5 text-emerald-400" />
+                        <span>{t('कोपोमिस पेशी योग्य (१००%)', 'COPOMIS Validated (100%)')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="size-3.5 text-amber-400" />
+                        <span>
+                          {fmtDigits(copomisValidation.summary.complianceScore)}% {t('अनुपालन तत्परता', 'Compliance Score')}
+                        </span>
+                      </>
+                    )}
+                  </span>
                 </div>
-                <h3 className="text-base sm:text-lg font-black tracking-tight">
+
+                <h3 className="text-base sm:text-xl font-black tracking-tight">
                   {t(
-                    'कोपोमिस (सहकारी व्यवस्थापन सूचना प्रणाली) नियामक निर्यात',
-                    'COPOMIS (Cooperative Management Information System) Regulatory Export'
+                    'कोपोमिस (सहकारी व्यवस्थापन सूचना प्रणाली) पूर्व-स्वीकृति अडिट तथा निर्यात हब',
+                    'COPOMIS Pre-Submission Regulatory Audit & Statutory Export Hub'
                   )}
                 </h3>
-                <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
+                <p className="text-xs text-slate-300 max-w-3xl leading-relaxed">
                   {t(
-                    `सहकारी विभागको कोपोमिस XML संरचना v2.5 अनुसार ${coopSettings.nameNepali} (दर्ता नं: ${coopSettings.regNo}) को आधिकारिक वैधानिक प्रतिवेदन डाटा निर्यात गर्नुहोस्।`,
-                    `Export standardized statutory reporting data for ${coopSettings.nameNepali} (Reg: ${coopSettings.regNo}) formatted in accordance with the Department of Cooperatives COPOMIS XML schema v2.5.`
+                    `सहकारी विभागको कोपोमिस XML/JSON ढाँचा v2.5 अनुसार ${coopSettings.nameNepali} (दर्ता नं: ${coopSettings.regNo}) को डाटा गुणस्तर, नागरिकता प्रमाणीकरण, सेयर कित्ता र कर्जा जोखिमको स्वचालित अडिट गरी नियामक निर्यात गर्नुहोस्।`,
+                    `Automated pre-submission validation of member identity, citizenship numbers, share kittas, and credit portfolio according to the Nepal Department of Cooperatives COPOMIS v2.5 schema.`
                   )}
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={handleExportCopomisXml}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition cursor-pointer"
                 >
                   <Download className="size-4" />
-                  <span>{t('कोपोमिस XML डाउनलोड', 'Download COPOMIS XML')}</span>
+                  <span>{t('XML v2.5 डाउनलोड', 'Download XML v2.5')}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExportCopomisJson}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold text-xs border border-emerald-900/60 shadow-md transition cursor-pointer"
+                >
+                  <Download className="size-4" />
+                  <span>{t('JSON (REST API)', 'COPOMIS JSON')}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={handleExportCopomisCsv}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 shadow-md transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs border border-slate-700 shadow-md transition cursor-pointer"
                 >
                   <Download className="size-4" />
-                  <span>{t('सदस्य CSV निर्यात', 'Export Member CSV')}</span>
+                  <span>{t('सदस्य CSV', 'Member CSV')}</span>
                 </button>
+
+                {copomisValidation.errors.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowValidationIssues(!showValidationIssues)}
+                    className="inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-bold text-xs border border-amber-500/40 transition cursor-pointer"
+                  >
+                    <AlertTriangle className="size-4 text-amber-400" />
+                    <span>
+                      {showValidationIssues ? t('कैफियत बन्द', 'Hide Issues') : `${t('कैफियतहरू', 'Issues')} (${fmtCount(copomisValidation.errors.length)})`}
+                    </span>
+                    {showValidationIssues ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
+                  </button>
+                )}
               </div>
             </div>
 
-            <div className="pt-2 border-t border-emerald-900/60 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-300">
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase">{t('दर्ता सदस्यहरू', 'Registered Members')}</span>
-                <strong className="text-white text-sm">{members.length} {t('खाताहरू', 'Accounts')}</strong>
+            {/* Quick Metrics Bar */}
+            <div className="pt-3 border-t border-emerald-900/60 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 text-xs text-slate-300">
+              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-900/40">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">{t('दर्ता सदस्यहरू', 'Members (Accounts)')}</span>
+                <strong className="text-white text-sm block mt-0.5">{fmtCount(members.length)}</strong>
+                <span className="text-[10px] text-emerald-400">
+                  {fmtPercent(copomisValidation.summary.genderStats.femalePercent)} {t('महिला सेयरधनी', 'Female')}
+                </span>
               </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase">{t('कुल सेयर पुँजी', 'Total Share Capital')}</span>
-                <strong className="text-white text-sm">
-                  {fmtCurrency(members.reduce((s, m) => s + m.shareCapital, 0), true)}
+
+              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-900/40">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">{t('कुल सेयर पुँजी', 'Total Share Capital')}</span>
+                <strong className="text-white text-sm block mt-0.5">
+                  {fmtCurrency(copomisValidation.summary.totalShareCapital, true)}
                 </strong>
+                <span className="text-[10px] text-slate-400">
+                  {fmtCount(copomisValidation.summary.totalShareUnits)} {t('कित्ता', 'Kitta units')}
+                </span>
               </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase">{t('कुल सक्रिय बचत', 'Total Active Savings')}</span>
-                <strong className="text-white text-sm">
-                  {fmtCurrency(members.reduce((s, m) => s + m.totalSavings, 0), true)}
+
+              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-900/40">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">{t('सक्रिय बचत मौज्दात', 'Active Savings')}</span>
+                <strong className="text-white text-sm block mt-0.5">
+                  {fmtCurrency(copomisValidation.summary.totalSavingsBalance, true)}
                 </strong>
+                <span className="text-[10px] text-slate-400">{savings.length} {t('खाताहरू', 'accounts')}</span>
               </div>
-              <div>
-                <span className="text-slate-400 block text-[10px] uppercase">{t('सक्रिय ऋण खाता', 'Active Loan Ledgers')}</span>
-                <strong className="text-white text-sm">{loans.length} {t('प्रवाह', 'Disbursed')}</strong>
+
+              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-900/40">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">{t('लगानीमा रहेको कर्जा', 'Loans Outstanding')}</span>
+                <strong className="text-white text-sm block mt-0.5">
+                  {fmtCurrency(copomisValidation.summary.totalLoansOutstanding, true)}
+                </strong>
+                <span className="text-[10px] text-slate-400">{copomisValidation.summary.activeLoanCount} {t('कर्जा प्रवाह', 'active')}</span>
+              </div>
+
+              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-900/40">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">{t('खराब कर्जा अनुपात (NPL)', 'NPL Ratio (Risk)')}</span>
+                <strong className={`text-sm block mt-0.5 ${copomisValidation.summary.nplRatio > 5 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                  {fmtPercent(copomisValidation.summary.nplRatio)}
+                </strong>
+                <span className="text-[10px] text-slate-400">PEARLS A1 &lt; 5.0%</span>
+              </div>
+
+              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-900/40">
+                <span className="text-slate-400 block text-[10px] uppercase font-semibold">{t('अडिट कैफियतहरू', 'Audit Findings')}</span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="text-xs font-bold text-red-400">{fmtCount(copomisValidation.summary.fatalErrorCount)} {t('गम्भीर', 'Fatal')}</span>
+                  <span className="text-slate-500">•</span>
+                  <span className="text-xs font-bold text-amber-400">{fmtCount(copomisValidation.summary.warningCount)} {t('चेतावनी', 'Warn')}</span>
+                </div>
+                <span className="text-[10px] text-emerald-400 block mt-0.5">
+                  {copomisValidation.summary.fatalErrorCount === 0 ? t('नियामक पेशी योग्य', 'Ready to submit') : t('सच्याउनुहोस्', 'Resolve fatals')}
+                </span>
               </div>
             </div>
+
+            {/* Expandable Validation Issues Drawer */}
+            {showValidationIssues && copomisValidation.errors.length > 0 && (
+              <div className="mt-4 p-4 rounded-xl bg-slate-900/90 border border-amber-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-amber-300 flex items-center gap-2">
+                    <AlertTriangle className="size-4" />
+                    <span>{t('कोपोमिस पूर्व-स्वीकृति अडिट कैफियत विवरण', 'COPOMIS Pre-Submission Validation Findings')}</span>
+                  </h4>
+                  <span className="text-[11px] text-slate-400">
+                    {t('सहकारी ऐन तथा विभागको मापदण्ड अनुसार सच्याउनु पर्ने विषयहरू', 'Issues requiring correction before regulatory submission')}
+                  </span>
+                </div>
+
+                <div className="max-h-60 overflow-y-auto divide-y divide-slate-800 text-xs">
+                  {copomisValidation.errors.map((err) => (
+                    <div key={err.id} className="py-2.5 flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <span
+                          className={`mt-0.5 px-2 py-0.5 rounded text-[10px] font-bold ${
+                            err.severity === 'FATAL'
+                              ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                              : err.severity === 'WARNING'
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                          }`}
+                        >
+                          {err.severity}
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            {err.recordIdentifier && (
+                              <span className="font-mono text-emerald-400 font-semibold">{err.recordIdentifier}</span>
+                            )}
+                            {err.recordName && <span className="font-semibold text-slate-200">{err.recordName}</span>}
+                            <span className="text-[10px] font-mono text-slate-500">[{err.field}]</span>
+                          </div>
+                          <p className="text-slate-300 mt-0.5">{t(err.messageNepali, err.message)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
