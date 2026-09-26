@@ -14,20 +14,24 @@ import {
   AlertTriangle,
   X,
   Printer,
+  UserMinus,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { MemberOnboardingWizard } from '../../components/admin/MemberOnboardingWizard';
 import { MemberAccountProfilePrintModal } from '../../components/common/MemberAccountProfilePrintModal';
+import { MembershipExitModal } from '../../components/admin/MembershipExitModal';
 
 export function MemberManagementPage() {
-  const { members, updateMemberDetails } = useCoopStore();
+  const { members, loans, savings, updateMemberDetails } = useCoopStore();
   const { t, fmtCurrency, fmtCount, fmtDigits, fmtPhone } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | VerificationStatus>('ALL');
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [printMember, setPrintMember] = useState<Member | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [exitSelectedMemberId, setExitSelectedMemberId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   React.useEffect(() => {
@@ -115,6 +119,18 @@ export function MemberManagementPage() {
           >
             <UserPlus className="size-4" />
             <span>{t('+ नयाँ सदस्य दर्ता', '+ Add New Member')}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setExitSelectedMemberId(null);
+              setShowExitModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-bold transition border border-rose-200 dark:border-rose-900/40 cursor-pointer"
+            type="button"
+          >
+            <UserMinus className="size-4 text-rose-500" />
+            <span>{t('सदस्यता त्याग तथा फरफारक', 'Exit & Clearance')}</span>
           </button>
         </div>
       </div>
@@ -260,6 +276,17 @@ export function MemberManagementPage() {
                       >
                         <Edit className="size-3.5" />
                         <span>{t('सम्पादन', 'Edit')}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setExitSelectedMemberId(m.id);
+                          setShowExitModal(true);
+                        }}
+                        title={t('सदस्यता त्याग तथा अन्तिम हिसाब फरफारक', 'Membership Exit & Final Settlement')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 font-bold transition text-xs cursor-pointer"
+                      >
+                        <UserMinus className="size-3.5" />
+                        <span className="hidden sm:inline">{t('फरफारक', 'Exit')}</span>
                       </button>
                     </div>
                   </td>
@@ -434,6 +461,23 @@ export function MemberManagementPage() {
         isOpen={!!printMember}
         onClose={() => setPrintMember(null)}
         member={printMember}
+      />
+
+      {/* STATUTORY MEMBERSHIP EXIT & CLEARANCE MODAL */}
+      <MembershipExitModal
+        isOpen={showExitModal}
+        onClose={() => setShowExitModal(false)}
+        onSuccess={showToastMsg}
+        members={members}
+        loans={loans}
+        savings={savings}
+        preselectedMemberId={exitSelectedMemberId || undefined}
+        onConfirmExit={(memberId, netPaid) => {
+          updateMemberDetails(memberId, {
+            status: 'REJECTED',
+            notes: `सदस्यता त्याग तथा फरफारक सम्पन्न (कुल भुक्तानी: रु. ${netPaid.toLocaleString()})`,
+          });
+        }}
       />
     </div>
   );
