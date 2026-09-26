@@ -227,3 +227,67 @@ export function createCashTransitRequest(
     notes,
   };
 }
+
+export interface CurrencyDenominationItem {
+  noteValue: number;
+  count: number;
+  total: number;
+}
+
+export function calculateDenominationTotal(
+  denominations: readonly CurrencyDenominationItem[]
+): number {
+  return denominations.reduce((sum, d) => sum + d.total, 0);
+}
+
+export interface CoopTransitHeaderInput {
+  name: string;
+  nameNepali: string;
+  regNo: string;
+}
+
+export function generateTransitVoucherCsv(
+  record: CashTransitRecord,
+  denominations: readonly CurrencyDenominationItem[],
+  coop: CoopTransitHeaderInput
+): string {
+  const lines: string[] = [];
+  lines.push(`"${coop.nameNepali} (${coop.name})"`);
+  lines.push(`"मार्गस्थ नगद कोष चलानी भौचर (Cash-in-Transit Movement Voucher)"`);
+  lines.push(`"चलानी नं: ${record.id} | सुरक्षा कोड: ${record.verificationOtp}"`);
+  lines.push(`"मिति: ${record.initiatedAt} | अवस्था: ${record.status}"`);
+  lines.push(`"पठाउने शाखा: ${record.fromLocation} | प्राप्त गर्ने शाखा: ${record.toLocation}"`);
+  lines.push(
+    `"प्रमाणित गर्ने: ${record.authorizedBy} | जिम्मा लिने प्रतिनिधि: ${record.custodianName} | सुरक्षक: ${record.securityCarrier}"`
+  );
+  lines.push('');
+  lines.push('क्र.सं.,नोट दर (रु.),थान (Count),रकम (NPR)');
+
+  denominations.forEach((d, idx) => {
+    lines.push(`${idx + 1},${d.noteValue},${d.count},${d.total}`);
+  });
+
+  lines.push('');
+  lines.push(`कुल चलानी रकम (Total Amount),-,-,${record.amount}`);
+  if (record.notes) {
+    lines.push(`"विशेष विवरण: ${record.notes}"`);
+  }
+
+  return lines.join('\n');
+}
+
+export function downloadTransitVoucherCsv(
+  record: CashTransitRecord,
+  denominations: readonly CurrencyDenominationItem[],
+  coop: CoopTransitHeaderInput
+): void {
+  const csv = generateTransitVoucherCsv(record, denominations, coop);
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${record.id}-VOUCHER.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
+import { useCoopStore } from '../../../../store/useCoopStore';
 import {
   ServiceCenter,
   CashTransitRecord,
@@ -8,6 +9,7 @@ import {
   createCashTransitRequest,
   evaluateBranchVaultStatus,
 } from '../../../../utils/vaultLiquidity';
+import { CashTransitVoucherModal } from './CashTransitVoucherModal';
 import {
   Building2,
   Landmark,
@@ -24,10 +26,12 @@ import {
   X,
   TrendingUp,
   Percent,
+  FileText,
 } from 'lucide-react';
 
 export const MultiBranchVaultMonitor: React.FC = () => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
+  const { coopSettings } = useCoopStore();
 
   const [branches, setBranches] = useState<ServiceCenter[]>([...INITIAL_SERVICE_CENTERS]);
   const [commercialBankBalance, setCommercialBankBalance] = useState<number>(6500000);
@@ -51,6 +55,8 @@ export const MultiBranchVaultMonitor: React.FC = () => {
   ]);
 
   const [showTransitModal, setShowTransitModal] = useState<boolean>(false);
+  const [selectedVoucherRecord, setSelectedVoucherRecord] = useState<CashTransitRecord | null>(null);
+  const [showVoucherModal, setShowVoucherModal] = useState<boolean>(false);
   const [transitFrom, setTransitFrom] = useState<string>('HQ-GDH');
   const [transitTo, setTransitTo] = useState<string>('SC-GBD');
   const [transitAmount, setTransitAmount] = useState<number>(150000);
@@ -111,6 +117,8 @@ export const MultiBranchVaultMonitor: React.FC = () => {
 
     setTransitLogs((prev) => [record, ...prev]);
     setShowTransitModal(false);
+    setSelectedVoucherRecord(record);
+    setShowVoucherModal(true);
     showToastMsg(
       t(
         `नगद ओसारपसार (CIT) आदेश जारी भयो! सुरक्षा कोड: ${record.verificationOtp}`,
@@ -407,6 +415,17 @@ export const MultiBranchVaultMonitor: React.FC = () => {
                     {log.verificationOtp}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedVoucherRecord(log);
+                    setShowVoucherModal(true);
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 font-bold text-xs text-slate-700 dark:text-slate-200 transition shadow-xs flex items-center gap-1 cursor-pointer"
+                >
+                  <FileText className="size-3.5 text-blue-500" />
+                  <span>{t('भौचर', 'Voucher')}</span>
+                </button>
                 {log.status === 'IN_TRANSIT' && (
                   <button
                     type="button"
@@ -537,6 +556,14 @@ export const MultiBranchVaultMonitor: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Cash-in-Transit Movement Security Voucher Modal */}
+      <CashTransitVoucherModal
+        isOpen={showVoucherModal}
+        onClose={() => setShowVoucherModal(false)}
+        record={selectedVoucherRecord}
+        coopSettings={coopSettings}
+      />
     </div>
   );
 };
