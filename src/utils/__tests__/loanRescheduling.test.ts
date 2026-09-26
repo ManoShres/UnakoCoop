@@ -1,3 +1,7 @@
+/**
+ * Statutory Loan Rescheduling & Restructuring Test Suite
+ * Unako SACCOS (गढवा-५, दाङ) - Cooperative Act 2074
+ */
 import { describe, it, expect } from 'vitest';
 import {
   MIN_OVERDUE_INTEREST_PAYMENT_RATIO,
