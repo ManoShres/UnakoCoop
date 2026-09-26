@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, CreditCard, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, CreditCard, ShieldCheck, CheckCircle2, AlertCircle, QrCode } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { useCoopStore } from '../../../../store/useCoopStore';
+import { NepalDynamicQrModal } from '../../../../components/common/NepalDynamicQrModal';
 
 interface MemberEmiPaymentModalProps {
   onClose: () => void;
@@ -23,6 +24,7 @@ export function MemberEmiPaymentModal({
   const [pin, setPin] = useState(['', '', '', '']);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const hasSufficientBalance = availableSavings >= emiAmount;
 
@@ -125,10 +127,31 @@ export function MemberEmiPaymentModal({
             </div>
           </div>
 
-          {!hasSufficientBalance && (
-            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 flex items-center gap-2 text-xs text-rose-600">
-              <AlertCircle className="size-4 shrink-0" />
-              <span>{t('खातामा मौज्दात अपुग छ। पहिले रकम जम्मा गर्नुहोस्।', 'Insufficient balance in Regular Savings. Please deposit first.')}</span>
+          {!hasSufficientBalance ? (
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-rose-600">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="size-4 shrink-0" />
+                <span>{t('साधारण बचतमा रकम अपुग छ।', 'Insufficient balance in Regular Savings.')}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQrModal(true)}
+                className="w-full sm:w-auto px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold text-[11px] flex items-center justify-center gap-1.5 shadow-sm transition cursor-pointer"
+              >
+                <QrCode className="size-3.5" />
+                <span>{t('क्युआरबाट सिधै तिर्नुहोस्', 'Pay via NepalQR')}</span>
+              </button>
+            </div>
+          ) : (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => setShowQrModal(true)}
+                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center justify-center gap-1.5 mx-auto cursor-pointer"
+              >
+                <QrCode className="size-3.5" />
+                <span>{t('वा नेपालपे / फोनपे क्युआरबाट तिर्नुहोस्', 'Or pay directly via NepalPay QR')}</span>
+              </button>
             </div>
           )}
 
@@ -169,11 +192,31 @@ export function MemberEmiPaymentModal({
               disabled={submitting || !hasSufficientBalance}
               className="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs font-bold shadow-md transition"
             >
-              {submitting ? t('प्रक्रियामा...', 'Processing...') : t('किस्ता चुक्ता गर्नुहोस्', 'Authorize NPR 8,640')}
+              {submitting ? t('प्रक्रियामा...', 'Processing...') : t('किस्ता चुक्ता गर्नुहोस्', `Authorize NPR ${emiAmount.toLocaleString()}`)}
             </button>
           </div>
         </form>
       </div>
+
+      <NepalDynamicQrModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        title="NepalPay / Fonepay Loan EMI QR"
+        titleNepali="नेपालपे / फोनपे कर्जा किस्ता क्युआर"
+        accountNo={loanNo}
+        amount={emiAmount}
+        remarks={`Loan EMI - ${loanNo}`}
+        onPaymentSuccess={(ref, paidAmount) => {
+          recordLoanRepayment(
+            loanNo,
+            paidAmount,
+            `Direct Loan EMI via NepalPay QR (${ref})`
+          );
+          setShowQrModal(false);
+          onSuccess(paidAmount);
+          onClose();
+        }}
+      />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { X, CheckCircle2, ArrowDownToLine, Smartphone, Landmark, ShieldCheck } from 'lucide-react';
+import { X, CheckCircle2, ArrowDownToLine, Smartphone, Landmark, ShieldCheck, QrCode } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { useCoopStore } from '../../../../store/useCoopStore';
+import { NepalDynamicQrModal } from '../../../../components/common/NepalDynamicQrModal';
 
 interface MemberDepositModalProps {
   onClose: () => void;
@@ -12,11 +13,13 @@ interface MemberDepositModalProps {
 export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: MemberDepositModalProps) {
   const { t, fmtCurrency } = useLanguageStore();
   const { adjustSavingsBalance } = useCoopStore();
-  const [selectedGateway, setSelectedGateway] = useState<'esewa' | 'khalti' | 'connectips' | 'counter'>('esewa');
+  const [selectedGateway, setSelectedGateway] = useState<'nepalqr' | 'esewa' | 'khalti' | 'connectips' | 'counter'>('nepalqr');
   const [amount, setAmount] = useState<number>(5000);
   const [submitting, setSubmitting] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   const gateways = [
+    { id: 'nepalqr', name: 'NepalPay / Fonepay QR', fee: t('शून्य शुल्क (Instant)', 'Zero Fee / Instant'), icon: QrCode, color: 'text-indigo-500' },
     { id: 'esewa', name: 'eSewa Mobile Wallet', fee: t('शून्य शुल्क (Free)', 'Zero Fee'), icon: Smartphone, color: 'text-emerald-500' },
     { id: 'khalti', name: 'Khalti Digital Wallet', fee: t('शून्य शुल्क (Free)', 'Zero Fee'), icon: Smartphone, color: 'text-purple-500' },
     { id: 'connectips', name: 'NCHL / ConnectIPS', fee: t('रु. २-८ प्रति कारोबार', 'NPR 2-8 fee'), icon: Landmark, color: 'text-blue-500' },
@@ -26,8 +29,13 @@ export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: Mem
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (amount <= 0) return;
-    setSubmitting(true);
 
+    if (selectedGateway === 'nepalqr') {
+      setShowQrModal(true);
+      return;
+    }
+
+    setSubmitting(true);
     setTimeout(() => {
       adjustSavingsBalance(
         primaryAccountNo,
@@ -159,6 +167,27 @@ export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: Mem
           </div>
         </form>
       </div>
+
+      <NepalDynamicQrModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        title="NepalPay / Fonepay Deposit QR"
+        titleNepali="नेपालपे / फोनपे क्युआर दाखिला"
+        accountNo={primaryAccountNo}
+        amount={amount}
+        remarks="Online Savings Deposit"
+        onPaymentSuccess={(ref, paidAmount) => {
+          adjustSavingsBalance(
+            primaryAccountNo,
+            paidAmount,
+            'DEPOSIT',
+            `Digital Deposit via NepalPay QR (${ref})`
+          );
+          setShowQrModal(false);
+          onSuccess(paidAmount, 'NEPALPAY_QR');
+          onClose();
+        }}
+      />
     </div>
   );
 }
