@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { INITIAL_STATUTORY_FUNDS } from '../../data/statutoryFundsMockData';
 import { StatutoryFundRecord } from '../../types';
+import {
+  calculateStatutoryProfitAppropriation,
+  calculateSavingsInterestWithTds,
+} from '../../utils/yearEndClosing';
+import { printElement } from '../../utils/printHelper';
 import {
   Landmark,
   ShieldCheck,
@@ -16,6 +21,10 @@ import {
   Coins,
   CheckCircle2,
   X,
+  Calculator,
+  Receipt,
+  Printer,
+  Calendar,
 } from 'lucide-react';
 
 export const StatutoryFundsPage: React.FC = () => {
@@ -31,6 +40,23 @@ export const StatutoryFundsPage: React.FC = () => {
   const [surplusNetProfit, setSurplusNetProfit] = useState<number>(1200000);
   const [surplusFiscalYear, setSurplusFiscalYear] = useState<string>('2081/82');
   const [toast, setToast] = useState<string | null>(null);
+
+  // Ashad Masanta closing and TDS simulator states
+  const [closingDepositPool, setClosingDepositPool] = useState<number>(45000000);
+  const [closingInterestRate, setClosingInterestRate] = useState<number>(7.5);
+  const [closingPeriod, setClosingPeriod] = useState<365 | 91>(365);
+
+  const closingInterest = useMemo(() => {
+    return calculateSavingsInterestWithTds(closingDepositPool, closingInterestRate, closingPeriod);
+  }, [closingDepositPool, closingInterestRate, closingPeriod]);
+
+  const appropriation = useMemo(() => {
+    return calculateStatutoryProfitAppropriation({
+      netProfit: surplusNetProfit,
+      fiscalYear: surplusFiscalYear,
+      shareCapital: 10000000,
+    });
+  }, [surplusNetProfit, surplusFiscalYear]);
 
   const totalReserves = funds.reduce((sum, f) => sum + f.currentBalance, 0);
   const totalAllocatedThisYear = funds.reduce((sum, f) => sum + f.allocatedThisYear, 0);
@@ -230,6 +256,153 @@ export const StatutoryFundsPage: React.FC = () => {
         ))}
       </div>
 
+      {/* Ashad Masanta (Year-End) Closing & 5% TDS Calculator Section */}
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+          <div className="flex items-center gap-3">
+            <div className="size-11 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/20">
+              <Calculator className="size-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                  {t('असार मसान्त क्लोजिङ इन्जिन', 'ASHAD MASANTA CLOSING ENGINE')}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                  {t('आयकर ऐन २०५८ दफा ८८ (५% TDS)', 'Income Tax Act 2058 (5% TDS)')}
+                </span>
+              </div>
+              <h2 className="text-lg font-black text-slate-900 dark:text-white">
+                {t('बचत ब्याज पुँजीकरण तथा ५% कर (TDS) कट्टी विवरण', 'Savings Interest Capitalization & 5% TDS Schedule')}
+              </h2>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => printElement('closing-tds-statement', { format: 'a4', title: 'Unako-Ashad-Masanta-TDS-Statement' })}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+          >
+            <Printer className="size-4" />
+            <span>{t('कर कट्टी विवरण छाप्नुहोस्', 'Print TDS Advice')}</span>
+          </button>
+        </div>
+
+        {/* Inputs & Computation Mosaic */}
+        <div id="closing-tds-statement" data-printable className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/80">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                {t('कुल सदस्य बचत मौज्दात (Total Savings Pool):', 'Total Member Savings Pool:')}
+              </label>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs font-bold text-slate-400">रु.</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="10000"
+                  value={closingDepositPool}
+                  onChange={(e) => setClosingDepositPool(Math.max(0, parseInt(e.target.value || '0', 10)))}
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono font-black"
+                />
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/80">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                {t('भारित औसत वार्षिक ब्याजदर (%):', 'Weighted Avg Annual Interest Rate (%):')}
+              </label>
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="number"
+                  min="0"
+                  max="25"
+                  step="0.1"
+                  value={closingInterestRate}
+                  onChange={(e) => setClosingInterestRate(Math.max(0, parseFloat(e.target.value || '0')))}
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono font-black"
+                />
+                <span className="text-xs font-bold text-slate-400">%</span>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/80">
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
+                {t('अवधि (Period):', 'Calculation Period:')}
+              </label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setClosingPeriod(365)}
+                  className={`py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    closingPeriod === 365
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {t('वार्षिक (३६५ दिन)', 'Annual (365d)')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setClosingPeriod(91)}
+                  className={`py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                    closingPeriod === 91
+                      ? 'bg-amber-600 text-white shadow-xs'
+                      : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  {t('त्रैमासिक (९१ दिन)', 'Quarterly (91d)')}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Three Result Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 space-y-1">
+              <span className="text-[11px] font-bold text-blue-700 dark:text-blue-300 uppercase">
+                {t('कुल पाकेको सावाँ ब्याज (Gross Interest)', 'Gross Accrued Interest')}
+              </span>
+              <div className="text-xl sm:text-2xl font-black font-mono text-blue-900 dark:text-blue-200">
+                रु. {closingInterest.grossInterest.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
+              </div>
+              <p className="text-[10px] text-blue-600/80 dark:text-blue-400">
+                {t('दैनिक मौज्दात विधिबाट गणना गरिएको', 'Calculated via daily product method')}
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 uppercase">
+                  {t('आ.रा.का. बुझाउने ५% कर (TDS Tax)', 'IRD 5% TDS Deducted')}
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200">
+                  5.0%
+                </span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black font-mono text-rose-900 dark:text-rose-200">
+                रु. {closingInterest.tdsAmount.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
+              </div>
+              <p className="text-[10px] text-rose-600/80 dark:text-rose-400">
+                {t('आन्तरिक राजस्व कार्यालयमा दाखिला हुने', 'Payable to Inland Revenue Dept')}
+              </p>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 space-y-1">
+              <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
+                {t('सदस्य खातामा जम्मा हुने (Net Interest)', 'Net Credited to Members')}
+              </span>
+              <div className="text-xl sm:text-2xl font-black font-mono text-emerald-900 dark:text-emerald-200">
+                रु. {closingInterest.netInterest.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
+              </div>
+              <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400">
+                {t('कर कट्टी पश्चातको खुद ब्याज पुँजीकरण', 'Net interest capitalized to passbooks')}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Fund Adjustment Modal */}
       {showModal && selectedFund && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
@@ -382,27 +555,31 @@ export const StatutoryFundsPage: React.FC = () => {
                 <div className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[11px] p-2 space-y-1.5">
                   <div className="flex justify-between items-center text-indigo-600 dark:text-indigo-400 font-bold">
                     <span>{t('साधारण जगेडा कोष (२५% न्यूनतम):', 'General Reserve (min 25%):')}</span>
-                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.25), true)}</span>
+                    <span>{fmtCurrency(appropriation.generalReserveFund, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
                     <span>{t('सहकारी प्रवर्द्धन कोष (०.५%):', 'Coop Promotion Fund (0.5%):')}</span>
-                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.005), true)}</span>
+                    <span>{fmtCurrency(appropriation.promotionFund, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
-                    <span>{t('सहकारी शिक्षा कोष (५.०%):', 'Coop Education Fund (5.0%):')}</span>
-                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.05), true)}</span>
+                    <span>{t('सहकारी शिक्षा कोष (०.५%):', 'Coop Education Fund (0.5%):')}</span>
+                    <span>{fmtCurrency(appropriation.educationFund, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
-                    <span>{t('सामुदायिक विकास तथा राहत कोष (५.०%):', 'Community Welfare Fund (5.0%):')}</span>
-                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.05), true)}</span>
+                    <span>{t('सामुदायिक विकास कोष (०.५%):', 'Community Development (0.5%):')}</span>
+                    <span>{fmtCurrency(appropriation.communityDevelopmentFund, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-slate-600 dark:text-slate-300">
-                    <span>{t('कर्मचारी बोनस कोष (१०.०%):', 'Employee Bonus Fund (10.0%):')}</span>
-                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.1), true)}</span>
+                    <span>{t('कर्मचारी कल्याण कोष (०.५%):', 'Employee Welfare Fund (0.5%):')}</span>
+                    <span>{fmtCurrency(appropriation.employeeWelfareFund, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-emerald-600 font-black border-t border-slate-200 dark:border-slate-700 pt-1.5">
-                    <span>{t('लाभांश तथा संरक्षित पुँजी फिर्ता कोष (५४.५%):', 'Distributable Dividend & Patronage Pool (54.5%):')}</span>
-                    <span>{fmtCurrency(Math.round(surplusNetProfit * 0.545), true)}</span>
+                    <span>{t('वितरणयोग्य खुद बचत (Distributable Surplus):', 'Distributable Surplus Pool:')}</span>
+                    <span>{fmtCurrency(appropriation.distributableSurplus, true)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+                    <span>{t('अधिकतम १८% सेयर लाभांश सीमा:', 'Max 18% Share Dividend Cap:')}</span>
+                    <span>{fmtCurrency(appropriation.maxPermissibleDividendAmount, true)}</span>
                   </div>
                 </div>
               </div>
@@ -422,23 +599,23 @@ export const StatutoryFundsPage: React.FC = () => {
                   setFunds((prev) =>
                     prev.map((f) => {
                       if (f.fundType === 'GENERAL_RESERVE') {
-                        const added = Math.round(surplusNetProfit * 0.25);
+                        const added = appropriation.generalReserveFund;
                         return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
                       }
                       if (f.fundType === 'COOP_EDUCATION') {
-                        const added = Math.round(surplusNetProfit * 0.05);
+                        const added = appropriation.educationFund;
                         return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
                       }
                       if (f.fundType === 'COOP_PROMOTION') {
-                        const added = Math.round(surplusNetProfit * 0.005);
+                        const added = appropriation.promotionFund;
                         return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
                       }
                       if (f.fundType === 'COMMUNITY_DEVELOPMENT') {
-                        const added = Math.round(surplusNetProfit * 0.05);
+                        const added = appropriation.communityDevelopmentFund;
                         return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
                       }
                       if (f.fundType === 'EMPLOYEE_BONUS') {
-                        const added = Math.round(surplusNetProfit * 0.1);
+                        const added = appropriation.employeeWelfareFund;
                         return { ...f, currentBalance: f.currentBalance + added, allocatedThisYear: f.allocatedThisYear + added };
                       }
                       return f;
@@ -446,7 +623,7 @@ export const StatutoryFundsPage: React.FC = () => {
                   );
                   setShowAppropriationModal(false);
                 }}
-                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
               >
                 <CheckCircle2 className="size-4" />
                 <span>{t('कोषहरूमा दाखिला गर्नुहोस्', 'Allocate to Statutory Reserves')}</span>
