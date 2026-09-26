@@ -4,6 +4,7 @@ import { useCoopStore } from '../../store/useCoopStore';
 import { generateCopomisXml, generateCopomisCsv, generateCopomisJson, triggerBrowserDownload } from '../../utils/copomisExport';
 import { validateCopomisData } from '../../utils/copomisValidator';
 import { generateReportsForPeriod, summariseReport, generateReportCsv } from '../../services/reportService';
+import { AmlComplianceCard } from '../../components/admin/AmlComplianceCard';
 import {
   ShieldCheck,
   FileText,
@@ -833,6 +834,13 @@ export const AdminAuditReportsPage: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* FIU-Nepal goAML & AML/CFT Compliance Center */}
+          <AmlComplianceCard
+            transactions={transactions}
+            members={members}
+            coopSettings={coopSettings}
+          />
         </div>
       )}
     </div>
