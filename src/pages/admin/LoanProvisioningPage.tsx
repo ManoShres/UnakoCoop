@@ -17,8 +17,10 @@ import {
   FileSpreadsheet,
   Download,
   Gavel,
+  Scale,
 } from 'lucide-react';
 import { BadDebtRecoveryModal } from '../../components/admin/BadDebtRecoveryModal';
+import { LoanReschedulingModal } from '../../components/admin/LoanReschedulingModal';
 
 export const LoanProvisioningPage: React.FC = () => {
   const { loans, members } = useCoopStore();
@@ -29,6 +31,8 @@ export const LoanProvisioningPage: React.FC = () => {
   const [simulatedOverdueDays, setSimulatedOverdueDays] = useState<Record<string, number>>({});
   const [isRecoveryModalOpen, setIsRecoveryModalOpen] = useState(false);
   const [selectedRecoveryLoanId, setSelectedRecoveryLoanId] = useState<string | undefined>(undefined);
+  const [isReschedulingModalOpen, setIsReschedulingModalOpen] = useState(false);
+  const [selectedReschedulingLoanId, setSelectedReschedulingLoanId] = useState<string | undefined>(undefined);
 
   // Build classified loans list with member linkages and interactive overdue days
   const classifiedLoans: ClassifiedLoan[] = useMemo(() => {
@@ -434,22 +438,37 @@ export const LoanProvisioningPage: React.FC = () => {
                     {fmtCurrency(l.requiredProvisionAmount, true)}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedRecoveryLoanId(l.loanId);
-                        setIsRecoveryModalOpen(true);
-                      }}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-xs ${
-                        l.category === 'BAD' || l.category === 'DOUBTFUL'
-                          ? 'bg-rose-600 hover:bg-rose-500 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
-                      }`}
-                      title={t('३५ दिने लिलाम सूचना वा अपलेखन प्रक्रिया', '35-day auction notice or write-off process')}
-                    >
-                      <Gavel className="size-3" />
-                      <span>{t('असुली / लिलाम', 'Recovery')}</span>
-                    </button>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedReschedulingLoanId(l.loanId);
+                          setIsReschedulingModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 transition-all border border-amber-500/20 shadow-2xs"
+                        title={t('कर्जा पुनर्तालिकीकरण तथा पुनर्संरचना (२५% ब्याज असुली सर्त)', 'Statutory loan rescheduling and restructuring')}
+                      >
+                        <Scale className="size-3 text-amber-600 dark:text-amber-400" />
+                        <span>{t('पुनर्तालिकीकरण', 'Reschedule')}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedRecoveryLoanId(l.loanId);
+                          setIsRecoveryModalOpen(true);
+                        }}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[10px] font-bold transition-all shadow-xs ${
+                          l.category === 'BAD' || l.category === 'DOUBTFUL'
+                            ? 'bg-rose-600 hover:bg-rose-500 text-white'
+                            : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300'
+                        }`}
+                        title={t('३५ दिने लिलाम सूचना वा अपलेखन प्रक्रिया', '35-day auction notice or write-off process')}
+                      >
+                        <Gavel className="size-3" />
+                        <span>{t('असुली/लिलाम', 'Recovery')}</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -465,6 +484,15 @@ export const LoanProvisioningPage: React.FC = () => {
         loans={loans}
         members={members}
         initialLoanId={selectedRecoveryLoanId}
+      />
+
+      {/* Statutory Loan Rescheduling & Restructuring Modal */}
+      <LoanReschedulingModal
+        isOpen={isReschedulingModalOpen}
+        onClose={() => setIsReschedulingModalOpen(false)}
+        loans={loans}
+        members={members}
+        initialLoanId={selectedReschedulingLoanId}
       />
     </div>
   );
