@@ -12,7 +12,7 @@ import {
 import { TerminalNode, FastTransactionSchema, FastTransactionReceipt } from './terminalTypes';
 import { useCoopStore } from '../../../store/useCoopStore';
 import { useLanguageStore } from '../../../store/useLanguageStore';
-import { printElement } from '../../../utils/printHelper';
+import { printElement, PrintFormat } from '../../../utils/printHelper';
 
 interface TerminalActionFormProps {
   node: TerminalNode;
@@ -28,13 +28,14 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
   onSuccessTransaction,
 }) => {
   const { t } = useLanguageStore();
-  const { members, savings, loans, adjustSavingsBalance, recordLoanRepayment, addTransaction } = useCoopStore();
+  const { coopSettings, members, savings, loans, adjustSavingsBalance, recordLoanRepayment, addTransaction } = useCoopStore();
 
   const [accountNo, setAccountNo] = useState('');
   const [amount, setAmount] = useState<string>('');
   const [remarks, setRemarks] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<FastTransactionReceipt | null>(null);
+  const [printFormat, setPrintFormat] = useState<PrintFormat>('thermal-80mm');
 
   const accountInputRef = useRef<HTMLInputElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
@@ -158,7 +159,7 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
           resetForNext();
         } else if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
           e.preventDefault();
-          printElement('cbs-fast-slip');
+          printElement('cbs-fast-slip', { format: printFormat });
         } else if (e.key === 'Escape') {
           e.preventDefault();
           onBack();
@@ -212,16 +213,16 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
           {/* Cooperative Official Header */}
           <div className="text-center pb-3 border-b-2 border-slate-800">
             <h4 className="font-black text-base tracking-tight text-slate-900 uppercase">
-              उनको बचत तथा ऋण सहकारी संस्था लि.
+              {coopSettings?.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}
             </h4>
-            <p className="text-[11px] font-bold text-slate-700">UNAKO SACCOS LIMITED</p>
+            <p className="text-[11px] font-bold text-slate-700">{coopSettings?.name || 'UNAKO SACCOS LIMITED'}</p>
             <p className="text-[10px] text-slate-600 mt-0.5">
-              केन्द्रीय कार्यालय, चाबहिल, काठमाडौं • फोन: ०१-४४९२३४०
+              {coopSettings?.addressNepali || 'गढवा-५, चैनपुर, दाङ, नेपाल'} • फोन: {coopSettings?.phone || '०८२-४१२०५५'}
             </p>
             <div className="flex items-center justify-center gap-3 text-[10px] text-slate-500 mt-0.5">
-              <span>दर्ता नं: ३८४/०६८/०६९</span>
+              <span>दर्ता नं: {coopSettings?.regNo || '१२९०/०६७/०६८'}</span>
               <span>•</span>
-              <span>प्यान नं: ६००५३४२१८</span>
+              <span>प्यान नं: {coopSettings?.panNo || '३००१२४८९०'}</span>
             </div>
             <div className="mt-2 inline-block px-3 py-0.5 bg-slate-100 border border-slate-300 rounded text-[10px] font-bold text-slate-800 tracking-wide uppercase">
               केन्द्रीय सीबीएस काउन्टर भौचर (CBS Transaction Advice)
@@ -298,11 +299,35 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons (hidden in print) */}
-        <div className="flex items-center gap-3 mt-3 print:hidden">
+        {/* Print Format Selector & Action Buttons (hidden in print) */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 mt-3 print:hidden">
+          <div className="flex items-center gap-1.5 p-1 bg-slate-800 rounded-lg border border-slate-700 text-xs">
+            <span className="text-[11px] text-slate-400 font-semibold px-1.5">ढाँचा:</span>
+            {(
+              [
+                { id: 'thermal-80mm', label: '८०mm थर्मल' },
+                { id: 'thermal-58mm', label: '५८mm थर्मल' },
+                { id: 'a4', label: 'A4 स्लिप' },
+              ] as const
+            ).map((fmt) => (
+              <button
+                key={fmt.id}
+                type="button"
+                onClick={() => setPrintFormat(fmt.id)}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all cursor-pointer ${
+                  printFormat === fmt.id
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+                }`}
+              >
+                {fmt.label}
+              </button>
+            ))}
+          </div>
+
           <button
             type="button"
-            onClick={() => printElement('cbs-fast-slip')}
+            onClick={() => printElement('cbs-fast-slip', { format: printFormat, title: `Unako-Slip-${receipt.referenceNo}` })}
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold transition cursor-pointer"
           >
             <Printer className="size-4" />
