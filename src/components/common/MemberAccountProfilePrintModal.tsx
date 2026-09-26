@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Printer,
   X,
@@ -18,6 +18,7 @@ import { Member } from '../../types';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
 import { printElement } from '../../utils/printHelper';
+import { MemberDigitalSmartCardModal } from './MemberDigitalSmartCardModal';
 
 interface MemberAccountProfilePrintModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
 }) => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
   const { coopSettings } = useCoopStore();
+  const [showSmartCard, setShowSmartCard] = useState(false);
 
   if (!isOpen || !member) return null;
 
@@ -68,6 +70,14 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowSmartCard(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold border border-amber-400/30 transition cursor-pointer"
+            >
+              <QrCode className="size-4" />
+              <span>{t('स्मार्ट कार्ड', 'Smart ID Card')}</span>
+            </button>
             <button
               type="button"
               onClick={handlePrint}
@@ -423,6 +433,13 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
           </div>
         </div>
       </div>
+
+      {/* Digital Smart ID Card Modal */}
+      <MemberDigitalSmartCardModal
+        isOpen={showSmartCard}
+        onClose={() => setShowSmartCard(false)}
+        member={member}
+      />
     </div>
   );
 };
