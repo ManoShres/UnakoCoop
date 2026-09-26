@@ -1,6 +1,7 @@
-import React from 'react';
-import { Upload, Check, User, FileCheck, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Upload, Check, User, FileCheck, ArrowLeft, CheckCircle2, PenTool } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
+import { BiometricSignatureModal } from '../../../components/common/BiometricSignatureModal';
 
 interface MemberVerificationStep4Props {
   docCitizenshipFront: string | null;
@@ -34,6 +35,7 @@ export function MemberVerificationStep4({
   onPrevious,
 }: MemberVerificationStep4Props) {
   const { t } = useLanguageStore();
+  const [showSigModal, setShowSigModal] = useState(false);
 
   return (
     <div className="space-y-6">
@@ -178,16 +180,27 @@ export function MemberVerificationStep4({
               </button>
             </div>
           ) : (
-            <label className="h-28 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-emerald-600 hover:border-emerald-500 transition cursor-pointer">
-              <FileCheck className="size-5" />
-              <span className="text-[11px] font-medium">{t('दस्तखत फोटो अपलोड गर्नुहोस्', 'Upload signature image')}</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => onFileUpload('sig', e)}
-                className="hidden"
-              />
-            </label>
+            <div className="space-y-2">
+              <label className="h-16 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-700 flex flex-col items-center justify-center gap-0.5 text-slate-400 hover:text-emerald-600 hover:border-emerald-500 transition cursor-pointer">
+                <FileCheck className="size-4" />
+                <span className="text-[10px] font-medium">{t('दस्तखत फोटो अपलोड गर्नुहोस्', 'Upload signature image')}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => onFileUpload('sig', e)}
+                  className="hidden"
+                />
+              </label>
+
+              <button
+                type="button"
+                onClick={() => setShowSigModal(true)}
+                className="w-full py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-xs font-bold transition flex items-center justify-center gap-1.5"
+              >
+                <PenTool className="size-3.5" />
+                <span>{t('वा सिधै स्क्रिनमा दस्तखत/ल्याप्चे गर्नुहोस्', 'Or Sign / Thumbprint on Screen')}</span>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -239,6 +252,13 @@ export function MemberVerificationStep4({
           )}
         </button>
       </div>
+
+      {/* Biometric Signature & Thumbprint Pad Modal */}
+      <BiometricSignatureModal
+        isOpen={showSigModal}
+        onClose={() => setShowSigModal(false)}
+        onSave={(specimen) => setDocSignature(specimen.dataUrl)}
+      />
     </div>
   );
 }

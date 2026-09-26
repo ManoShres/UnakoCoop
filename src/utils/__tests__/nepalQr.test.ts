@@ -6,6 +6,7 @@ import {
   parseNepalQrPayload,
 } from '../nepalQr';
 
+
 describe('Nepal QR (NepalPay / Fonepay EMVCo) Utility', () => {
   it('correctly calculates 16-bit CCITT CRC checksum for standard test strings', () => {
     // Standard test verification for CRC-16/CCITT-FALSE
