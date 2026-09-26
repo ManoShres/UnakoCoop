@@ -12,15 +12,18 @@ import {
   X,
   CreditCard,
   Wallet,
+  Send,
 } from 'lucide-react';
+import { RemittanceClearingModal } from '../../components/admin/RemittanceClearingModal';
 
 export function TransfersManagementPage() {
-  const { transactions, gatewayRails, toggleGatewayRail, updateGatewayLimit } = useCoopStore();
+  const { transactions, gatewayRails, toggleGatewayRail, updateGatewayLimit, members } = useCoopStore();
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGateway, setSelectedGateway] = useState<GatewayRail | null>(null);
   const [newLimit, setNewLimit] = useState<number>(100000);
   const [toast, setToast] = useState<string | null>(null);
+  const [isRemittanceModalOpen, setIsRemittanceModalOpen] = useState(false);
 
   const showToastMsg = (msg: string) => {
     setToast(msg);
@@ -76,9 +79,18 @@ export function TransfersManagementPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+          <button
+            type="button"
+            onClick={() => setIsRemittanceModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold transition-all shadow-sm"
+          >
+            <Send className="size-3.5" />
+            <span>{t('आन्तरिक विप्रेषण तथा क्लियरिङ', 'Domestic Remittance & Clearing')}</span>
+          </button>
+
+          <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
             <Zap className="size-3.5" />
-            <span>{t('आरटिजियस प्रणाली: ०% अतिरिक्त शुल्क', 'RTGS Rail: 0% Surcharge')}</span>
+            <span>{t('आरटिजियस प्रणाली: ०%', 'RTGS Rail: 0%')}</span>
           </span>
         </div>
       </div>
@@ -277,6 +289,13 @@ export function TransfersManagementPage() {
           </div>
         </div>
       )}
+
+      {/* Inter-Branch Domestic Remittance & Clearing Modal */}
+      <RemittanceClearingModal
+        isOpen={isRemittanceModalOpen}
+        onClose={() => setIsRemittanceModalOpen(false)}
+        members={members}
+      />
     </div>
   );
 }
