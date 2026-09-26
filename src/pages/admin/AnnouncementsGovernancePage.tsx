@@ -17,8 +17,10 @@ import {
   Phone,
   Building,
   Smartphone,
+  Users,
 } from 'lucide-react';
 import { SmsBroadcastModal } from '../../components/admin/SmsBroadcastModal';
+import { AgmAttendanceRosterModal } from '../../components/admin/AgmAttendanceRosterModal';
 
 export function AnnouncementsGovernancePage() {
   const { t } = useLanguageStore();
@@ -31,12 +33,15 @@ export function AnnouncementsGovernancePage() {
     updateAgmDetails,
     fieldOfficers,
     updateFieldOfficer,
+    members,
+    coopSettings,
   } = useCoopStore();
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showSmsModal, setShowSmsModal] = useState(false);
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
   const [showAgmModal, setShowAgmModal] = useState(false);
+  const [showRosterModal, setShowRosterModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // New Notice state
@@ -245,12 +250,23 @@ export function AnnouncementsGovernancePage() {
               </h3>
               <p className="text-xs text-slate-400">{agmDetails.edition}</p>
             </div>
-            <button
-              onClick={() => setShowAgmModal(true)}
-              className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold transition"
-            >
-              {t('व्यवस्थापन', 'Configure')}
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setShowRosterModal(true)}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs cursor-pointer"
+              >
+                <Users className="size-3.5" />
+                <span>{t('उपस्थिति तथा गणपूरक', 'Roster & Quorum')}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAgmModal(true)}
+                className="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-xs font-bold transition cursor-pointer"
+              >
+                {t('व्यवस्थापन', 'Configure')}
+              </button>
+            </div>
           </div>
 
           <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
@@ -274,6 +290,12 @@ export function AnnouncementsGovernancePage() {
               <span className="font-medium">{t('डिजिटल क्युआर गेट स्क्यानर:', 'Digital QR Pass Gate Scanner:')}</span>
               <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">
                 {t('सक्रिय', 'ACTIVE')}
+              </span>
+            </div>
+            <div className="flex justify-between items-center pt-1 border-t border-slate-100 dark:border-slate-800">
+              <span className="font-medium">{t('वैधानिक गणपूरक संख्या (दफा ३९):', 'Statutory Quorum (Sec 39):')}</span>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 text-[10px] font-bold">
+                {t('५१% गणपूरक पुगेको', '51% Quorum Achieved')}
               </span>
             </div>
           </div>
@@ -596,6 +618,15 @@ export function AnnouncementsGovernancePage() {
       <SmsBroadcastModal
         isOpen={showSmsModal}
         onClose={() => setShowSmsModal(false)}
+      />
+
+      {/* AGM Attendance & Proxy Roster Modal */}
+      <AgmAttendanceRosterModal
+        isOpen={showRosterModal}
+        onClose={() => setShowRosterModal(false)}
+        agmDetails={agmDetails}
+        members={members}
+        coopSettings={coopSettings}
       />
     </div>
   );
