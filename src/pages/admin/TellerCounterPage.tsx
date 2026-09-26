@@ -17,12 +17,15 @@ import {
   Printer,
   RotateCcw,
   Sparkles,
+  Building2,
 } from 'lucide-react';
 import { printElement } from '../../utils/printHelper';
+import { MultiBranchVaultMonitor } from './components/vault/MultiBranchVaultMonitor';
 
 export const TellerCounterPage: React.FC = () => {
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
 
+  const [activeView, setActiveView] = useState<'DRAWER' | 'VAULT_MONITOR'>('DRAWER');
   const [session, setSession] = useState(MOCK_TELLER_SESSION);
   const [denoms, setDenoms] = useState<DenominationBreakdown>(MOCK_TELLER_SESSION.denominations);
   const [openingFloat, setOpeningFloat] = useState(MOCK_TELLER_SESSION.openingFloat);
@@ -138,8 +141,40 @@ export const TellerCounterPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Grid: Denominations on Left, Reconciliation Balance on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Navigation Tabs */}
+      <div className="flex items-center gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveView('DRAWER')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+            activeView === 'DRAWER'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
+          }`}
+        >
+          <Banknote className="size-4" />
+          <span>{t('काउन्टर नगद मिलान (Counter Drawer)', 'Counter Drawer Balancing')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveView('VAULT_MONITOR')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition ${
+            activeView === 'VAULT_MONITOR'
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900'
+          }`}
+        >
+          <Building2 className="size-4" />
+          <span>{t('शाखा तथा केन्द्रीय तिजोरी मौज्दात (Multi-Branch Vault & CIT)', 'Multi-Branch Vault & CIT')}</span>
+        </button>
+      </div>
+
+      {activeView === 'VAULT_MONITOR' ? (
+        <MultiBranchVaultMonitor />
+      ) : (
+        /* Main Grid: Denominations on Left, Reconciliation Balance on Right */
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Denomination Calculator (8 cols) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
@@ -362,6 +397,7 @@ export const TellerCounterPage: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Print Slip Modal */}
       {showPrintModal && (
