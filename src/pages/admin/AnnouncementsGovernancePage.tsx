@@ -21,12 +21,14 @@ import {
   Scale,
   GitMerge,
   Vote,
+  BookOpen,
 } from 'lucide-react';
 import { SmsBroadcastModal } from '../../components/admin/SmsBroadcastModal';
 import { AgmAttendanceRosterModal } from '../../components/admin/AgmAttendanceRosterModal';
 import { SupervisoryAuditModal } from '../../components/admin/SupervisoryAuditModal';
 import { CoopMergerConsolidationModal } from '../../components/admin/CoopMergerConsolidationModal';
 import { AgmElectionPortalModal } from '../../components/admin/AgmElectionPortalModal';
+import { BoardMinuteLedgerModal } from '../../components/admin/BoardMinuteLedgerModal';
 
 export function AnnouncementsGovernancePage() {
   const { t } = useLanguageStore();
@@ -51,6 +53,7 @@ export function AnnouncementsGovernancePage() {
   const [showSupervisoryModal, setShowSupervisoryModal] = useState(false);
   const [showMergerModal, setShowMergerModal] = useState(false);
   const [showElectionModal, setShowElectionModal] = useState(false);
+  const [showMinuteModal, setShowMinuteModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // New Notice state
@@ -145,6 +148,18 @@ export function AnnouncementsGovernancePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowMinuteModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+            type="button"
+            title={t(
+              'सहकारी ऐन २०७४ दफा ४१, ४२, ४३ बमोजिम सञ्चालक समिति निर्णय पुस्तिका तथा बैठक भत्ता लेजर',
+              'Board of Directors Minute Book, Quorum & Meeting Allowance Ledger'
+            )}
+          >
+            <BookOpen className="size-4" />
+            <span>{t('सञ्चालक बैठक (Minute Book)', 'Board Minute Book')}</span>
+          </button>
           <button
             onClick={() => setShowElectionModal(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-sm cursor-pointer"
@@ -678,6 +693,12 @@ export function AnnouncementsGovernancePage() {
       <AgmElectionPortalModal
         isOpen={showElectionModal}
         onClose={() => setShowElectionModal(false)}
+      />
+
+      {/* Board of Directors & Supervisory Committee Minute Book & Allowance Modal */}
+      <BoardMinuteLedgerModal
+        isOpen={showMinuteModal}
+        onClose={() => setShowMinuteModal(false)}
       />
     </div>
   );
