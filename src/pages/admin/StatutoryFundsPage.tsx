@@ -8,6 +8,7 @@ import {
   calculateSavingsInterestWithTds,
 } from '../../utils/yearEndClosing';
 import { printElement } from '../../utils/printHelper';
+import { MemberWelfareReliefModal } from '../../components/admin/MemberWelfareReliefModal';
 import {
   Landmark,
   ShieldCheck,
@@ -37,6 +38,7 @@ export const StatutoryFundsPage: React.FC = () => {
   const [adjustNote, setAdjustNote] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showAppropriationModal, setShowAppropriationModal] = useState(false);
+  const [showWelfareModal, setShowWelfareModal] = useState(false);
   const [surplusNetProfit, setSurplusNetProfit] = useState<number>(1200000);
   const [surplusFiscalYear, setSurplusFiscalYear] = useState<string>('2081/82');
   const [toast, setToast] = useState<string | null>(null);
@@ -133,6 +135,15 @@ export const StatutoryFundsPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setShowWelfareModal(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition shadow-sm shadow-rose-500/20 cursor-pointer"
+            >
+              <HeartHandshake className="size-4 text-rose-200" />
+              <span>{t('+ सदस्य राहत तथा कल्याणकारी कोष', '+ Member Welfare & Demise Relief')}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowAppropriationModal(true)}
@@ -241,17 +252,30 @@ export const StatutoryFundsPage: React.FC = () => {
               <p className="text-[11px] text-slate-500 line-clamp-2">{fund.descriptionNepali}</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedFund(fund);
-                setShowModal(true);
-              }}
-              className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
-            >
-              <PlusCircle className="size-3.5" />
-              <span>{t('कोष प्रविष्टि / खर्च समायोजन', 'Record Transfer / Expense')}</span>
-            </button>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedFund(fund);
+                  setShowModal(true);
+                }}
+                className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+              >
+                <PlusCircle className="size-3.5" />
+                <span>{t('कोष प्रविष्टि / खर्च समायोजन', 'Record Transfer / Expense')}</span>
+              </button>
+
+              {fund.fundType === 'COMMUNITY_DEVELOPMENT' && (
+                <button
+                  type="button"
+                  onClick={() => setShowWelfareModal(true)}
+                  className="w-full py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-bold transition flex items-center justify-center gap-1.5 border border-rose-200 dark:border-rose-800"
+                >
+                  <HeartHandshake className="size-3.5" />
+                  <span>{t('मृत्यु राहत तथा कल्याण दाबी कन्सोल', 'Death Relief & Claims Console')}</span>
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -632,6 +656,12 @@ export const StatutoryFundsPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Member Demise Relief & Family Welfare Discretionary Fund Modal */}
+      <MemberWelfareReliefModal
+        isOpen={showWelfareModal}
+        onClose={() => setShowWelfareModal(false)}
+      />
     </div>
   );
 };
