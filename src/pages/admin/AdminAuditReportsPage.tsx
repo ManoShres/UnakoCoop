@@ -6,6 +6,7 @@ import { validateCopomisData } from '../../utils/copomisValidator';
 import { generateReportsForPeriod, summariseReport, generateReportCsv } from '../../services/reportService';
 import { AmlComplianceCard } from '../../components/admin/AmlComplianceCard';
 import { IrdETdsManagerModal } from '../../components/admin/IrdETdsManagerModal';
+import { StatutoryAuditorComplianceModal } from '../../components/admin/StatutoryAuditorComplianceModal';
 import {
   ShieldCheck,
   FileText,
@@ -72,6 +73,7 @@ export const AdminAuditReportsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const [isEtdsModalOpen, setIsEtdsModalOpen] = useState(false);
+  const [isAuditorModalOpen, setIsAuditorModalOpen] = useState(false);
 
   const [showValidationIssues, setShowValidationIssues] = useState(false);
 
@@ -306,6 +308,15 @@ export const AdminAuditReportsPage: React.FC = () => {
           >
             <Download className="size-4" />
             <span>{t('CSV निर्यात', 'Export CSV')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsAuditorModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition cursor-pointer"
+          >
+            <ShieldCheck className="size-4" />
+            <span>{t('लेखापरीक्षक नियुक्ति तथा दफा ८८ अनुपालन', 'Auditor & Sec 88 Compliance')}</span>
           </button>
 
           <button
@@ -860,6 +871,12 @@ export const AdminAuditReportsPage: React.FC = () => {
       <IrdETdsManagerModal
         isOpen={isEtdsModalOpen}
         onClose={() => setIsEtdsModalOpen(false)}
+      />
+
+      {/* Statutory Auditor Appointment & Section 87/88 Audit Compliance Modal */}
+      <StatutoryAuditorComplianceModal
+        isOpen={isAuditorModalOpen}
+        onClose={() => setIsAuditorModalOpen(false)}
       />
     </div>
   );
