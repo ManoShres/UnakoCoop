@@ -19,12 +19,14 @@ import {
   TrendingUp,
   TrendingDown,
   Sparkles,
+  QrCode,
 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { Transaction } from '../../types';
 import { printElement } from '../../utils/printHelper';
+import { PassbookDeskModal } from '../../components/admin/PassbookDeskModal';
 
 export function PassbookPage() {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
@@ -35,6 +37,7 @@ export function PassbookPage() {
   const [filter, setFilter] = useState<'all' | 'credits' | 'debits' | 'loan_emi'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [isPassbookDeskOpen, setIsPassbookDeskOpen] = useState(false);
 
   const activeMember = currentMember || members[0];
 
@@ -164,6 +167,16 @@ export function PassbookPage() {
             <FileText className="size-4 text-emerald-600" />
             <span>{t('वार्षिक कर विवरण', 'Annual Statement')}</span>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setIsPassbookDeskOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-600 dark:border-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-xs font-bold shadow-2xs transition cursor-pointer"
+            title={t('भौतिक पासबुक कभर, बारकोड तथा लाइन-प्रिन्टर मुद्रण', 'Physical Passbook Cover, Barcode & Print Desk')}
+          >
+            <QrCode className="size-4" />
+            <span>{t('भौतिक पासबुक तथा QR', 'Passbook QR & Book')}</span>
+          </button>
 
           <button
             type="button"
@@ -506,6 +519,14 @@ export function PassbookPage() {
           </div>
         </div>
       )}
+
+      {/* Physical Passbook, Barcode Verification & Print Desk Modal */}
+      <PassbookDeskModal
+        isOpen={isPassbookDeskOpen}
+        onClose={() => setIsPassbookDeskOpen(false)}
+        initialAccountNo={accounts[activeAccountIdx]?.no}
+        initialMemberId={activeMember.id}
+      />
     </div>
   );
 }

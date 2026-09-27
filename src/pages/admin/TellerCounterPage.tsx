@@ -23,11 +23,13 @@ import {
   FileSpreadsheet,
   ArrowRightLeft,
   CreditCard,
+  BookOpen,
 } from 'lucide-react';
 import { printElement } from '../../utils/printHelper';
 import { MultiBranchVaultMonitor } from './components/vault/MultiBranchVaultMonitor';
 import { SewaKendraClearingModal } from '../../components/admin/SewaKendraClearingModal';
 import { ChequeClearingDeskModal } from '../../components/admin/ChequeClearingDeskModal';
+import { PassbookDeskModal } from '../../components/admin/PassbookDeskModal';
 
 export const TellerCounterPage: React.FC = () => {
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
@@ -44,6 +46,7 @@ export const TellerCounterPage: React.FC = () => {
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showSewaKendraModal, setShowSewaKendraModal] = useState(false);
   const [showChequeClearingModal, setShowChequeClearingModal] = useState(false);
+  const [showPassbookDeskModal, setShowPassbookDeskModal] = useState(false);
 
   // Recalculate drawer reconciliation dynamically
   const reconciliation = useMemo(() => {
@@ -182,6 +185,16 @@ export const TellerCounterPage: React.FC = () => {
             >
               <CreditCard className="size-3.5" />
               <span>{t('चेक क्लियरिङ तथा रोक्का', 'Cheque Clearing Desk')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowPassbookDeskModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title={t('पासबुक प्रमाणीकरण, बारकोड/QR तथा लाइन-प्रिन्टर मुद्रण डेस्क', 'Passbook Verification, Barcode & Print Desk')}
+            >
+              <BookOpen className="size-3.5" />
+              <span>{t('पासबुक डेस्क', 'Passbook Desk')}</span>
             </button>
 
             <button
@@ -553,6 +566,12 @@ export const TellerCounterPage: React.FC = () => {
       <ChequeClearingDeskModal
         isOpen={showChequeClearingModal}
         onClose={() => setShowChequeClearingModal(false)}
+      />
+
+      {/* Passbook Verification, Barcode Scanner & Line-Printer Desk Modal */}
+      <PassbookDeskModal
+        isOpen={showPassbookDeskModal}
+        onClose={() => setShowPassbookDeskModal(false)}
       />
     </div>
   );
