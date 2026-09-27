@@ -21,9 +21,11 @@ import {
   Sparkles,
   Building2,
   FileSpreadsheet,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { printElement } from '../../utils/printHelper';
 import { MultiBranchVaultMonitor } from './components/vault/MultiBranchVaultMonitor';
+import { SewaKendraClearingModal } from '../../components/admin/SewaKendraClearingModal';
 
 export const TellerCounterPage: React.FC = () => {
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
@@ -38,6 +40,7 @@ export const TellerCounterPage: React.FC = () => {
   const [witnessName, setWitnessName] = useState(MOCK_TELLER_SESSION.vaultHandoverWitness ?? '');
   const [isClosed, setIsClosed] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showSewaKendraModal, setShowSewaKendraModal] = useState(false);
 
   // Recalculate drawer reconciliation dynamically
   const reconciliation = useMemo(() => {
@@ -156,6 +159,16 @@ export const TellerCounterPage: React.FC = () => {
             >
               <FileSpreadsheet className="size-3.5" />
               <span>{t('CSV / Excel डाउनलोड', 'Export CSV')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowSewaKendraModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title={t('सहकारी सेवा केन्द्र तथा अन्तर-शाखा दैनिक हिसाब मिलान', 'Sewa Kendra & Inter-Branch Daily Reconciliation')}
+            >
+              <ArrowRightLeft className="size-3.5" />
+              <span>{t('सेवा केन्द्र क्लियरिङ', 'Sewa Kendra Clearing')}</span>
             </button>
 
             <button
@@ -516,6 +529,12 @@ export const TellerCounterPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Sewa Kendra & Inter-Branch Daily Cash Reconciliation & Clearing Modal */}
+      <SewaKendraClearingModal
+        isOpen={showSewaKendraModal}
+        onClose={() => setShowSewaKendraModal(false)}
+      />
     </div>
   );
 };
