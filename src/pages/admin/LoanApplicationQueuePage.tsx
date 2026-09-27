@@ -22,7 +22,9 @@ import {
   Scale,
   AlertTriangle,
   ShieldAlert,
+  Award,
 } from 'lucide-react';
+import { CreditRiskRatingModal } from '../../components/admin/CreditRiskRatingModal';
 import { evaluateLoanSafetyGate } from '../../utils/loanLtvCalculator';
 
 export const LoanApplicationQueuePage: React.FC = () => {
@@ -32,6 +34,7 @@ export const LoanApplicationQueuePage: React.FC = () => {
   const [decisionNotes, setDecisionNotes] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
   const [showOriginateModal, setShowOriginateModal] = useState(false);
+  const [showCreditScoringModal, setShowCreditScoringModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -102,14 +105,24 @@ export const LoanApplicationQueuePage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowOriginateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md transition shrink-0"
-        >
-          <PlusCircle className="size-4" />
-          <span>{t('+ नयाँ कर्जा आवेदन', '+ Originate Loan')}</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowCreditScoringModal(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-black shadow-md transition"
+          >
+            <Award className="size-4" />
+            <span>{t('क्रेडिट स्कोरिङ (5 Cs)', '5 Cs Credit Scoring')}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowOriginateModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md transition"
+          >
+            <PlusCircle className="size-4" />
+            <span>{t('+ नयाँ कर्जा आवेदन', '+ Originate Loan')}</span>
+          </button>
+        </div>
       </div>
 
       <div className="glass-panel rounded-2xl overflow-hidden shadow-xs">
@@ -480,6 +493,14 @@ export const LoanApplicationQueuePage: React.FC = () => {
                 </button>
                 <button
                   type="button"
+                  onClick={() => setShowCreditScoringModal(true)}
+                  className="px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-300 dark:border-purple-800 text-xs font-bold transition flex items-center gap-1.5"
+                >
+                  <Award className="size-4" />
+                  <span>{t('५ Cs स्कोरिङ', '5 Cs Scoring')}</span>
+                </button>
+                <button
+                  type="button"
                   onClick={() => handleDecision('REJECTED')}
                   className="px-3.5 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 hover:bg-rose-100 dark:hover:bg-rose-900/50 border border-rose-300 dark:border-rose-800 text-xs font-bold transition"
                 >
@@ -566,6 +587,12 @@ export const LoanApplicationQueuePage: React.FC = () => {
           );
           setTimeout(() => setToast(null), 3500);
         }}
+      />
+
+      {/* Credit Risk Rating & Basel/PEARLS Scoring Modal */}
+      <CreditRiskRatingModal
+        isOpen={showCreditScoringModal}
+        onClose={() => setShowCreditScoringModal(false)}
       />
     </div>
   );
