@@ -19,10 +19,12 @@ import {
   Smartphone,
   Users,
   Scale,
+  GitMerge,
 } from 'lucide-react';
 import { SmsBroadcastModal } from '../../components/admin/SmsBroadcastModal';
 import { AgmAttendanceRosterModal } from '../../components/admin/AgmAttendanceRosterModal';
 import { SupervisoryAuditModal } from '../../components/admin/SupervisoryAuditModal';
+import { CoopMergerConsolidationModal } from '../../components/admin/CoopMergerConsolidationModal';
 
 export function AnnouncementsGovernancePage() {
   const { t } = useLanguageStore();
@@ -45,6 +47,7 @@ export function AnnouncementsGovernancePage() {
   const [showAgmModal, setShowAgmModal] = useState(false);
   const [showRosterModal, setShowRosterModal] = useState(false);
   const [showSupervisoryModal, setShowSupervisoryModal] = useState(false);
+  const [showMergerModal, setShowMergerModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // New Notice state
@@ -139,6 +142,14 @@ export function AnnouncementsGovernancePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowMergerModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-700 hover:bg-violet-800 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+            type="button"
+          >
+            <GitMerge className="size-4" />
+            <span>{t('सहकारी एकीकरण (Merger)', 'Coop Merger')}</span>
+          </button>
           <button
             onClick={() => setShowSupervisoryModal(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold transition shadow-sm cursor-pointer"
@@ -644,6 +655,12 @@ export function AnnouncementsGovernancePage() {
       <SupervisoryAuditModal
         isOpen={showSupervisoryModal}
         onClose={() => setShowSupervisoryModal(false)}
+      />
+
+      {/* Cooperative Merger, Amalgamation & Balance Sheet Consolidation Modal */}
+      <CoopMergerConsolidationModal
+        isOpen={showMergerModal}
+        onClose={() => setShowMergerModal(false)}
       />
     </div>
   );
