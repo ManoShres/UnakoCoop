@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { useCoopStore } from '../../store/useCoopStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { Badge } from '../../components/ui/Badge';
-import { MessageSquareQuote, Send } from 'lucide-react';
+import { MessageSquareQuote, Send, Scale } from 'lucide-react';
+import { GrievanceRedressalModal } from '../../components/admin/GrievanceRedressalModal';
 
 export const InquiryManagementPage: React.FC = () => {
   const { inquiries, replyToInquiry } = useCoopStore();
   const { t } = useLanguageStore();
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [isGrievanceModalOpen, setIsGrievanceModalOpen] = useState(false);
 
   const selectedInq = inquiries.find((i) => i.id === selectedInquiryId);
 
@@ -23,16 +25,26 @@ export const InquiryManagementPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-200 dark:border-slate-800 pb-4">
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-          {t('सदस्य सोधपुछ तथा सहायता डेस्क', 'Member Inquiries & Support Desk')}
-        </h1>
-        <p className="text-xs text-slate-500">
-          {t(
-            'सार्वजनिक सम्पर्क सोधपुछ, कर्जा दर परामर्श र सदस्य गुनासो व्यवस्थापन।',
-            'Manage public contact inquiries, loan rate requests, and member support tickets.'
-          )}
-        </p>
+      <div className="border-b border-slate-200 dark:border-slate-800 pb-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
+            {t('सदस्य सोधपुछ तथा सहायता डेस्क', 'Member Inquiries & Support Desk')}
+          </h1>
+          <p className="text-xs text-slate-500">
+            {t(
+              'सार्वजनिक सम्पर्क सोधपुछ, कर्जा दर परामर्श र सदस्य गुनासो व्यवस्थापन।',
+              'Manage public contact inquiries, loan rate requests, and member support tickets.'
+            )}
+          </p>
+        </div>
+
+        <button
+          onClick={() => setIsGrievanceModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white text-xs font-bold rounded-xl shadow-md shadow-rose-600/20 transition-all cursor-pointer"
+        >
+          <Scale className="size-4" />
+          <span>{t('संस्थागत गुनासो तथा लोकपाल दर्ता', 'Institutional Grievance & Ombudsman')}</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -124,6 +136,11 @@ export const InquiryManagementPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      <GrievanceRedressalModal
+        isOpen={isGrievanceModalOpen}
+        onClose={() => setIsGrievanceModalOpen(false)}
+      />
     </div>
   );
 };
