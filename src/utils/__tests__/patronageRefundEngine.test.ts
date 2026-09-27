@@ -4,8 +4,8 @@ import {
   generateWarrantNumber,
   generatePatronageVoucherPayload,
   exportPatronageAuditCsv,
-  MemberPatronageMetric,
-  PatronageWeightConfig,
+  type MemberPatronageMetric,
+  type PatronageWeightConfig,
 } from '../patronageRefundEngine';
 
 describe('patronageRefundEngine - Section 41 Nepal Cooperative Act 2074', () => {
