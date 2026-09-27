@@ -9,6 +9,7 @@ import { SavingsStatsMosaic } from './components/savings/SavingsStatsMosaic';
 import { SavingsAccountsTable } from './components/savings/SavingsAccountsTable';
 import { SavingsAdjustModal } from './components/savings/SavingsAdjustModal';
 import { SavingsRatesModal } from './components/savings/SavingsRatesModal';
+import { DepositCeilingModal } from '../../components/admin/DepositCeilingModal';
 
 export function SavingsManagementPage() {
   const { savings, adjustSavingsBalance, updateSavingsRate, members } = useCoopStore();
@@ -16,6 +17,7 @@ export function SavingsManagementPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedAcct, setSelectedAcct] = useState<SavingsAccount | null>(null);
   const [showRatesModal, setShowRatesModal] = useState(false);
+  const [showCeilingModal, setShowCeilingModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   const [rateSchemes, setRateSchemes] = useState<RateSchemeConfig[]>([
@@ -129,7 +131,10 @@ export function SavingsManagementPage() {
       )}
 
       {/* Header Banner */}
-      <SavingsHeaderBanner onOpenRatesModal={() => setShowRatesModal(true)} />
+      <SavingsHeaderBanner
+        onOpenRatesModal={() => setShowRatesModal(true)}
+        onOpenDepositCeilingModal={() => setShowCeilingModal(true)}
+      />
 
       {/* Stats Mosaic */}
       <SavingsStatsMosaic totalDeposits={totalDeposits} activeAccountsCount={savings.length} />
@@ -162,6 +167,14 @@ export function SavingsManagementPage() {
           onAddCustomScheme={handleAddCustomScheme}
         />
       )}
+
+      {/* Section 49 Deposit Ceiling (15x Core Capital) & Concentration Risk Modal */}
+      <DepositCeilingModal
+        isOpen={showCeilingModal}
+        onClose={() => setShowCeilingModal(false)}
+        savings={savings}
+        members={members}
+      />
     </div>
   );
 }
