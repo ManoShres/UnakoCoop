@@ -13,6 +13,7 @@ import {
   Gauge,
 } from 'lucide-react';
 import { AlmMaturityGapModal } from '../../components/admin/AlmMaturityGapModal';
+import { LiquidityStressTestingModal } from '../../components/admin/LiquidityStressTestingModal';
 
 const PERIOD_PRESETS = [
   { id: 'CURRENT', ne: 'हालको अवस्था', en: 'Current Position' },
@@ -33,6 +34,7 @@ export const PearlsAnalysisPage: React.FC = () => {
   } = useCoopStore();
   const [preset, setPreset] = useState<PeriodPreset>('CURRENT');
   const [showAlmModal, setShowAlmModal] = useState(false);
+  const [showStressModal, setShowStressModal] = useState(false);
 
   // Date window applied to the trend series only (balances stay point-in-time).
   const trendMonths = preset === '12M' ? 12 : 6;
@@ -82,6 +84,15 @@ export const PearlsAnalysisPage: React.FC = () => {
           >
             <Layers className="size-3.5" />
             <span>{t('ALM परिपक्वता अन्तर (ALCO)', 'ALM Maturity Gap')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setShowStressModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white text-xs font-bold transition shadow-sm cursor-pointer shrink-0"
+          >
+            <Activity className="size-3.5" />
+            <span>{t('तरलता तनाव परीक्षण (CFP)', 'Liquidity Stress Test (CFP)')}</span>
           </button>
 
           <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
@@ -282,6 +293,12 @@ export const PearlsAnalysisPage: React.FC = () => {
       <AlmMaturityGapModal
         isOpen={showAlmModal}
         onClose={() => setShowAlmModal(false)}
+      />
+
+      {/* Liquidity Stress Testing & Contingency Funding Plan Modal */}
+      <LiquidityStressTestingModal
+        isOpen={showStressModal}
+        onClose={() => setShowStressModal(false)}
       />
     </div>
   );
