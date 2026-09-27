@@ -22,10 +22,12 @@ import {
   Building2,
   FileSpreadsheet,
   ArrowRightLeft,
+  CreditCard,
 } from 'lucide-react';
 import { printElement } from '../../utils/printHelper';
 import { MultiBranchVaultMonitor } from './components/vault/MultiBranchVaultMonitor';
 import { SewaKendraClearingModal } from '../../components/admin/SewaKendraClearingModal';
+import { ChequeClearingDeskModal } from '../../components/admin/ChequeClearingDeskModal';
 
 export const TellerCounterPage: React.FC = () => {
   const { t, fmtCurrency, fmtCount, fmtDigits } = useLanguageStore();
@@ -41,6 +43,7 @@ export const TellerCounterPage: React.FC = () => {
   const [isClosed, setIsClosed] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showSewaKendraModal, setShowSewaKendraModal] = useState(false);
+  const [showChequeClearingModal, setShowChequeClearingModal] = useState(false);
 
   // Recalculate drawer reconciliation dynamically
   const reconciliation = useMemo(() => {
@@ -169,6 +172,16 @@ export const TellerCounterPage: React.FC = () => {
             >
               <ArrowRightLeft className="size-3.5" />
               <span>{t('सेवा केन्द्र क्लियरिङ', 'Sewa Kendra Clearing')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowChequeClearingModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title={t('सहकारी चेक क्लियरिङ, इनवार्ड/आउटवार्ड तथा रोक्का कन्सोल', 'Cheque Clearing & Stop-Payment Desk')}
+            >
+              <CreditCard className="size-3.5" />
+              <span>{t('चेक क्लियरिङ तथा रोक्का', 'Cheque Clearing Desk')}</span>
             </button>
 
             <button
@@ -534,6 +547,12 @@ export const TellerCounterPage: React.FC = () => {
       <SewaKendraClearingModal
         isOpen={showSewaKendraModal}
         onClose={() => setShowSewaKendraModal(false)}
+      />
+
+      {/* Cooperative Cheque Clearing & Stop-Payment Desk Modal */}
+      <ChequeClearingDeskModal
+        isOpen={showChequeClearingModal}
+        onClose={() => setShowChequeClearingModal(false)}
       />
     </div>
   );
