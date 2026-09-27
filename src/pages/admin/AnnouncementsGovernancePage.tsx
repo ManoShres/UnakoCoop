@@ -18,9 +18,11 @@ import {
   Building,
   Smartphone,
   Users,
+  Scale,
 } from 'lucide-react';
 import { SmsBroadcastModal } from '../../components/admin/SmsBroadcastModal';
 import { AgmAttendanceRosterModal } from '../../components/admin/AgmAttendanceRosterModal';
+import { SupervisoryAuditModal } from '../../components/admin/SupervisoryAuditModal';
 
 export function AnnouncementsGovernancePage() {
   const { t } = useLanguageStore();
@@ -42,6 +44,7 @@ export function AnnouncementsGovernancePage() {
   const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
   const [showAgmModal, setShowAgmModal] = useState(false);
   const [showRosterModal, setShowRosterModal] = useState(false);
+  const [showSupervisoryModal, setShowSupervisoryModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // New Notice state
@@ -135,10 +138,18 @@ export function AnnouncementsGovernancePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowSupervisoryModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-800 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+            type="button"
+          >
+            <Scale className="size-4" />
+            <span>{t('लेखा सुपरीवेक्षण समिति (Audit)', 'Supervisory Audit')}</span>
+          </button>
           <button
             onClick={() => setShowSmsModal(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm cursor-pointer"
             type="button"
           >
             <Smartphone className="size-4" />
@@ -146,7 +157,7 @@ export function AnnouncementsGovernancePage() {
           </button>
           <button
             onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm cursor-pointer"
             type="button"
           >
             <PlusCircle className="size-4" />
@@ -627,6 +638,12 @@ export function AnnouncementsGovernancePage() {
         agmDetails={agmDetails}
         members={members}
         coopSettings={coopSettings}
+      />
+
+      {/* Supervisory Committee Internal Audit Modal */}
+      <SupervisoryAuditModal
+        isOpen={showSupervisoryModal}
+        onClose={() => setShowSupervisoryModal(false)}
       />
     </div>
   );
