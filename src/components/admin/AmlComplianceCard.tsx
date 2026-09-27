@@ -8,10 +8,12 @@ import {
   Filter,
   FileSpreadsheet,
   FileJson,
+  FileCode,
   UserCheck,
   ChevronDown,
   ChevronUp,
 } from 'lucide-react';
+import { GoAmlDispatchModal } from './GoAmlDispatchModal';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import {
   scanTransactionsForAml,
@@ -40,6 +42,7 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
   const [typeFilter, setTypeFilter] = useState<'ALL' | AmlReportType>('ALL');
   const [statusFilter, setStatusFilter] = useState<'ALL' | AmlStatus>('ALL');
   const [showTable, setShowTable] = useState(true);
+  const [selectedAlertForGoAml, setSelectedAlertForGoAml] = useState<AmlAlert | null>(null);
 
   // Transform transactions to AML input format
   const amlTxInputs = useMemo(() => {
@@ -83,6 +86,11 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
       return true;
     });
   }, [liveAlerts, typeFilter, statusFilter]);
+
+  const selectedMember = useMemo(() => {
+    if (!selectedAlertForGoAml) return undefined;
+    return members.find((m) => m.id === selectedAlertForGoAml.memberId);
+  }, [selectedAlertForGoAml, members]);
 
   const handleStatusChange = (alertId: string, newStatus: AmlStatus) => {
     setLiveAlerts((prev) =>
@@ -173,6 +181,18 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
           >
             <FileJson className="size-4" />
             <span>{t('goAML JSON (API)', 'goAML JSON')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              const target = liveAlerts.find((a) => a.status === 'PENDING_REVIEW') || liveAlerts[0] || null;
+              setSelectedAlertForGoAml(target);
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-xs shadow-md transition cursor-pointer"
+          >
+            <FileCode className="size-4" />
+            <span>{t('goAML XML पोर्टल', 'goAML XML Portal')}</span>
           </button>
 
           <button
@@ -278,6 +298,7 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
                     <th className="p-3">{t('ट्रिगर कारण', 'Trigger Rule')}</th>
                     <th className="p-3 text-center">{t('गम्भीरता', 'Severity')}</th>
                     <th className="p-3 text-center">{t('अनुपालन स्थिति', 'Status')}</th>
+                    <th className="p-3 text-center">{t('goAML XML / मिसिल', 'goAML XML')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -334,11 +355,21 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
                           <option value="ESCALATED">{t('थप अनुसन्धान (Escalated)', 'Escalated')}</option>
                         </select>
                       </td>
+                      <td className="p-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedAlertForGoAml(a)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[11px] font-bold transition cursor-pointer"
+                        >
+                          <FileCode className="size-3" />
+                          <span>{t('XML / मिसिल', 'XML / Dossier')}</span>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                   {filteredAlerts.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="p-8 text-center text-slate-400">
+                      <td colSpan={8} className="p-8 text-center text-slate-400">
                         {t('कुनै AML/CFT अलर्ट फेला परेन।', 'No AML/CFT alerts found matching criteria.')}
                       </td>
                     </tr>
@@ -349,6 +380,16 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
           </div>
         </div>
       )}
+
+      {/* goAML XML Dispatch & STR Dossier Modal */}
+      <GoAmlDispatchModal
+        isOpen={Boolean(selectedAlertForGoAml)}
+        onClose={() => setSelectedAlertForGoAml(null)}
+        alert={selectedAlertForGoAml}
+        member={selectedMember}
+        transactions={transactions as Transaction[]}
+        onStatusUpdate={handleStatusChange}
+      />
     </div>
   );
 };
