@@ -20,11 +20,13 @@ import {
   Users,
   Scale,
   GitMerge,
+  Vote,
 } from 'lucide-react';
 import { SmsBroadcastModal } from '../../components/admin/SmsBroadcastModal';
 import { AgmAttendanceRosterModal } from '../../components/admin/AgmAttendanceRosterModal';
 import { SupervisoryAuditModal } from '../../components/admin/SupervisoryAuditModal';
 import { CoopMergerConsolidationModal } from '../../components/admin/CoopMergerConsolidationModal';
+import { AgmElectionPortalModal } from '../../components/admin/AgmElectionPortalModal';
 
 export function AnnouncementsGovernancePage() {
   const { t } = useLanguageStore();
@@ -48,6 +50,7 @@ export function AnnouncementsGovernancePage() {
   const [showRosterModal, setShowRosterModal] = useState(false);
   const [showSupervisoryModal, setShowSupervisoryModal] = useState(false);
   const [showMergerModal, setShowMergerModal] = useState(false);
+  const [showElectionModal, setShowElectionModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   // New Notice state
@@ -142,6 +145,14 @@ export function AnnouncementsGovernancePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowElectionModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+            type="button"
+          >
+            <Vote className="size-4" />
+            <span>{t('निर्वाचन आयोग तथा मतदान', 'Election Commission & Voting')}</span>
+          </button>
           <button
             onClick={() => setShowMergerModal(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-700 hover:bg-violet-800 text-white text-xs font-bold transition shadow-sm cursor-pointer"
@@ -661,6 +672,12 @@ export function AnnouncementsGovernancePage() {
       <CoopMergerConsolidationModal
         isOpen={showMergerModal}
         onClose={() => setShowMergerModal(false)}
+      />
+
+      {/* AGM Digital Voting, Election Commission Portal & Quorum Ledger Modal */}
+      <AgmElectionPortalModal
+        isOpen={showElectionModal}
+        onClose={() => setShowElectionModal(false)}
       />
     </div>
   );
