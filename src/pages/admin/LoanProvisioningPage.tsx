@@ -27,6 +27,7 @@ import { NbaAcquisitionModal } from '../../components/admin/NbaAcquisitionModal'
 import { CibRegulatoryModal } from '../../components/admin/CibRegulatoryModal';
 import { LoanInterestSubsidyModal } from '../../components/admin/LoanInterestSubsidyModal';
 import { InterestRateSpreadModal } from '../../components/admin/InterestRateSpreadModal';
+import { SingleObligorLimitModal } from '../../components/admin/SingleObligorLimitModal';
 
 export const LoanProvisioningPage: React.FC = () => {
   const { loans, members } = useCoopStore();
@@ -44,6 +45,7 @@ export const LoanProvisioningPage: React.FC = () => {
   const [isCibModalOpen, setIsCibModalOpen] = useState(false);
   const [isSubsidyModalOpen, setIsSubsidyModalOpen] = useState(false);
   const [isSpreadModalOpen, setIsSpreadModalOpen] = useState(false);
+  const [isSolModalOpen, setIsSolModalOpen] = useState(false);
 
   // Build classified loans list with member linkages and interactive overdue days
   const classifiedLoans: ClassifiedLoan[] = useMemo(() => {
@@ -153,6 +155,19 @@ export const LoanProvisioningPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsSolModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title={t(
+                'सहकारी ऐन २०७४ दफा ५१ बमोजिम एकल ग्राहक कर्जा सीमा (SOL) तथा एकाघर परिवार जोखिम अनुगमन',
+                'Single Obligor Limit (SOL) & Family Risk Monitor under Section 51'
+              )}
+            >
+              <ShieldAlert className="size-4" />
+              <span>{t('एकल ग्राहक सीमा (SOL)', 'Single Obligor (SOL)')}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setIsSpreadModalOpen(true)}
@@ -589,6 +604,14 @@ export const LoanProvisioningPage: React.FC = () => {
       <InterestRateSpreadModal
         isOpen={isSpreadModalOpen}
         onClose={() => setIsSpreadModalOpen(false)}
+      />
+
+      {/* Section 51 Single Obligor Limit (SOL) & Family Exposure Modal */}
+      <SingleObligorLimitModal
+        isOpen={isSolModalOpen}
+        onClose={() => setIsSolModalOpen(false)}
+        loans={loans}
+        members={members}
       />
     </div>
   );
