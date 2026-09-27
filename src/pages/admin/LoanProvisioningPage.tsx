@@ -23,6 +23,7 @@ import {
 import { BadDebtRecoveryModal } from '../../components/admin/BadDebtRecoveryModal';
 import { LoanReschedulingModal } from '../../components/admin/LoanReschedulingModal';
 import { NbaAcquisitionModal } from '../../components/admin/NbaAcquisitionModal';
+import { CibRegulatoryModal } from '../../components/admin/CibRegulatoryModal';
 
 export const LoanProvisioningPage: React.FC = () => {
   const { loans, members } = useCoopStore();
@@ -37,6 +38,7 @@ export const LoanProvisioningPage: React.FC = () => {
   const [selectedReschedulingLoanId, setSelectedReschedulingLoanId] = useState<string | undefined>(undefined);
   const [isNbaModalOpen, setIsNbaModalOpen] = useState(false);
   const [selectedNbaLoanId, setSelectedNbaLoanId] = useState<string | undefined>(undefined);
+  const [isCibModalOpen, setIsCibModalOpen] = useState(false);
 
   // Build classified loans list with member linkages and interactive overdue days
   const classifiedLoans: ClassifiedLoan[] = useMemo(() => {
@@ -145,7 +147,17 @@ export const LoanProvisioningPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsCibModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title={t('कर्जा सूचना केन्द्र (CIB) कालोसूची तथा सोधपुछ प्रणाली', 'Credit Information Bureau (CIB) Blacklist & Inquiry')}
+            >
+              <ShieldAlert className="size-4" />
+              <span>{t('कर्जा सूचना (CIB)', 'CIB Credit Bureau')}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => {
@@ -532,6 +544,14 @@ export const LoanProvisioningPage: React.FC = () => {
         loans={loans}
         members={members}
         initialLoanId={selectedNbaLoanId}
+      />
+
+      {/* Cooperative Credit Information Bureau (CIB) Blacklist & Inquiry Modal */}
+      <CibRegulatoryModal
+        isOpen={isCibModalOpen}
+        onClose={() => setIsCibModalOpen(false)}
+        members={members}
+        loans={loans}
       />
     </div>
   );
