@@ -19,6 +19,7 @@ import {
   Building,
   Fingerprint,
 } from 'lucide-react';
+import { EkycNationalIdVerificationModal } from '../../components/admin/EkycNationalIdVerificationModal';
 
 export const MemberVerificationQueuePage: React.FC = () => {
   const { members, updateMemberStatus } = useCoopStore();
@@ -27,6 +28,7 @@ export const MemberVerificationQueuePage: React.FC = () => {
   const [filter, setFilter] = useState<'ALL' | 'PENDING' | 'VERIFIED' | 'ACTION_REQUIRED'>('ALL');
   const [reviewNotes, setReviewNotes] = useState('');
   const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
+  const [isEkycModalOpen, setIsEkycModalOpen] = useState(false);
 
   React.useEffect(() => {
     if (!selectedMember && !previewDoc) return;
@@ -69,25 +71,36 @@ export const MemberVerificationQueuePage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex gap-2">
-          {([
-            { key: 'ALL', label: t('सबै', 'ALL') },
-            { key: 'PENDING', label: t('प्रतीक्षारत', 'PENDING') },
-            { key: 'ACTION_REQUIRED', label: t('पुनः पेश आवश्यक', 'ACTION REQUIRED') },
-            { key: 'VERIFIED', label: t('प्रमाणित', 'VERIFIED') },
-          ] as const).map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => setFilter(key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                filter === key
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setIsEkycModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-bold transition shadow-sm cursor-pointer"
+          >
+            <Fingerprint className="size-4" />
+            <span>{t('राष्ट्रिय परिचयपत्र e-KYC कन्सोल', 'DoNIDCR e-KYC Console')}</span>
+          </button>
+
+          <div className="flex gap-2">
+            {([
+              { key: 'ALL', label: t('सबै', 'ALL') },
+              { key: 'PENDING', label: t('प्रतीक्षारत', 'PENDING') },
+              { key: 'ACTION_REQUIRED', label: t('पुनः पेश आवश्यक', 'ACTION REQUIRED') },
+              { key: 'VERIFIED', label: t('प्रमाणित', 'VERIFIED') },
+            ] as const).map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setFilter(key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors ${
+                  filter === key
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -468,6 +481,12 @@ export const MemberVerificationQueuePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* DoNIDCR Electronic KYC & Biometric Verification Modal */}
+      <EkycNationalIdVerificationModal
+        isOpen={isEkycModalOpen}
+        onClose={() => setIsEkycModalOpen(false)}
+      />
     </div>
   );
 };
