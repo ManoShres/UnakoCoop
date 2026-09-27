@@ -12,6 +12,7 @@ import {
   Activity,
   Gauge,
 } from 'lucide-react';
+import { AlmMaturityGapModal } from '../../components/admin/AlmMaturityGapModal';
 
 const PERIOD_PRESETS = [
   { id: 'CURRENT', ne: 'हालको अवस्था', en: 'Current Position' },
@@ -31,6 +32,7 @@ export const PearlsAnalysisPage: React.FC = () => {
     motherGroupDeposits,
   } = useCoopStore();
   const [preset, setPreset] = useState<PeriodPreset>('CURRENT');
+  const [showAlmModal, setShowAlmModal] = useState(false);
 
   // Date window applied to the trend series only (balances stay point-in-time).
   const trendMonths = preset === '12M' ? 12 : 6;
@@ -72,21 +74,32 @@ export const PearlsAnalysisPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
-          {PERIOD_PRESETS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              onClick={() => setPreset(option.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
-                preset === option.id
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
-              }`}
-            >
-              {t(option.ne, option.en)}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            type="button"
+            onClick={() => setShowAlmModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm cursor-pointer shrink-0"
+          >
+            <Layers className="size-3.5" />
+            <span>{t('ALM परिपक्वता अन्तर (ALCO)', 'ALM Maturity Gap')}</span>
+          </button>
+
+          <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/60 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            {PERIOD_PRESETS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => setPreset(option.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${
+                  preset === option.id
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-slate-700'
+                }`}
+              >
+                {t(option.ne, option.en)}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -264,6 +277,12 @@ export const PearlsAnalysisPage: React.FC = () => {
           ))}
         </div>
       </div>
+
+      {/* Asset Liability Management & Maturity Gap Modal */}
+      <AlmMaturityGapModal
+        isOpen={showAlmModal}
+        onClose={() => setShowAlmModal(false)}
+      />
     </div>
   );
 };
