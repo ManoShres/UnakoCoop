@@ -32,6 +32,22 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    const isDynamicImportError =
+      error.message?.includes('Failed to fetch dynamically imported module') ||
+      error.message?.includes('Failed to load module') ||
+      error.message?.includes('dynamically imported module') ||
+      error.message?.includes('error loading dynamically imported module');
+
+    if (isDynamicImportError && typeof window !== 'undefined') {
+      const storageKey = 'unako_chunk_reload_lock';
+      const lastReload = window.sessionStorage.getItem(storageKey);
+      const now = Date.now();
+      if (!lastReload || now - parseInt(lastReload, 10) > 10000) {
+        window.sessionStorage.setItem(storageKey, String(now));
+        window.location.reload();
+      }
+    }
+
     return {
       hasError: true,
       // Sanitize: show only the message, never the stack trace.
@@ -86,22 +102,31 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             {this.state.errorMessage}
           </p>
 
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') window.location.reload();
+              }}
+              className="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm"
+            >
+              पृष्ठ ताजा गर्नुहोस् (Reload Page)
+            </button>
             <button
               type="button"
               onClick={this.handleRetry}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+              className="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors shadow-sm"
             >
-              Try Again
+              पुनः प्रयास (Try Again)
             </button>
             <button
               type="button"
               onClick={() => {
                 window.location.href = '/';
               }}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              className="px-4 py-2 text-xs font-bold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-colors"
             >
-              Go Home
+              गृहपृष्ठ (Go Home)
             </button>
           </div>
         </div>
