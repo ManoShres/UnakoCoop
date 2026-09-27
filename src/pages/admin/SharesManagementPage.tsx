@@ -24,6 +24,7 @@ import { BonusShareDistributionModal } from '../../components/admin/BonusShareDi
 import { MemberDividendPayoutModal } from '../../components/admin/MemberDividendPayoutModal';
 import { FixedDepositSettlementModal } from '../../components/admin/FixedDepositSettlementModal';
 import { ShareConcentrationCeilingModal } from '../../components/admin/ShareConcentrationCeilingModal';
+import { PatronageRefundModal } from '../../components/admin/PatronageRefundModal';
 import { Member } from '../../types';
 
 export function SharesManagementPage() {
@@ -39,6 +40,7 @@ export function SharesManagementPage() {
   const [showBulkDividendModal, setShowBulkDividendModal] = useState(false);
   const [showBonusShareModal, setShowBonusShareModal] = useState(false);
   const [showConcentrationModal, setShowConcentrationModal] = useState(false);
+  const [showPatronageModal, setShowPatronageModal] = useState(false);
   const [payoutSelectedMember, setPayoutSelectedMember] = useState<Member | null>(null);
   const [preselectedMemberId, setPreselectedMemberId] = useState<string | undefined>(undefined);
   const [preselectedTenure, setPreselectedTenure] = useState<string | undefined>(undefined);
@@ -199,6 +201,15 @@ export function SharesManagementPage() {
           >
             <Award className="size-4 text-purple-200" />
             <span>{t('+ बोनस सेयर बाँडफाँड', '+ Distribute Bonus Shares')}</span>
+          </button>
+
+          <button
+            onClick={() => setShowPatronageModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition shadow-sm shadow-amber-500/20 cursor-pointer"
+            type="button"
+          >
+            <Coins className="size-4 text-amber-200" />
+            <span>{t('संरक्षकता फिर्ता कोष (दफा ४१)', 'Patronage Refund (Sec 41)')}</span>
           </button>
 
           <button
@@ -666,6 +677,12 @@ export function SharesManagementPage() {
       <ShareConcentrationCeilingModal
         isOpen={showConcentrationModal}
         onClose={() => setShowConcentrationModal(false)}
+      />
+
+      {/* MODAL 8: SECTION 41 PATRONAGE REFUND FUND DESK */}
+      <PatronageRefundModal
+        isOpen={showPatronageModal}
+        onClose={() => setShowPatronageModal(false)}
       />
 
       {/* MODAL 3: UPDATE SHARE PARAMETERS */}
