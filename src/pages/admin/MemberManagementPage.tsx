@@ -16,6 +16,7 @@ import {
   Printer,
   UserMinus,
   HeartHandshake,
+  Receipt,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
@@ -23,6 +24,7 @@ import { MemberOnboardingWizard } from '../../components/admin/MemberOnboardingW
 import { MemberAccountProfilePrintModal } from '../../components/common/MemberAccountProfilePrintModal';
 import { MembershipExitModal } from '../../components/admin/MembershipExitModal';
 import { MemberMicroInsuranceModal } from '../../components/admin/MemberMicroInsuranceModal';
+import { MemberTaxClearanceModal } from '../../components/admin/MemberTaxClearanceModal';
 
 export function MemberManagementPage() {
   const { members, loans, savings, updateMemberDetails } = useCoopStore();
@@ -34,7 +36,9 @@ export function MemberManagementPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [showInsuranceModal, setShowInsuranceModal] = useState(false);
+  const [showTaxClearanceModal, setShowTaxClearanceModal] = useState(false);
   const [exitSelectedMemberId, setExitSelectedMemberId] = useState<string | null>(null);
+  const [taxSelectedMemberId, setTaxSelectedMemberId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   React.useEffect(() => {
@@ -144,6 +148,19 @@ export function MemberManagementPage() {
           >
             <HeartHandshake className="size-4 text-teal-600" />
             <span>{t('राहत तथा लघु-बीमा', 'Mutual Relief & Insurance')}</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setTaxSelectedMemberId(null);
+              setShowTaxClearanceModal(true);
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition border border-indigo-200 dark:border-indigo-900/40 cursor-pointer"
+            type="button"
+            title={t('सदस्य कर चुक्ता तथा टीडीएस प्रमाणपत्र', 'Member Tax Clearance & TDS Certificate')}
+          >
+            <Receipt className="size-4 text-indigo-600" />
+            <span>{t('कर चुक्ता तथा टीडीएस', 'Tax Clearance & TDS')}</span>
           </button>
         </div>
       </div>
@@ -282,6 +299,17 @@ export function MemberManagementPage() {
                       >
                         <Printer className="size-3.5" />
                         <span className="hidden sm:inline">{t('प्रिन्ट', 'Print')}</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setTaxSelectedMemberId(m.id);
+                          setShowTaxClearanceModal(true);
+                        }}
+                        title={t('कर चुक्ता तथा दफा ९० टीडीएस प्रमाणपत्र', 'Tax Clearance & TDS Certificate')}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 font-bold transition text-xs cursor-pointer"
+                      >
+                        <Receipt className="size-3.5" />
+                        <span className="hidden sm:inline">{t('कर चुक्ता', 'Tax')}</span>
                       </button>
                       <button
                         onClick={() => setEditingMember(m)}
@@ -499,6 +527,13 @@ export function MemberManagementPage() {
         onClose={() => setShowInsuranceModal(false)}
         members={members}
         loans={loans}
+      />
+
+      {/* MEMBER TAX CLEARANCE & WITHHOLDING SUITE MODAL */}
+      <MemberTaxClearanceModal
+        isOpen={showTaxClearanceModal}
+        onClose={() => setShowTaxClearanceModal(false)}
+        preselectedMemberId={taxSelectedMemberId || undefined}
       />
     </div>
   );
