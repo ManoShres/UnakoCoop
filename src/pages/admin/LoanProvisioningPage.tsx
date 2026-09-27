@@ -19,11 +19,13 @@ import {
   Gavel,
   Scale,
   Building2,
+  Percent,
 } from 'lucide-react';
 import { BadDebtRecoveryModal } from '../../components/admin/BadDebtRecoveryModal';
 import { LoanReschedulingModal } from '../../components/admin/LoanReschedulingModal';
 import { NbaAcquisitionModal } from '../../components/admin/NbaAcquisitionModal';
 import { CibRegulatoryModal } from '../../components/admin/CibRegulatoryModal';
+import { LoanInterestSubsidyModal } from '../../components/admin/LoanInterestSubsidyModal';
 
 export const LoanProvisioningPage: React.FC = () => {
   const { loans, members } = useCoopStore();
@@ -39,6 +41,7 @@ export const LoanProvisioningPage: React.FC = () => {
   const [isNbaModalOpen, setIsNbaModalOpen] = useState(false);
   const [selectedNbaLoanId, setSelectedNbaLoanId] = useState<string | undefined>(undefined);
   const [isCibModalOpen, setIsCibModalOpen] = useState(false);
+  const [isSubsidyModalOpen, setIsSubsidyModalOpen] = useState(false);
 
   // Build classified loans list with member linkages and interactive overdue days
   const classifiedLoans: ClassifiedLoan[] = useMemo(() => {
@@ -148,6 +151,16 @@ export const LoanProvisioningPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
+            <button
+              type="button"
+              onClick={() => setIsSubsidyModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-sm cursor-pointer"
+              title={t('सहुलियतपूर्ण कर्जा तथा सरकारी ब्याज अनुदान व्यवस्थापन', 'Concessional Loan & Interest Subsidy Gateway')}
+            >
+              <Percent className="size-4" />
+              <span>{t('ब्याज अनुदान (Subsidy)', 'Interest Subsidy')}</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setIsCibModalOpen(true)}
@@ -552,6 +565,12 @@ export const LoanProvisioningPage: React.FC = () => {
         onClose={() => setIsCibModalOpen(false)}
         members={members}
         loans={loans}
+      />
+
+      {/* Concessional Loan & Government Interest Subsidy Modal */}
+      <LoanInterestSubsidyModal
+        isOpen={isSubsidyModalOpen}
+        onClose={() => setIsSubsidyModalOpen(false)}
       />
     </div>
   );
