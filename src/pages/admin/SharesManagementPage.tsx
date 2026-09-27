@@ -15,6 +15,7 @@ import {
   ArrowUpRight,
   TrendingUp,
   Receipt,
+  Scale,
 } from 'lucide-react';
 import { ShareCertificateModal } from '../../components/admin/ShareCertificateModal';
 import { OpenFixedDepositModal } from '../../components/admin/OpenFixedDepositModal';
@@ -22,6 +23,7 @@ import { BulkDividendDistributionModal } from '../../components/admin/BulkDivide
 import { BonusShareDistributionModal } from '../../components/admin/BonusShareDistributionModal';
 import { MemberDividendPayoutModal } from '../../components/admin/MemberDividendPayoutModal';
 import { FixedDepositSettlementModal } from '../../components/admin/FixedDepositSettlementModal';
+import { ShareConcentrationCeilingModal } from '../../components/admin/ShareConcentrationCeilingModal';
 import { Member } from '../../types';
 
 export function SharesManagementPage() {
@@ -36,6 +38,7 @@ export function SharesManagementPage() {
   const [settlementPreselectedAccountNo, setSettlementPreselectedAccountNo] = useState<string | undefined>(undefined);
   const [showBulkDividendModal, setShowBulkDividendModal] = useState(false);
   const [showBonusShareModal, setShowBonusShareModal] = useState(false);
+  const [showConcentrationModal, setShowConcentrationModal] = useState(false);
   const [payoutSelectedMember, setPayoutSelectedMember] = useState<Member | null>(null);
   const [preselectedMemberId, setPreselectedMemberId] = useState<string | undefined>(undefined);
   const [preselectedTenure, setPreselectedTenure] = useState<string | undefined>(undefined);
@@ -171,6 +174,15 @@ export function SharesManagementPage() {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setShowConcentrationModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition shadow-sm shadow-indigo-500/20 cursor-pointer"
+            type="button"
+          >
+            <Scale className="size-4 text-indigo-200" />
+            <span>{t('सेयर सीमा तथा केन्द्रीकरण (दफा ३७)', 'Share Ceiling & Concentration')}</span>
+          </button>
+
           <button
             onClick={() => setShowBulkDividendModal(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-sm shadow-blue-500/20 cursor-pointer"
@@ -648,6 +660,12 @@ export function SharesManagementPage() {
         accounts={savings}
         members={members}
         preselectedAccountNo={settlementPreselectedAccountNo}
+      />
+
+      {/* MODAL 7: SHARE CAPITAL CEILING & REGULATORY DIVESTMENT */}
+      <ShareConcentrationCeilingModal
+        isOpen={showConcentrationModal}
+        onClose={() => setShowConcentrationModal(false)}
       />
 
       {/* MODAL 3: UPDATE SHARE PARAMETERS */}
