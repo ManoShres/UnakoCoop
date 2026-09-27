@@ -9,6 +9,7 @@ import {
 } from '../../utils/yearEndClosing';
 import { printElement } from '../../utils/printHelper';
 import { MemberWelfareReliefModal } from '../../components/admin/MemberWelfareReliefModal';
+import { FixedAssetDepreciationModal } from '../../components/admin/FixedAssetDepreciationModal';
 import {
   Landmark,
   ShieldCheck,
@@ -26,6 +27,7 @@ import {
   Receipt,
   Printer,
   Calendar,
+  Building2,
 } from 'lucide-react';
 
 export const StatutoryFundsPage: React.FC = () => {
@@ -39,6 +41,7 @@ export const StatutoryFundsPage: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [showAppropriationModal, setShowAppropriationModal] = useState(false);
   const [showWelfareModal, setShowWelfareModal] = useState(false);
+  const [showAssetDepreciationModal, setShowAssetDepreciationModal] = useState(false);
   const [surplusNetProfit, setSurplusNetProfit] = useState<number>(1200000);
   const [surplusFiscalYear, setSurplusFiscalYear] = useState<string>('2081/82');
   const [toast, setToast] = useState<string | null>(null);
@@ -151,6 +154,15 @@ export const StatutoryFundsPage: React.FC = () => {
             >
               <Sparkles className="size-4 text-indigo-200" />
               <span>{t('+ नाफा तथा लाभांश विनियोजन', '+ Appropriate Net Surplus')}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowAssetDepreciationModal(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-sm shadow-emerald-500/20 cursor-pointer"
+            >
+              <Building2 className="size-4 text-emerald-200" />
+              <span>{t('+ स्थिर सम्पत्ति तथा ह्रासकट्टी (COPAS)', '+ Fixed Assets & Depreciation')}</span>
             </button>
 
             <Link
@@ -661,6 +673,12 @@ export const StatutoryFundsPage: React.FC = () => {
       <MemberWelfareReliefModal
         isOpen={showWelfareModal}
         onClose={() => setShowWelfareModal(false)}
+      />
+
+      {/* Fixed Asset Management & Depreciation Schedule Modal */}
+      <FixedAssetDepreciationModal
+        isOpen={showAssetDepreciationModal}
+        onClose={() => setShowAssetDepreciationModal(false)}
       />
     </div>
   );
