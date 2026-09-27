@@ -15,12 +15,14 @@ import {
   X,
   Printer,
   UserMinus,
+  HeartHandshake,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { MemberOnboardingWizard } from '../../components/admin/MemberOnboardingWizard';
 import { MemberAccountProfilePrintModal } from '../../components/common/MemberAccountProfilePrintModal';
 import { MembershipExitModal } from '../../components/admin/MembershipExitModal';
+import { MemberMicroInsuranceModal } from '../../components/admin/MemberMicroInsuranceModal';
 
 export function MemberManagementPage() {
   const { members, loans, savings, updateMemberDetails } = useCoopStore();
@@ -31,6 +33,7 @@ export function MemberManagementPage() {
   const [printMember, setPrintMember] = useState<Member | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showInsuranceModal, setShowInsuranceModal] = useState(false);
   const [exitSelectedMemberId, setExitSelectedMemberId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -131,6 +134,16 @@ export function MemberManagementPage() {
           >
             <UserMinus className="size-4 text-rose-500" />
             <span>{t('सदस्यता त्याग तथा फरफारक', 'Exit & Clearance')}</span>
+          </button>
+
+          <button
+            onClick={() => setShowInsuranceModal(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-xs font-bold transition border border-teal-200 dark:border-teal-900/40 cursor-pointer"
+            type="button"
+            title={t('सदस्य राहत तथा लघु-बीमा कोष व्यवस्थापन', 'Member Mutual Relief & Micro-Insurance Gateway')}
+          >
+            <HeartHandshake className="size-4 text-teal-600" />
+            <span>{t('राहत तथा लघु-बीमा', 'Mutual Relief & Insurance')}</span>
           </button>
         </div>
       </div>
@@ -478,6 +491,14 @@ export function MemberManagementPage() {
             notes: `सदस्यता त्याग तथा फरफारक सम्पन्न (कुल भुक्तानी: रु. ${netPaid.toLocaleString()})`,
           });
         }}
+      />
+
+      {/* MEMBER MICRO-INSURANCE & MUTUAL RELIEF MODAL */}
+      <MemberMicroInsuranceModal
+        isOpen={showInsuranceModal}
+        onClose={() => setShowInsuranceModal(false)}
+        members={members}
+        loans={loans}
       />
     </div>
   );
