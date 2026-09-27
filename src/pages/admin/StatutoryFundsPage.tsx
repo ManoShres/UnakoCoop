@@ -10,6 +10,7 @@ import {
 import { printElement } from '../../utils/printHelper';
 import { MemberWelfareReliefModal } from '../../components/admin/MemberWelfareReliefModal';
 import { FixedAssetDepreciationModal } from '../../components/admin/FixedAssetDepreciationModal';
+import { CoopEducationTrainingModal } from '../../components/admin/CoopEducationTrainingModal';
 import {
   Landmark,
   ShieldCheck,
@@ -28,6 +29,7 @@ import {
   Printer,
   Calendar,
   Building2,
+  GraduationCap,
 } from 'lucide-react';
 
 export const StatutoryFundsPage: React.FC = () => {
@@ -42,6 +44,7 @@ export const StatutoryFundsPage: React.FC = () => {
   const [showAppropriationModal, setShowAppropriationModal] = useState(false);
   const [showWelfareModal, setShowWelfareModal] = useState(false);
   const [showAssetDepreciationModal, setShowAssetDepreciationModal] = useState(false);
+  const [showEducationModal, setShowEducationModal] = useState(false);
   const [surplusNetProfit, setSurplusNetProfit] = useState<number>(1200000);
   const [surplusFiscalYear, setSurplusFiscalYear] = useState<string>('2081/82');
   const [toast, setToast] = useState<string | null>(null);
@@ -165,6 +168,15 @@ export const StatutoryFundsPage: React.FC = () => {
               <span>{t('+ स्थिर सम्पत्ति तथा ह्रासकट्टी (COPAS)', '+ Fixed Assets & Depreciation')}</span>
             </button>
 
+            <button
+              type="button"
+              onClick={() => setShowEducationModal(true)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition shadow-sm shadow-teal-500/20 cursor-pointer"
+            >
+              <GraduationCap className="size-4 text-teal-200" />
+              <span>{t('+ सहकारी शिक्षा तथा तालिम कोष', '+ Coop Education & Training')}</span>
+            </button>
+
             <Link
               to="/admin/shares"
               className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition"
@@ -285,6 +297,17 @@ export const StatutoryFundsPage: React.FC = () => {
                 >
                   <HeartHandshake className="size-3.5" />
                   <span>{t('मृत्यु राहत तथा कल्याण दाबी कन्सोल', 'Death Relief & Claims Console')}</span>
+                </button>
+              )}
+
+              {fund.fundType === 'COOP_EDUCATION' && (
+                <button
+                  type="button"
+                  onClick={() => setShowEducationModal(true)}
+                  className="w-full py-2 rounded-xl bg-teal-50 hover:bg-teal-100 dark:bg-teal-950/40 dark:hover:bg-teal-900/50 text-teal-700 dark:text-teal-300 text-xs font-bold transition flex items-center justify-center gap-1.5 border border-teal-200 dark:border-teal-800 cursor-pointer"
+                >
+                  <GraduationCap className="size-3.5" />
+                  <span>{t('सहकारी शिक्षा तथा तालिम खर्च लेजर (दफा ६८)', 'Education & Training Ledger (Sec 68)')}</span>
                 </button>
               )}
             </div>
@@ -679,6 +702,13 @@ export const StatutoryFundsPage: React.FC = () => {
       <FixedAssetDepreciationModal
         isOpen={showAssetDepreciationModal}
         onClose={() => setShowAssetDepreciationModal(false)}
+      />
+
+      {/* Cooperative Education, Training & Capacity Building Fund Ledger Modal */}
+      <CoopEducationTrainingModal
+        isOpen={showEducationModal}
+        onClose={() => setShowEducationModal(false)}
+        initialFundBalance={funds.find((f) => f.fundType === 'COOP_EDUCATION')?.currentBalance || 640000}
       />
     </div>
   );
