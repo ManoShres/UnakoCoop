@@ -29,7 +29,9 @@ import {
   Banknote,
   Keyboard,
   Terminal,
+  Smartphone,
 } from 'lucide-react';
+
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { signOutOfSupabase } from '../../services/employeeService';
@@ -121,7 +123,9 @@ export const AdminLayout: React.FC = () => {
       badge: pendingDeposits > 0 ? pendingDeposits : undefined,
     },
     { to: '/admin/collection-entry', label: t('कलेक्सन प्रवेश', 'Collection Entry'), icon: TrendingUp, badge: pendingDeposits > 0 ? pendingDeposits : undefined },
+    { to: '/admin/field-collector', label: t('फिल्ड संकलक मोड (Mobile)', 'Field Collector Mode'), icon: Smartphone },
     { to: '/admin/trading-pl', label: t('ट्रेडिङ नाफा नोक्सान', 'Trading Profit & Loss'), icon: TrendingUp },
+
     { to: '/admin/pearls-analysis', label: t('पर्ल्स विश्लेषण', 'PEARLS Analysis'), icon: Landmark },
     { to: '/admin/statutory-funds', label: t('वैधानिक जगेडा कोषहरू', 'Statutory Reserve Funds'), icon: Landmark },
     {

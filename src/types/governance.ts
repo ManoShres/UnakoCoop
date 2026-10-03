@@ -68,6 +68,7 @@ export interface CoopSettings {
   openingHoursNepali?: string;
   openingHoursEnglish?: string;
   operatingStatus: 'NORMAL' | 'MAINTENANCE';
+  logoUrl?: string;
 }
 
 export interface ThemeColors {

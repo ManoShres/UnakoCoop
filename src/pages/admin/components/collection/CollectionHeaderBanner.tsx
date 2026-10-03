@@ -1,5 +1,6 @@
 import React from 'react';
-import { Download, Wallet } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Download, Wallet, Smartphone } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 interface CollectionHeaderBannerProps {
@@ -27,6 +28,13 @@ export const CollectionHeaderBanner: React.FC<CollectionHeaderBannerProps> = ({ 
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
+        <Link
+          to="/admin/field-collector"
+          className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-xs"
+        >
+          <Smartphone className="size-4" />
+          {t('मोबाइल फिल्ड संकलक मोड', 'Mobile Field Collector')}
+        </Link>
         <button
           onClick={onExportSheet}
           className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition flex items-center gap-2"
@@ -38,3 +46,4 @@ export const CollectionHeaderBanner: React.FC<CollectionHeaderBannerProps> = ({ 
     </div>
   );
 };
+

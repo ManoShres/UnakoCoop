@@ -7,3 +7,5 @@ export { LoanAmortizationTable } from './LoanAmortizationTable';
 export { LoanAdvisoryFootplate } from './LoanAdvisoryFootplate';
 export { LoanEmiPaymentModal } from './LoanEmiPaymentModal';
 export { LoanApplyModal } from './LoanApplyModal';
+export { MemberWarehousePledgeSection } from './MemberWarehousePledgeSection';
+export { MemberAgriQuotaSection } from './MemberAgriQuotaSection';

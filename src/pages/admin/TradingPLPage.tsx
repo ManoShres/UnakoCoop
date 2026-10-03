@@ -9,8 +9,10 @@ import {
   TRADING_TYPE_GROUP,
 } from '../../utils/tradingPL';
 import { triggerBrowserDownload } from '../../utils/copomisExport';
-import { TrendingUp, Download, X, Plus, Ban, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Download, X, Plus, Ban, CheckCircle2, Warehouse, Sprout } from 'lucide-react';
 import type { TradingCategory, TradingType } from '../../types';
+import { WarehouseReceiptFinancingModal } from '../../components/admin/WarehouseReceiptFinancingModal';
+import { AgriInputQuotaModal } from '../../components/admin/AgriInputQuotaModal';
 
 const CATEGORY_OPTIONS: { id: TradingCategory; ne: string; en: string }[] = [
   { id: 'INVESTMENT', ne: 'लगानी पोर्टफोलियो', en: 'Investment Portfolio' },
@@ -43,6 +45,8 @@ export const TradingPLPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<TradingType | 'ALL'>('ALL');
   const [categoryFilter, setCategoryFilter] = useState<TradingCategory | 'ALL'>('ALL');
   const [showModal, setShowModal] = useState(false);
+  const [showWarehouseModal, setShowWarehouseModal] = useState(false);
+  const [showAgriQuotaModal, setShowAgriQuotaModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -160,6 +164,22 @@ export const TradingPLPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowWarehouseModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black shadow-md transition"
+          >
+            <Warehouse className="size-4" />
+            {t('अन्न गोदाम रसिद कर्जा', 'Warehouse Receipt Financing')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowAgriQuotaModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black shadow-md transition"
+          >
+            <Sprout className="size-4" />
+            {t('मल तथा बीउ कोटा', 'Agri-Input Quota')}
+          </button>
           <button
             type="button"
             onClick={handleExportCsv}
@@ -607,6 +627,18 @@ export const TradingPLPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Warehouse Receipt Financing & Crop Pledge Modal */}
+      <WarehouseReceiptFinancingModal
+        isOpen={showWarehouseModal}
+        onClose={() => setShowWarehouseModal(false)}
+      />
+
+      {/* Subsidized Agri-Input & Fertilizer Quota Modal */}
+      <AgriInputQuotaModal
+        isOpen={showAgriQuotaModal}
+        onClose={() => setShowAgriQuotaModal(false)}
+      />
     </div>
   );
 };

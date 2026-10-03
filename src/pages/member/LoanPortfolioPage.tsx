@@ -7,6 +7,8 @@ import {
   PlusCircle,
   SlidersHorizontal,
   Sparkles,
+  Wheat,
+  Sprout,
 } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
@@ -21,6 +23,8 @@ import {
   LoanAdvisoryFootplate,
   LoanEmiPaymentModal,
   LoanApplyModal,
+  MemberWarehousePledgeSection,
+  MemberAgriQuotaSection,
 } from './components/loan';
 
 export function LoanPortfolioPage() {
@@ -31,7 +35,7 @@ export function LoanPortfolioPage() {
   const recordLoanRepayment = useCoopStore((s) => s.recordLoanRepayment);
   const addLoanApplication = useCoopStore((s) => s.addLoanApplication);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'topup' | 'advisory'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'topup' | 'advisory' | 'warehouse' | 'agri-quota'>('overview');
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showEmiModal, setShowEmiModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -166,6 +170,32 @@ export function LoanPortfolioPage() {
             <Headset className="w-4 h-4" />
             <span>{t('सल्लाहकार तथा फिल्ड डेस्क', 'Advisory & Field Support')}</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('warehouse')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-label-md text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'warehouse'
+                ? 'bg-amber-500 text-white shadow-sm font-bold'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
+            }`}
+          >
+            <Wheat className="w-4 h-4 text-amber-500" />
+            <span>{t('अन्न गोदाम रसिद धितो (WHR)', 'Crop Warehouse Pledge')}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('agri-quota')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-label-md text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              activeTab === 'agri-quota'
+                ? 'bg-emerald-600 text-white shadow-sm font-bold'
+                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low'
+            }`}
+          >
+            <Sprout className="w-4 h-4 text-emerald-500" />
+            <span>{t('मल-बीउ कोटा तथा कृषि कर्जा', 'Agri-Input Quota & Credit')}</span>
+          </button>
         </div>
 
         {/* Tab 1: Overview & Pay */}
@@ -204,6 +234,20 @@ export function LoanPortfolioPage() {
         {activeTab === 'advisory' && (
           <div className="animate-fade-in">
             <LoanAdvisoryFootplate />
+          </div>
+        )}
+
+        {/* Tab 5: Crop Warehouse Pledge */}
+        {activeTab === 'warehouse' && (
+          <div className="animate-fade-in">
+            <MemberWarehousePledgeSection />
+          </div>
+        )}
+
+        {/* Tab 6: Agri-Input Quota & Seasonal Credit */}
+        {activeTab === 'agri-quota' && (
+          <div className="animate-fade-in">
+            <MemberAgriQuotaSection />
           </div>
         )}
       </div>

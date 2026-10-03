@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Award, Building2, PiggyBank } from 'lucide-react';
+import { CheckCircle2, Award, Building2, PiggyBank, HeartHandshake } from 'lucide-react';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useDesignStore } from '../../store/useDesignStore';
 import { SharesEquityHero } from './components/SharesEquityHero';
 import { ShareCapitalSection } from './components/ShareCapitalSection';
 import { FixedDepositsSection } from './components/FixedDepositsSection';
+import { MemberPatronageSection } from './components/MemberPatronageSection';
 import { ShareCertificateModal } from './components/ShareCertificateModal';
 import { SharePurchaseModal } from './components/SharePurchaseModal';
 import { FdCertificateLoanModal } from './components/FdCertificateLoanModal';
 import { MudhatiBookingModal } from './components/MudhatiBookingModal';
 import { MemberDividendClaimModal } from './components/MemberDividendClaimModal';
 
-type SharesTab = 'shares' | 'fd' | 'calculator';
+type SharesTab = 'shares' | 'fd' | 'calculator' | 'patronage';
 
 export function SharesFixedDepositsPage() {
   const { t } = useLanguageStore();
@@ -61,6 +62,12 @@ export function SharesFixedDepositsPage() {
       icon: <PiggyBank className="w-4 h-4" />,
       desc: t('११.०% सम्म निश्चित प्रतिफल र स्वचालित बुकिंग', 'High-yield term plans & booking'),
     },
+    {
+      id: 'patronage',
+      label: t('संरक्षित पूँजी फिर्ता कोष', 'Patronage Refund'),
+      icon: <HeartHandshake className="w-4 h-4" />,
+      desc: t('सहकारी ऐन दफा ४१ अनुसार कारोबार आधारित लाभांश', 'Coop Act Sec 41 activity-based return'),
+    },
   ];
 
   return (
@@ -78,7 +85,7 @@ export function SharesFixedDepositsPage() {
         <SharesEquityHero />
 
         {/* Calm Segmented Tab Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 bg-surface-container-low p-1.5 rounded-2xl border border-outline-variant/15">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 bg-surface-container-low p-1.5 rounded-2xl border border-outline-variant/15">
           {tabItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -141,7 +148,15 @@ export function SharesFixedDepositsPage() {
             />
           </div>
         )}
+
+        {/* TAB 4: SECTION 41 PATRONAGE REFUND */}
+        {activeTab === 'patronage' && (
+          <div className="animate-fade-in">
+            <MemberPatronageSection onSuccessToast={showToast} />
+          </div>
+        )}
       </div>
+
 
       {/* Modals */}
       <ShareCertificateModal

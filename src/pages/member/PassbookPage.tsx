@@ -27,17 +27,27 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { Transaction } from '../../types';
 import { printElement } from '../../utils/printHelper';
 import { PassbookDeskModal } from '../../components/admin/PassbookDeskModal';
+import { NepalDynamicQrModal } from '../../components/common/NepalDynamicQrModal';
 
 export function PassbookPage() {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
   const { currentMember } = useAuthStore();
-  const { savings, transactions, members, coopSettings } = useCoopStore();
+  const { savings, transactions, members, coopSettings, adjustSavingsBalance } = useCoopStore();
 
   const [activeAccountIdx, setActiveAccountIdx] = useState(0);
   const [filter, setFilter] = useState<'all' | 'credits' | 'debits' | 'loan_emi'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
   const [isPassbookDeskOpen, setIsPassbookDeskOpen] = useState(false);
+  const [showQrAmountDialog, setShowQrAmountDialog] = useState(false);
+  const [isDirectQrOpen, setIsDirectQrOpen] = useState(false);
+  const [qrDepositAmount, setQrDepositAmount] = useState<number>(1000);
+  const [toast, setToast] = useState<string | null>(null);
+
+  const showToastMsg = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const activeMember = currentMember || members[0];
 
@@ -144,6 +154,14 @@ export function PassbookPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl border border-emerald-500/40 flex items-center gap-3 animate-fade-in">
+          <CheckCircle2 className="size-5 text-emerald-400" />
+          <span className="text-sm font-semibold">{toast}</span>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-5 print:hidden">
         <div>
@@ -160,6 +178,16 @@ export function PassbookPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowQrAmountDialog(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition cursor-pointer"
+            title={t('नेपालपे / फोनपे क्युआर कोडबाट खातामा सिधै रकम दाखिला गर्नुहोस्', 'Deposit funds directly to your savings account via NepalPay / Fonepay QR')}
+          >
+            <QrCode className="size-4" />
+            <span>{t('नेपालपे QR दाखिला', 'Deposit via QR')}</span>
+          </button>
+
           <Link
             to="/member/annual-statement"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition shadow-2xs"
@@ -526,6 +554,130 @@ export function PassbookPage() {
         onClose={() => setIsPassbookDeskOpen(false)}
         initialAccountNo={accounts[activeAccountIdx]?.no}
         initialMemberId={activeMember.id}
+      />
+
+      {/* Pre-QR Deposit Amount Selector Dialog */}
+      {showQrAmountDialog && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5 animate-scale-in">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600">
+                  <QrCode className="size-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-slate-900 dark:text-white">
+                    {t('नेपालपे QR दाखिला रकम', 'Select Deposit Amount')}
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    {t('खाता:', 'Account:')} {regularSavingsAcct?.accountNo || '004-10294-88-01'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowQrAmountDialog(false)}
+                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 cursor-pointer"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <label className="text-xs font-bold text-slate-700 dark:text-slate-300 block">
+                {t('दाखिला गर्ने रकम छनोट गर्नुहोस् वा टाइप गर्नुहोस्:', 'Select or enter amount:')}
+              </label>
+
+              {/* Amount preset chips */}
+              <div className="grid grid-cols-3 gap-2">
+                {[500, 1000, 2000, 5000, 10000, 25000].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setQrDepositAmount(preset)}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold font-mono transition cursor-pointer ${
+                      qrDepositAmount === preset
+                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20'
+                        : 'border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    रु. {preset.toLocaleString('ne-NP')}
+                  </button>
+                ))}
+              </div>
+
+              <div className="relative mt-2">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">
+                  रु.
+                </span>
+                <input
+                  type="number"
+                  min="50"
+                  step="50"
+                  value={qrDepositAmount || ''}
+                  onChange={(e) => setQrDepositAmount(Math.max(1, Number(e.target.value)))}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono text-sm font-bold focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  placeholder="५०००"
+                />
+              </div>
+
+              <p className="text-[11px] text-slate-500">
+                {t(
+                  'नेपालपे वा फोनपे स्क्यान गरेपछि रकम सिधै पासबुक खातामा तत्कालै क्रेडिट हुनेछ।',
+                  'Funds will instantly reflect on your passbook upon successful QR scan.'
+                )}
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowQrAmountDialog(false)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer"
+              >
+                {t('रद्द', 'Cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowQrAmountDialog(false);
+                  setIsDirectQrOpen(true);
+                }}
+                disabled={!qrDepositAmount || qrDepositAmount <= 0}
+                className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-xs font-bold shadow-md cursor-pointer transition"
+              >
+                {t('QR कोड देखाउनुहोस्', 'Generate QR Code')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* NepalDynamicQrModal for Instant Passbook Inbound Deposit */}
+      <NepalDynamicQrModal
+        isOpen={isDirectQrOpen}
+        onClose={() => setIsDirectQrOpen(false)}
+        title="Passbook Direct NepalPay QR Deposit"
+        titleNepali="नेपालपे पासबुक सिधा दाखिला क्युआर"
+        accountNo={regularSavingsAcct?.accountNo || '004-10294-88-01'}
+        memberName={activeMember.name}
+        amount={qrDepositAmount}
+        remarks={`Passbook Inbound Deposit - ${activeMember.memberNo}`}
+        onPaymentSuccess={(refNo, paidAmount) => {
+          adjustSavingsBalance(
+            regularSavingsAcct?.accountNo || '004-10294-88-01',
+            paidAmount,
+            'DEPOSIT',
+            `NepalPay QR Inbound Ref: ${refNo}`
+          );
+          setIsDirectQrOpen(false);
+          showToastMsg(
+            t(
+              `रु. ${paidAmount.toLocaleString('ne-NP')} सफलतापूर्वक पासबुक खातामा दाखिला भयो!`,
+              `NPR ${paidAmount.toLocaleString()} successfully credited to your passbook!`
+            )
+          );
+        }}
       />
     </div>
   );

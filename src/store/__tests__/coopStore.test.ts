@@ -338,4 +338,96 @@ describe('Mother Group Collection Posting', () => {
     expect(history.length).toBeGreaterThan(0);
     expect(history.every((d) => d.memberNo === 'UK-88219')).toBe(true);
   });
+
+  describe('Warehouse Receipt Financing & Crop Pledge Actions', () => {
+    it('issues a new warehouse receipt immutably with notification', () => {
+      const initialCount = useCoopStore.getState().warehouseReceipts.length;
+      const newReceipt = useCoopStore.getState().issueWarehouseReceipt({
+        memberId: 'm1',
+        memberName: 'Ram Bahadur Shrestha',
+        memberNo: 'UK-88219',
+        memberPhone: '9851023456',
+        commodity: 'PADDY_DHAN',
+        varietyName: 'सुवर्ण धान (Subarna Paddy)',
+        bagCount: 50,
+        netWeightQuintals: 25,
+        storageLocation: 'गढवा गोदाम (Bay D-1)',
+        qualityInspection: {
+          moisturePercent: 13.0,
+          foreignMatterPercent: 1.0,
+          grade: 'GRADE_A',
+          isMoistureAcceptable: true,
+          rateAdjustmentFactor: 1.0,
+          inspectorNotes: 'High quality grain',
+        },
+        baseMarketRatePerQuintal: 3450,
+        effectiveRatePerQuintal: 3450,
+        totalMarketValuation: 86250,
+        maxEligiblePledgeLoanAmount: 60375,
+        storageMonthlyChargePerQuintal: 25,
+        depositDate: '2081-07-10',
+        expiryDate: '2082-01-10',
+      });
+
+      expect(newReceipt.receiptNo).toContain('WHR-2081-');
+      expect(newReceipt.status).toBe('STORED');
+      expect(useCoopStore.getState().warehouseReceipts.length).toBe(initialCount + 1);
+    });
+
+    it('disburses crop pledge loan, updates receipt to PLEDGED, credits member savings, and logs transaction', () => {
+      const receipt = useCoopStore.getState().warehouseReceipts.find((r) => r.status === 'STORED');
+      expect(receipt).toBeDefined();
+      if (!receipt) return;
+
+      const memberSavingsBefore = useCoopStore.getState().savings.find((s) => s.memberId === receipt.memberId)?.balance || 0;
+      const loan = useCoopStore.getState().disbursePledgeLoan({
+        receiptId: receipt.id,
+        principalAmount: 40000,
+        savingsAccountNo: 'SAV-001-88219',
+        tenureMonths: 6,
+        notes: 'Pledge loan for agricultural operations',
+      });
+
+      expect(loan.loanNo).toContain('CROP-LN-2081-');
+      expect(loan.principalDisbursed).toBe(40000);
+
+      const updatedReceipt = useCoopStore.getState().warehouseReceipts.find((r) => r.id === receipt.id);
+      expect(updatedReceipt?.status).toBe('PLEDGED');
+      expect(updatedReceipt?.activeLoanId).toBe(loan.id);
+
+      const memberSavingsAfter = useCoopStore.getState().savings.find((s) => s.memberId === receipt.memberId)?.balance || 0;
+      expect(memberSavingsAfter).toBe(memberSavingsBefore + 40000);
+
+      const latestTx = useCoopStore.getState().transactions[0];
+      expect(latestTx.type).toBe('DEPOSIT');
+      expect(latestTx.amount).toBe(40000);
+    });
+
+    it('settles warehouse receipt on harvest market liquidation and credits surplus', () => {
+      const receipt = useCoopStore.getState().warehouseReceipts.find((r) => r.status === 'PLEDGED');
+      expect(receipt).toBeDefined();
+      if (!receipt) return;
+
+      const loan = useCoopStore.getState().warehousePledgeLoans.find((l) => l.receiptId === receipt.id);
+
+      const memberSavingsBefore = useCoopStore.getState().savings.find((s) => s.memberId === receipt.memberId)?.balance || 0;
+
+      const result = useCoopStore.getState().settleWarehouseReceipt({
+        receipt,
+        pledgeLoan: loan,
+        actualSaleRatePerQuintal: 4000,
+        saleDate: '2081-09-15',
+        buyerName: 'दाङ खाद्य उद्योग (Dang Food Industries)',
+      }, 3);
+
+      expect(result.grossSaleRevenue).toBe(receipt.netWeightQuintals * 4000);
+      expect(result.netSurplusPayableToMember).toBeGreaterThan(0);
+
+      const updatedReceipt = useCoopStore.getState().warehouseReceipts.find((r) => r.id === receipt.id);
+      expect(updatedReceipt?.status).toBe('LIQUIDATED_SOLD');
+
+      const memberSavingsAfter = useCoopStore.getState().savings.find((s) => s.memberId === receipt.memberId)?.balance || 0;
+      expect(memberSavingsAfter).toBe(memberSavingsBefore + result.netSurplusPayableToMember);
+    });
+  });
 });

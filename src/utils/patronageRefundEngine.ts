@@ -334,3 +334,74 @@ export const MOCK_PATRONAGE_METRICS: MemberPatronageMetric[] = [
     isEligible: true,
   },
 ];
+
+/**
+ * Retrieves patronage metric for a specific member ID
+ */
+export function getMemberPatronageMetric(memberId: string): MemberPatronageMetric {
+  const existing = MOCK_PATRONAGE_METRICS.find((m) => m.memberId === memberId);
+  if (existing) return existing;
+
+  // Fallback default for any member in the cooperative
+  return {
+    memberId,
+    memberNo: 'M-00101',
+    memberName: 'रामबहादुर चौधरी',
+    accountNo: '004-10294-88-01',
+    annualSavingsInterestEarned: 18450,
+    annualLoanInterestPaid: 64200,
+    annualDairyBusinessVolume: 245000,
+    isEligible: true,
+  };
+}
+
+/**
+ * Calculates patronage distribution for a specific member
+ */
+export function getMemberPatronageDistribution(
+  memberId: string,
+  config: PatronageWeightConfig = DEFAULT_PATRONAGE_CONFIG
+): MemberPatronageDistribution {
+  const metric = getMemberPatronageMetric(memberId);
+  const metrics = MOCK_PATRONAGE_METRICS.some((m) => m.memberId === memberId)
+    ? MOCK_PATRONAGE_METRICS
+    : [metric, ...MOCK_PATRONAGE_METRICS.slice(1)];
+
+  const { distributions } = calculatePatronageRefund(metrics, config);
+  const dist = distributions.find((d) => d.memberId === memberId);
+  return dist || distributions[0];
+}
+
+/**
+ * Formats a clean 58mm/80mm thermal slip for Patronage Refund Warrant
+ */
+export function formatPatronageThermalSlip(
+  dist: MemberPatronageDistribution,
+  coopName = 'उनाको साकोस लि.'
+): string {
+  const line = '--------------------------------';
+  return [
+    coopName,
+    'गढवा, दाङ - संरक्षित पूँजी फिर्ता पुर्जी',
+    '(सहकारी ऐन २०७४ दफा ४१ अनुसार)',
+    line,
+    `पुर्जी नं: ${dist.warrantNumber}`,
+    `सदस्य नं: ${dist.memberNo}`,
+    `सदस्य नाम: ${dist.memberName}`,
+    `खाता नं: ${dist.accountNo}`,
+    line,
+    `बचत ब्याज लाभांश : रु. ${dist.savingsShareAmount.toLocaleString()}`,
+    `ऋण ब्याज लाभांश  : रु. ${dist.loanShareAmount.toLocaleString()}`,
+    `कृषि/दुग्ध लाभांश : रु. ${dist.dairyShareAmount.toLocaleString()}`,
+    line,
+    `कुल संरक्षित लाभांश: रु. ${dist.grossPatronageRefund.toLocaleString()}`,
+    `अग्रिम कर (WHT ०%): रु. ${dist.taxWithholding.toLocaleString()}`,
+    `भुक्तानी योग्य रकम: रु. ${dist.netPatronageRefund.toLocaleString()}`,
+    line,
+    `स्थिति: ${dist.status === 'DISBURSED' ? 'भुक्तानी सम्पन्न' : 'दाबी योग्य'}`,
+    `भुक्तानी माध्यम: ${dist.payoutMode === 'SAVINGS_ACCOUNT' ? 'बचत खाता' : 'सेयर पुँजी'}`,
+    '',
+    'धन्यवाद ! उनाको साकोस परिवार',
+  ].join('\n');
+}
+

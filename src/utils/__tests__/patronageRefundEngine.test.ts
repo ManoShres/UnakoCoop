@@ -1,12 +1,15 @@
 import { describe, it, expect } from 'vitest';
+import type { MemberPatronageMetric, PatronageWeightConfig } from '../patronageRefundEngine';
 import {
   calculatePatronageRefund,
   generateWarrantNumber,
   generatePatronageVoucherPayload,
   exportPatronageAuditCsv,
-  type MemberPatronageMetric,
-  type PatronageWeightConfig,
+  getMemberPatronageMetric,
+  getMemberPatronageDistribution,
+  formatPatronageThermalSlip,
 } from '../patronageRefundEngine';
+
 
 describe('patronageRefundEngine - Section 41 Nepal Cooperative Act 2074', () => {
   const mockConfig: PatronageWeightConfig = {
@@ -137,4 +140,30 @@ describe('patronageRefundEngine - Section 41 Nepal Cooperative Act 2074', () => 
       expect(csv).toContain('PRF-UNAKO-2080-81-');
     });
   });
+
+  describe('Member-Centric Patronage Utilities', () => {
+    it('retrieves member metric and computes individual distribution', () => {
+      const metric = getMemberPatronageMetric('mem-1');
+      expect(metric.memberId).toBe('mem-1');
+      expect(metric.memberName).toBe('रामबहादुर चौधरी');
+
+      const dist = getMemberPatronageDistribution('mem-1');
+      expect(dist.memberId).toBe('mem-1');
+      expect(dist.grossPatronageRefund).toBeGreaterThan(0);
+      expect(dist.netPatronageRefund).toBe(dist.grossPatronageRefund);
+      expect(dist.warrantNumber).toContain('PRF-UNAKO-');
+    });
+
+    it('formats 58mm/80mm thermal receipt slip with statutory details', () => {
+      const dist = getMemberPatronageDistribution('mem-1');
+      const slip = formatPatronageThermalSlip(dist, 'उनाको साकोस');
+
+      expect(slip).toContain('संरक्षित पूँजी फिर्ता पुर्जी');
+      expect(slip).toContain('सहकारी ऐन २०७४ दफा ४१ अनुसार');
+      expect(slip).toContain(dist.warrantNumber);
+      expect(slip).toContain('रामबहादुर चौधरी');
+      expect(slip).toContain('बचत ब्याज लाभांश');
+    });
+  });
 });
+

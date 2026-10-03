@@ -26,6 +26,10 @@ import {
   BonusShareDistributionParams,
   DividendPayoutSummary,
   BonusSharePayoutSummary,
+  WarehouseReceipt,
+  WarehousePledgeLoan,
+  HarvestLiquidationParams,
+  HarvestLiquidationResult,
 } from '../types';
 import { EmployeeSyncStatus } from './initialData';
 import { CollectionPostingResult } from '../utils/collectionPosting';
@@ -107,6 +111,14 @@ export interface OperationsSlice {
     destination: 'SAVINGS' | 'SHARES';
     savingsAccountNo?: string;
   }) => { success: boolean; amountClaimed: number; newSharesCount?: number };
+
+  // Warehouse Receipt Financing & Crop Pledge
+  warehouseReceipts: WarehouseReceipt[];
+  warehousePledgeLoans: WarehousePledgeLoan[];
+  issueWarehouseReceipt: (receipt: Omit<WarehouseReceipt, 'id' | 'receiptNo' | 'createdAt' | 'status'>) => WarehouseReceipt;
+  disbursePledgeLoan: (params: { receiptId: string; principalAmount: number; savingsAccountNo: string; tenureMonths?: number; notes?: string }) => WarehousePledgeLoan;
+  settleWarehouseReceipt: (params: HarvestLiquidationParams, elapsedMonths?: number) => HarvestLiquidationResult;
+  releaseWarehouseReceiptCrop: (receiptId: string, notes?: string) => void;
 }
 
 export interface MotherGroupSlice {

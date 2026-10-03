@@ -55,6 +55,7 @@ const ReconciliationPage = lazy(() => import('./pages/admin/ReconciliationPage')
 const LoanProvisioningPage = lazy(() => import('./pages/admin/LoanProvisioningPage').then((m) => ({ default: m.LoanProvisioningPage })));
 const TellerCounterPage = lazy(() => import('./pages/admin/TellerCounterPage').then((m) => ({ default: m.TellerCounterPage })));
 const StatutoryFundsPage = lazy(() => import('./pages/admin/StatutoryFundsPage').then((m) => ({ default: m.StatutoryFundsPage })));
+const FieldCollectorPage = lazy(() => import('./pages/field/FieldCollectorPage').then((m) => ({ default: m.FieldCollectorPage })));
 
 // Interactive Widgets (Lazy Loaded)
 const SupportChatPopup = lazy(() => import('./components/ui/SupportChatPopup').then((m) => ({ default: m.SupportChatPopup })));
@@ -219,11 +220,26 @@ export function App() {
             <Route path="teller-counter" element={<TellerCounterPage />} />
             <Route path="statutory-funds" element={<StatutoryFundsPage />} />
             <Route path="audit-reports" element={<AdminAuditReportsPage />} />
+            <Route path="field-collector" element={<FieldCollectorPage />} />
           </Route>
+
+          {/* Dedicated Field Mobility App Mode — mobile-optimized for rural field officers */}
+          <Route
+            path="/field"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'MEMBER']}>
+                <ErrorBoundary>
+                  <FieldCollectorPage />
+                </ErrorBoundary>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/collector" element={<Navigate to="/field" replace />} />
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/member" replace />} />
         </Routes>
+
       </Suspense>
 
       {/* Conditionally Rendered Floating Support & Guide */}

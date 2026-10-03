@@ -23,8 +23,10 @@ import {
   AlertTriangle,
   ShieldAlert,
   Award,
+  Wheat,
 } from 'lucide-react';
 import { CreditRiskRatingModal } from '../../components/admin/CreditRiskRatingModal';
+import { WarehouseReceiptFinancingModal } from '../../components/admin/WarehouseReceiptFinancingModal';
 import { evaluateLoanSafetyGate } from '../../utils/loanLtvCalculator';
 
 export const LoanApplicationQueuePage: React.FC = () => {
@@ -35,6 +37,7 @@ export const LoanApplicationQueuePage: React.FC = () => {
   const [previewDoc, setPreviewDoc] = useState<{ title: string; image: string; meta: string } | null>(null);
   const [showOriginateModal, setShowOriginateModal] = useState(false);
   const [showCreditScoringModal, setShowCreditScoringModal] = useState(false);
+  const [showWarehouseModal, setShowWarehouseModal] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
@@ -106,6 +109,14 @@ export const LoanApplicationQueuePage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => setShowWarehouseModal(true)}
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-black shadow-md transition"
+          >
+            <Wheat className="size-4" />
+            <span>{t('अन्न गोदाम धितो कर्जा (WHR)', 'Crop Warehouse Loans')}</span>
+          </button>
           <button
             type="button"
             onClick={() => setShowCreditScoringModal(true)}
@@ -593,6 +604,12 @@ export const LoanApplicationQueuePage: React.FC = () => {
       <CreditRiskRatingModal
         isOpen={showCreditScoringModal}
         onClose={() => setShowCreditScoringModal(false)}
+      />
+
+      {/* Warehouse Receipt Financing & Crop Pledge Modal */}
+      <WarehouseReceiptFinancingModal
+        isOpen={showWarehouseModal}
+        onClose={() => setShowWarehouseModal(false)}
       />
     </div>
   );

@@ -4,6 +4,10 @@ import {
   Inquiry,
   Notification,
   Notice,
+  WarehouseReceipt,
+  WarehousePledgeLoan,
+  HarvestLiquidationParams,
+  HarvestLiquidationResult,
 } from '../../types';
 import {
   INITIAL_TRANSACTIONS,
@@ -26,6 +30,13 @@ import {
   buildDividendTransactionRef,
   buildBonusShareTransactionRef,
 } from '../../utils/dividendDistribution';
+import {
+  INITIAL_WAREHOUSE_RECEIPTS,
+  INITIAL_WAREHOUSE_PLEDGE_LOANS,
+  generateWarehouseReceiptNo,
+  generateCropPledgeLoanNo,
+  calculateHarvestLiquidationSettlement,
+} from '../../utils/warehouseReceiptEngine';
 
 export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSlice> = (set, get) => ({
   transactions: INITIAL_TRANSACTIONS,
@@ -37,6 +48,8 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
   agmDetails: INITIAL_AGM_DETAILS,
   fieldOfficers: INITIAL_FIELD_OFFICERS,
   coopSettings: getStoredCoopSettings(),
+  warehouseReceipts: INITIAL_WAREHOUSE_RECEIPTS,
+  warehousePledgeLoans: INITIAL_WAREHOUSE_PLEDGE_LOANS,
 
   addTransaction: (txData) => {
     const newTx: Transaction = {
@@ -491,5 +504,210 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
 
       return { success: true, amountClaimed: capitalAdded, newSharesCount: kitta };
     }
+  },
+
+  issueWarehouseReceipt: (receiptData) => {
+    const state = get();
+    const id = 'whr-' + Date.now();
+    const receiptNo = generateWarehouseReceiptNo(state.warehouseReceipts.length + 1);
+    const newReceipt: WarehouseReceipt = {
+      ...receiptData,
+      id,
+      receiptNo,
+      status: 'STORED',
+      createdAt: new Date().toISOString(),
+    };
+
+    const today = new Date().toISOString().split('T')[0];
+
+    set((s) => ({
+      warehouseReceipts: [newReceipt, ...s.warehouseReceipts],
+      notifications: [
+        {
+          id: 'notif-' + Date.now(),
+          type: 'FINANCE',
+          title: 'अन्न गोदाम रसिद जारी भयो',
+          message: `${receiptData.varietyName} (${receiptData.netWeightQuintals} क्विन्टल) को गोदाम रसिद ${receiptNo} जारी गरियो।`,
+          date: today,
+          isRead: false,
+        },
+        ...s.notifications,
+      ],
+    }));
+
+    return newReceipt;
+  },
+
+  disbursePledgeLoan: ({ receiptId, principalAmount, savingsAccountNo, tenureMonths = 6, notes }) => {
+    const state = get();
+    const receipt = state.warehouseReceipts.find((r) => r.id === receiptId);
+    if (!receipt) throw new Error('Warehouse receipt not found');
+
+    const loanId = 'wln-' + Date.now();
+    const loanNo = generateCropPledgeLoanNo(state.warehousePledgeLoans.length + 1);
+    const today = new Date().toISOString().split('T')[0];
+    const dueDate = new Date(Date.now() + tenureMonths * 30 * 24 * 60 * 60 * 1000)
+      .toISOString()
+      .split('T')[0];
+
+    const newLoan: WarehousePledgeLoan = {
+      id: loanId,
+      loanNo,
+      receiptId: receipt.id,
+      receiptNo: receipt.receiptNo,
+      memberId: receipt.memberId,
+      memberName: receipt.memberName,
+      principalDisbursed: principalAmount,
+      annualInterestRate: 8.5,
+      disbursedDate: today,
+      dueDate,
+      tenureMonths,
+      monthlyStorageRatePerQuintal: receipt.storageMonthlyChargePerQuintal,
+      savingsAccountNo,
+      status: 'ACTIVE',
+      notes: notes || `कृषि उपज धितो कर्जा (गोदाम रसिद नं. ${receipt.receiptNo})`,
+    };
+
+    // Update receipt status
+    const updatedReceipts = state.warehouseReceipts.map((r) =>
+      r.id === receiptId ? { ...r, status: 'PLEDGED' as const, activeLoanId: loanId } : r
+    );
+
+    // Credit member savings
+    const updatedSavings = state.savings.map((s) =>
+      s.accountNo === savingsAccountNo ? { ...s, balance: s.balance + principalAmount } : s
+    );
+
+    // Update member activeLoanBalance
+    const updatedMembers = state.members.map((m) =>
+      m.id === receipt.memberId ? { ...m, activeLoanBalance: m.activeLoanBalance + principalAmount } : m
+    );
+
+    // Record CBS Transaction (Crediting regular savings)
+    const newTx: Transaction = {
+      id: 'tx-pledge-' + Date.now(),
+      memberId: receipt.memberId,
+      date: today,
+      type: 'DEPOSIT',
+      description: `Crop Pledge Loan Disbursed (${receipt.receiptNo} - ${receipt.varietyName})`,
+      amount: principalAmount,
+      referenceNo: loanNo,
+      status: 'COMPLETED',
+    };
+
+    set((s) => ({
+      warehouseReceipts: updatedReceipts,
+      warehousePledgeLoans: [newLoan, ...s.warehousePledgeLoans],
+      savings: updatedSavings,
+      members: updatedMembers,
+      transactions: [newTx, ...s.transactions],
+      notifications: [
+        {
+          id: 'notif-' + Date.now(),
+          type: 'FINANCE',
+          title: 'कृषि धितो कर्जा निकासा भयो',
+          message: `गोदाम रसिद ${receipt.receiptNo} धितोमा रु. ${principalAmount.toLocaleString()} कर्जा बचत खातामा जम्मा भयो।`,
+          date: today,
+          isRead: false,
+        },
+        ...s.notifications,
+      ],
+    }));
+
+    return newLoan;
+  },
+
+  settleWarehouseReceipt: (params, elapsedMonths = 3) => {
+    const state = get();
+    const result = calculateHarvestLiquidationSettlement(params, elapsedMonths);
+    const { receipt } = params;
+
+    const updatedReceipts = state.warehouseReceipts.map((r) =>
+      r.id === receipt.id ? { ...r, status: 'LIQUIDATED_SOLD' as const } : r
+    );
+
+    const updatedLoans = state.warehousePledgeLoans.map((l) =>
+      l.receiptId === receipt.id ? { ...l, status: 'SETTLED' as const } : l
+    );
+
+    const updatedMembers = state.members.map((m) => {
+      if (m.id !== receipt.memberId) return m;
+      const newLoanBal = Math.max(0, m.activeLoanBalance - result.loanPrincipalDeducted);
+      return { ...m, activeLoanBalance: newLoanBal };
+    });
+
+    let updatedSavings = state.savings;
+    if (result.netSurplusPayableToMember > 0) {
+      updatedSavings = state.savings.map((s) => {
+        if (s.memberId === receipt.memberId) {
+          return { ...s, balance: s.balance + result.netSurplusPayableToMember };
+        }
+        return s;
+      });
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    const newTx: Transaction = {
+      id: 'tx-wh-settle-' + Date.now(),
+      memberId: receipt.memberId,
+      date: today,
+      type: 'DEPOSIT',
+      description: `Harvest Liquidation Net Surplus (${receipt.receiptNo} - ${receipt.varietyName})`,
+      amount: result.netSurplusPayableToMember,
+      referenceNo: result.transactionRef,
+      status: 'COMPLETED',
+    };
+
+    set((s) => ({
+      warehouseReceipts: updatedReceipts,
+      warehousePledgeLoans: updatedLoans,
+      members: updatedMembers,
+      savings: updatedSavings,
+      transactions: [newTx, ...s.transactions],
+      notifications: [
+        {
+          id: 'notif-' + Date.now(),
+          type: 'FINANCE',
+          title: 'अन्न बिक्री मिलान तथा नाफा भुक्तानी',
+          message: result.summaryNe,
+          date: today,
+          isRead: false,
+        },
+        ...s.notifications,
+      ],
+    }));
+
+    return result;
+  },
+
+  releaseWarehouseReceiptCrop: (receiptId, notes) => {
+    const state = get();
+    const receipt = state.warehouseReceipts.find((r) => r.id === receiptId);
+    if (!receipt) return;
+    const today = new Date().toISOString().split('T')[0];
+
+    const updatedReceipts = state.warehouseReceipts.map((r) =>
+      r.id === receiptId ? { ...r, status: 'RELEASED' as const } : r
+    );
+
+    const updatedLoans = state.warehousePledgeLoans.map((l) =>
+      l.receiptId === receiptId ? { ...l, status: 'SETTLED' as const } : l
+    );
+
+    set((s) => ({
+      warehouseReceipts: updatedReceipts,
+      warehousePledgeLoans: updatedLoans,
+      notifications: [
+        {
+          id: 'notif-' + Date.now(),
+          type: 'FINANCE',
+          title: 'गोदामबाट अन्न फिर्ता लगियो',
+          message: `गोदाम रसिद ${receipt.receiptNo} अन्तर्गत भण्डारण गरिएको ${receipt.varietyName} किसानले सकुशल फिर्ता लिनुभयो।`,
+          date: today,
+          isRead: false,
+        },
+        ...s.notifications,
+      ],
+    }));
   },
 });
