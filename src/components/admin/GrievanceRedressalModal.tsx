@@ -395,7 +395,7 @@ export const GrievanceRedressalModal: React.FC<GrievanceRedressalModalProps> = (
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै श्रेणीहरू (All Categories)', 'All Categories')}</option>
+                <option value="ALL">{t('सबै श्रेणीहरू', 'All Categories')}</option>
                 {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v.np}</option>
                 ))}
@@ -406,7 +406,7 @@ export const GrievanceRedressalModal: React.FC<GrievanceRedressalModalProps> = (
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै अवस्था (All Statuses)', 'All Statuses')}</option>
+                <option value="ALL">{t('सबै अवस्था', 'All Statuses')}</option>
                 {Object.entries(STATUS_CONFIG).map(([k, v]) => (
                   <option key={k} value={k}>{v.np}</option>
                 ))}
@@ -571,14 +571,14 @@ export const GrievanceRedressalModal: React.FC<GrievanceRedressalModalProps> = (
                     {TIER_CONFIG[selectedRecord.currentTier]?.np}
                   </span>
                   <span className="text-slate-400 text-[10px]">
-                    SLA: {selectedRecord.slaDeadlineDays} {t('दिन (days)', 'days')}
+                    SLA: {selectedRecord.slaDeadlineDays} {t('दिन', 'days')}
                   </span>
                 </div>
               </div>
 
               <div className="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed">
                 <span className="font-bold text-slate-400 block text-[10px] uppercase tracking-wider mb-1">
-                  {t('उजुरीको पूर्ण व्यहोरा (Grievance Description):', 'Full Description:')}
+                  {t('उजुरीको पूर्ण व्यहोरा:', 'Full Description:')}
                 </span>
                 {selectedRecord.description}
               </div>
@@ -588,7 +588,7 @@ export const GrievanceRedressalModal: React.FC<GrievanceRedressalModalProps> = (
             <div className="space-y-3">
               <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <CheckCircle2 className="size-4 text-blue-600" />
-                <span>{t('छानबिन तथा अनुसन्धान अभिलेख (Investigation Log Trail)', 'Investigation Log Trail')}</span>
+                <span>{t('छानबिन तथा अनुसन्धान अभिलेख', 'Investigation Log Trail')}</span>
               </h3>
 
               <div className="space-y-2.5">
@@ -912,7 +912,7 @@ export const GrievanceRedressalModal: React.FC<GrievanceRedressalModalProps> = (
 
               <form onSubmit={handleCreateTicket} className="space-y-3 text-xs">
                 <div>
-                  <label className="text-[10px] text-slate-400 font-semibold block mb-1">{t('गोपनीयता स्तर (Privacy Mode)', 'Privacy Mode')}</label>
+                  <label className="text-[10px] text-slate-400 font-semibold block mb-1">{t('गोपनीयता स्तर', 'Privacy Mode')}</label>
                   <select
                     value={newPrivacy}
                     onChange={(e) => setNewPrivacy(e.target.value as PrivacyMode)}
@@ -993,7 +993,7 @@ export const GrievanceRedressalModal: React.FC<GrievanceRedressalModalProps> = (
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">{t('विषय (Subject)', 'Subject')}</label>
+                  <label className="text-[10px] text-slate-400 block mb-1">{t('विषय', 'Subject')}</label>
                   <input
                     type="text"
                     required

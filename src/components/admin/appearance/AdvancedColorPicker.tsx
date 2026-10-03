@@ -299,7 +299,7 @@ export const AdvancedColorPicker: React.FC = () => {
       <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 space-y-3">
         <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
           <Eye className="size-4 text-primary" />
-          <span>{t('प्रत्यक्ष दृश्य पूर्वावलोकन (Live UI Preview)', 'Live UI Preview Component')}</span>
+          <span>{t('प्रत्यक्ष दृश्य पूर्वावलोकन', 'Live UI Preview Component')}</span>
         </div>
 
         <div

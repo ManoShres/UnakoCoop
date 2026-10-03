@@ -199,7 +199,7 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
             <CheckCircle2 className="size-7" />
           </div>
           <h3 className="text-base sm:text-lg font-black text-white text-center">
-            {t('दाखिला सफल भयो! (Transaction Posted)', 'Transaction Successfully Posted!')}
+            {t('दाखिला सफल भयो!', 'Transaction Successfully Posted!')}
           </h3>
           <p className="text-xs text-slate-400 font-mono mt-0.5">भौचर नं: {receipt.referenceNo}</p>
         </div>

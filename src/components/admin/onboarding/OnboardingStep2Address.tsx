@@ -136,7 +136,7 @@ export const OnboardingStep2Address: React.FC<OnboardingStep2AddressProps> = ({
             className="size-4 rounded text-blue-600 focus:ring-blue-500"
           />
           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-            {t('हालको बसोबास स्थायी ठेगानामै हो (Current address same as permanent)', 'Current residence is same as permanent address')}
+            {t('हालको बसोबास स्थायी ठेगानामै हो', 'Current residence is same as permanent address')}
           </span>
         </label>
         {!sameAsPermanent && (
@@ -159,7 +159,7 @@ export const OnboardingStep2Address: React.FC<OnboardingStep2AddressProps> = ({
       <div className="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/40 space-y-2">
         <div className="text-xs font-black text-indigo-900 dark:text-indigo-300 flex items-center gap-2">
           <Building className="size-4 text-indigo-600" />
-          <span>{t('आमा समूह / केन्द्र आवद्धता (Mother Group Center)', 'Mother Group / Center Affiliation')}</span>
+          <span>{t('आमा समूह / केन्द्र आवद्धता', 'Mother Group / Center Affiliation')}</span>
         </div>
         <select
           value={selectedMotherGroup}

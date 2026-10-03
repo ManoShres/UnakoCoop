@@ -28,11 +28,12 @@ import { Transaction } from '../../types';
 import { printElement } from '../../utils/printHelper';
 import { PassbookDeskModal } from '../../components/admin/PassbookDeskModal';
 import { NepalDynamicQrModal } from '../../components/common/NepalDynamicQrModal';
+import { localizeTxDescription } from '../../utils/transactionLocalization';
 
 export function PassbookPage() {
-  const { t, fmtCurrency, fmtDigits } = useLanguageStore();
+  const { lang, t, fmtCurrency, fmtDigits } = useLanguageStore();
   const { currentMember } = useAuthStore();
-  const { savings, transactions, members, coopSettings, adjustSavingsBalance } = useCoopStore();
+  const { savings, transactions, members, coopSettings, adjustSavingsBalance, addTransaction } = useCoopStore();
 
   const [activeAccountIdx, setActiveAccountIdx] = useState(0);
   const [filter, setFilter] = useState<'all' | 'credits' | 'debits' | 'loan_emi'>('all');
@@ -53,17 +54,20 @@ export function PassbookPage() {
 
   // Live account calculations
   const memberSavings = savings.filter(
-    (s) => s.memberId === activeMember.id || s.accountNo.includes('004-10294')
+    (s) => s.memberId === activeMember.id
   );
 
   const regularSavingsAcct =
     memberSavings.find((s) => s.accountType.includes('Regular') || s.accountType.includes('साधारण')) ||
-    savings[0];
+    memberSavings[0];
 
-  const regularBalance = regularSavingsAcct?.balance || 184500;
-  const compulsoryBalance = 68000;
-  const shareBalance = activeMember.shareCapital || 50000;
-  const fdBalance = 40350;
+  const compulsorySavingsAcct = memberSavings.find((s) => s.accountType.includes('Compulsory') || s.accountType.includes('मासिक'));
+  const fdSavingsAcct = memberSavings.find((s) => s.accountType.includes('Fixed') || s.accountType.includes('मुद्दती'));
+
+  const regularBalance = regularSavingsAcct?.balance ?? (activeMember.totalSavings || 0);
+  const compulsoryBalance = compulsorySavingsAcct?.balance ?? (activeMember.id === 'm1' ? 68000 : 0);
+  const shareBalance = activeMember.shareCapital || 0;
+  const fdBalance = fdSavingsAcct?.balance ?? (activeMember.id === 'm1' ? 40350 : 0);
   const totalBalance = regularBalance + compulsoryBalance + shareBalance + fdBalance;
 
   const accounts = [
@@ -81,7 +85,7 @@ export function PassbookPage() {
       label: t('नियमित बचत खाता', 'Regular Savings'),
       sub: '001',
       bal: regularBalance,
-      no: regularSavingsAcct?.accountNo || '004-10294-88-01',
+      no: regularSavingsAcct?.accountNo || (activeMember.id === 'm1' ? 'SAV-001-88219' : `SAV-${activeMember.id}-01`),
       badge: '8.0%',
       badgeColor: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800',
     },
@@ -90,7 +94,7 @@ export function PassbookPage() {
       label: t('अनिवार्य मासिक बचत', 'Compulsory Monthly'),
       sub: '002',
       bal: compulsoryBalance,
-      no: '004-10294-88-02 (रु. २,०००/महिना)',
+      no: compulsorySavingsAcct?.accountNo || `${activeMember.memberNo}-COMP`,
       badge: '8.5%',
       badgeColor: 'bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-800',
     },
@@ -99,7 +103,7 @@ export function PassbookPage() {
       label: t('सदस्य शेयर पुँजी', 'Share Capital'),
       sub: 'SC',
       bal: shareBalance,
-      no: `${fmtDigits(activeMember.shareKitta || 500)} ${t('कित्ता @ रु. १००', 'Units @ NPR 100')}`,
+      no: `${fmtDigits(activeMember.shareKitta || Math.round(shareBalance / 100))} ${t('कित्ता @ रु. १००', 'Units @ NPR 100')}`,
       badge: '12%',
       badgeColor: 'bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300 border border-amber-300 dark:border-amber-800',
     },
@@ -108,7 +112,7 @@ export function PassbookPage() {
       label: t('मुद्दती निक्षेप', 'Fixed Term Deposit'),
       sub: 'FD',
       bal: fdBalance,
-      no: t('१ वर्षे मुद्दती • परिपक्वता २०८२', '1-Yr Term • Mat 2082'),
+      no: fdSavingsAcct?.accountNo || t('१ वर्षे मुद्दती • परिपक्वता २०८२', '1-Yr Term • Mat 2082'),
       badge: '10.5%',
       badgeColor: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-800',
     },
@@ -116,7 +120,7 @@ export function PassbookPage() {
 
   // Live member transactions
   const memberTransactions = transactions.filter(
-    (tx) => tx.memberId === activeMember.id || tx.memberId === 'mem-1' || !tx.memberId
+    (tx) => tx.memberId === activeMember.id || (activeMember.id === 'm1' && tx.memberId === 'mem-1')
   );
 
   const filteredTransactions = memberTransactions.filter((tx) => {
@@ -239,8 +243,8 @@ export function PassbookPage() {
                   {acct.badge}
                 </span>
               </div>
-              <div className="text-lg font-black font-mono tracking-tight text-slate-900 dark:text-white">
-                रु. {fmtCurrency(acct.bal, false)}
+              <div className="text-lg font-black font-mono tracking-tight text-slate-900 dark:text-white tabular-nums">
+                {fmtCurrency(acct.bal, false)}
               </div>
             </div>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-2 truncate font-mono">
@@ -255,8 +259,8 @@ export function PassbookPage() {
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
           <div>
             <div className="text-xs text-slate-500 font-bold uppercase">{t('कुल दाखिला / आम्दानी', 'Total Inflows (Credits)')}</div>
-            <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
-              + रु. {fmtCurrency(totalCredits, false)}
+            <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1 tabular-nums">
+              + {fmtCurrency(totalCredits, false)}
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">{t('दुग्ध संकलन, नगद तथा लाभांश', 'Dairy credit, deposit & yield')}</div>
           </div>
@@ -268,8 +272,8 @@ export function PassbookPage() {
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
           <div>
             <div className="text-xs text-slate-500 font-bold uppercase">{t('कुल खर्च तथा किस्ता', 'Total Outflows (Debits & EMI)')}</div>
-            <div className="text-xl sm:text-2xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1">
-              − रु. {fmtCurrency(totalDebits, false)}
+            <div className="text-xl sm:text-2xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1 tabular-nums">
+              − {fmtCurrency(totalDebits, false)}
             </div>
             <div className="text-[11px] text-slate-400 mt-0.5">{t('ऋण किस्ता भुक्तानी तथा स्थानान्तरण', 'Loan EMI payments & transfers')}</div>
           </div>
@@ -365,9 +369,9 @@ export function PassbookPage() {
           <table className="w-full text-left text-xs min-w-[700px]">
             <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 font-bold uppercase tracking-wider">
               <tr>
-                <th className="py-3 px-4">{t('कारोबार मिति (Date)', 'Date')}</th>
-                <th className="py-3 px-4">{t('भौचर / रेफरन्स (Ref)', 'Voucher Ref')}</th>
-                <th className="py-3 px-4">{t('कारोबार विवरण (Narration)', 'Narration & Details')}</th>
+                <th className="py-3 px-4">{t('कारोबार मिति', 'Date')}</th>
+                <th className="py-3 px-4">{t('भौचर / रेफरन्स', 'Voucher Ref')}</th>
+                <th className="py-3 px-4">{t('कारोबार विवरण', 'Narration & Details')}</th>
                 <th className="py-3 px-4 text-right">{t('डेबिट (खर्च)', 'Debit (NPR)')}</th>
                 <th className="py-3 px-4 text-right">{t('क्रेडिट (जम्मा)', 'Credit (NPR)')}</th>
                 <th className="py-3 px-4 text-right">{t('अन्तिम मौज्दात', 'Balance (NPR)')}</th>
@@ -390,16 +394,16 @@ export function PassbookPage() {
                       {tx.referenceNo || tx.id}
                     </td>
                     <td className="py-3 px-4 font-medium text-slate-800 dark:text-slate-200 max-w-xs">
-                      <div className="truncate font-semibold">{tx.description}</div>
+                      <div className="truncate font-semibold">{localizeTxDescription(tx.description, lang)}</div>
                       <div className="text-[10px] text-slate-400">{tx.type}</div>
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-rose-600 dark:text-rose-400">
+                    <td className="py-3 px-4 text-right font-mono font-bold text-rose-600 dark:text-rose-400 tabular-nums">
                       {!isCredit ? `− ${fmtCurrency(tx.amount, false)}` : '—'}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                    <td className="py-3 px-4 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
                       {isCredit ? `+ ${fmtCurrency(tx.amount, false)}` : '—'}
                     </td>
-                    <td className="py-3 px-4 text-right font-mono font-black text-slate-900 dark:text-white">
+                    <td className="py-3 px-4 text-right font-mono font-black text-slate-900 dark:text-white tabular-nums">
                       {fmtCurrency(regularBalance, false)}
                     </td>
                     <td className="py-3 px-4 text-center print:hidden">
@@ -477,10 +481,10 @@ export function PassbookPage() {
 
               <div className="text-center py-2 border-b border-slate-100 dark:border-slate-800">
                 <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
-                  {t('कारोबार रकम (Amount)', 'Amount')}
+                  {t('कारोबार रकम', 'Transaction Amount')}
                 </div>
-                <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
-                  रु. {fmtCurrency(selectedTx.amount, false)}
+                <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1 tabular-nums">
+                  {fmtCurrency(selectedTx.amount, false)}
                 </div>
                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold mt-1">
                   {t('प्रमाणीकृत तथा फर्छ्यौट', 'SETTLED & ARCHIVED')}
@@ -489,23 +493,23 @@ export function PassbookPage() {
 
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">{t('विवरण (Narration)', 'Narration')}</span>
+                  <span className="text-slate-500">{t('विवरण', 'Narration')}</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 text-right max-w-[220px]">
-                    {selectedTx.description}
+                    {localizeTxDescription(selectedTx.description, lang)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
-                  <span className="text-slate-500 font-sans">{t('भौचर नम्बर (JV Ref)', 'Voucher No')}</span>
+                  <span className="text-slate-500 font-sans">{t('भौचर नम्बर', 'Voucher Ref No.')}</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">
                     {selectedTx.referenceNo || selectedTx.id}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
-                  <span className="text-slate-500 font-sans">{t('कारोबार मिति (Date)', 'Date')}</span>
+                  <span className="text-slate-500 font-sans">{t('कारोबार मिति', 'Date')}</span>
                   <span className="text-slate-800 dark:text-slate-200">{selectedTx.date}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">{t('खाता प्रकार (Account)', 'Account Type')}</span>
+                  <span className="text-slate-500">{t('खाता प्रकार', 'Account Type')}</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedTx.type}</span>
                 </div>
                 <div className="flex justify-between py-1 font-mono">
@@ -662,19 +666,20 @@ export function PassbookPage() {
         accountNo={regularSavingsAcct?.accountNo || '004-10294-88-01'}
         memberName={activeMember.name}
         amount={qrDepositAmount}
-        remarks={`Passbook Inbound Deposit - ${activeMember.memberNo}`}
         onPaymentSuccess={(refNo, paidAmount) => {
-          adjustSavingsBalance(
-            regularSavingsAcct?.accountNo || '004-10294-88-01',
-            paidAmount,
-            'DEPOSIT',
-            `NepalPay QR Inbound Ref: ${refNo}`
-          );
+          addTransaction({
+            memberId: activeMember.id,
+            type: 'DEPOSIT',
+            amount: paidAmount,
+            description: `NepalPay QR Inbound (Pending Verification) - Ref: ${refNo}`,
+            referenceNo: refNo,
+            status: 'PENDING',
+          });
           setIsDirectQrOpen(false);
           showToastMsg(
             t(
-              `रु. ${paidAmount.toLocaleString('ne-NP')} सफलतापूर्वक पासबुक खातामा दाखिला भयो!`,
-              `NPR ${paidAmount.toLocaleString()} successfully credited to your passbook!`
+              `रु. ${paidAmount.toLocaleString('ne-NP')} को दाखिला अनुरोध दर्ता भयो (स्थिति: विचाराधीन/Pending)। गेटवे वा काउन्टर प्रमाणीकरणपछि रकम खातामा जम्मा हुनेछ।`,
+              `NPR ${paidAmount.toLocaleString()} deposit request submitted (Pending Verification). Funds will be credited once verified.`
             )
           );
         }}

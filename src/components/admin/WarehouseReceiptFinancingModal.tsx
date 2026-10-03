@@ -419,7 +419,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                     {fmtCurrency(totalValuation)}
                   </div>
                   <p className="text-[11px] text-slate-500">
-                    {t('७०% सुरक्षित धितो क्षमता: ', '70% Safe Pledge Capacity: ')}
+                    {t('७०% सुरक्षित धितो क्षमता:', '70% Safe Pledge Capacity: ')}
                     <span className="font-bold text-slate-700 dark:text-slate-300">
                       {fmtCurrency(Math.floor(totalValuation * 0.7))}
                     </span>
@@ -638,7 +638,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 {/* Commodity Type */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('बालीको प्रकार (Commodity)', 'Commodity Type')}
+                    {t('बालीको प्रकार', 'Commodity Type')}
                   </label>
                   <select
                     value={commodityType}
@@ -725,7 +725,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      {t('नमीको मात्रा % (Moisture Meter)', 'Moisture Content %')}
+                      {t('नमीको मात्रा %', 'Moisture Content %')}
                     </label>
                     <span
                       className={`text-[10px] font-black px-1.5 py-0.2 rounded-md ${
@@ -752,7 +752,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 {/* Foreign Matter % */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('धुलो तथा अखाद्य वस्तु % (Foreign Matter)', 'Foreign Matter %')}
+                    {t('धुलो तथा अखाद्य वस्तु %', 'Foreign Matter %')}
                   </label>
                   <input
                     type="number"
@@ -770,7 +770,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
               {/* Inspector Notes */}
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                  {t('गुणस्तर निरिक्षकको टिप्पणी (Quality Notes)', 'Quality Inspector Notes')}
+                  {t('गुणस्तर निरिक्षकको टिप्पणी', 'Quality Inspector Notes')}
                 </label>
                 <input
                   type="text"
@@ -785,7 +785,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
               <div className="p-4 rounded-2xl bg-slate-900 text-white space-y-3 shadow-lg">
                 <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
-                    {t('मूल्याङ्कन तथा धितो कर्जा सीमा (Live Computation)', 'Valuation & Pledge Limit')}
+                    {t('मूल्याङ्कन तथा धितो कर्जा सीमा', 'Valuation & Pledge Limit')}
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-400">
                     स्तर: {liveInspection.grade}
@@ -876,7 +876,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                      {t('माग गरिएको कर्जा रकम (Loan Amount)', 'Requested Loan Amount')}
+                      {t('माग गरिएको कर्जा रकम', 'Requested Loan Amount')}
                     </label>
                     <span className="text-xs font-mono font-bold text-emerald-500">
                       {fmtCurrency(loanPrincipalInput)}
@@ -905,7 +905,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 {/* Tenure Months */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('कर्जा अवधि (Tenure Months)', 'Loan Tenure')}
+                    {t('कर्जा अवधि', 'Loan Tenure')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {[3, 6, 9].map((m) => (
@@ -928,7 +928,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 {/* Savings Destination Account */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {t('रकम जम्मा हुने बचत खाता (Destination Savings Account)', 'Credit Savings Account')}
+                    {t('रकम जम्मा हुने बचत खाता', 'Credit Savings Account')}
                   </label>
                   <select
                     value={savingsAccountNo}
@@ -1047,7 +1047,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
               <div className="p-5 rounded-2xl bg-surface-elevated border border-outline/20 space-y-3 font-mono text-xs shadow-sm">
                 <div className="flex items-center justify-between border-b border-outline/10 pb-2">
                   <span className="font-bold text-slate-900 dark:text-white uppercase font-sans">
-                    {t('बिक्री मिलान हिसाब विवरण (Reconciliation Sheet)', 'Reconciliation Sheet')}
+                    {t('बिक्री मिलान हिसाब विवरण', 'Reconciliation Sheet')}
                   </span>
                   <span className="text-amber-500 font-bold">{currentReceipt.receiptNo}</span>
                 </div>
@@ -1114,7 +1114,7 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                   className="px-5 py-2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold rounded-xl shadow-xs hover:opacity-90 flex items-center gap-2 transition-all"
                 >
                   <Printer className="size-4" />
-                  {t('प्रमाणपत्र प्रिन्ट गर्नुहोस् (Print A4)', 'Print Official Certificate')}
+                  {t('प्रमाणपत्र प्रिन्ट गर्नुहोस्', 'Print Official Certificate')}
                 </button>
               </div>
 
@@ -1200,11 +1200,11 @@ export const WarehouseReceiptFinancingModal: React.FC<WarehouseReceiptFinancingM
                 {/* Statutory Lien Declaration */}
                 <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-700 space-y-1">
                   <p className="font-bold text-slate-900">
-                    {t('वैधानिक धितो अधिकार तथा नियम (Statutory Lien Terms):', 'Statutory Lien Terms:')}
+                    {t('वैधानिक धितो अधिकार तथा नियम:', 'Statutory Lien Terms:')}
                   </p>
                   <p>
                     {t(
-                      '१. यो रसिद सहकारी ऐन २०७४ अनुसार जारी गरिएको आधिकारिक कानुनी दस्तावेज हो। २. यस रसिदमा उल्लिखित अन्न सहकारीको नियन्त्रणमा सुरक्षित रहनेछ। ३. अधिकतम ७०% सम्म कृषि धितो कर्जा (रु. ' +
+                      '१. यो रसिद सहकारी ऐन २०७४ अनुसार जारी गरिएको आधिकारिक कानुनी दस्तावेज हो। २. यस रसिदमा उल्लिखित अन्न सहकारीको नियन्त्रणमा सुरक्षित रहनेछ। ३. अधिकतम ७०% सम्म कृषि धितो कर्जा (रु.' +
                         currentReceipt.maxEligiblePledgeLoanAmount.toLocaleString() +
                         ') प्रवाह गर्न सकिनेछ।',
                       '1. Issued under Nepal Cooperative Act 2074. 2. Stored grain remains in cooperative lien. 3. Eligible for pledge credit up to 70% LTV.'

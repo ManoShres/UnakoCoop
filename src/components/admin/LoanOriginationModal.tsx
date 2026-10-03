@@ -286,7 +286,7 @@ export const LoanOriginationModal: React.FC<LoanOriginationModalProps> = ({
                 }}
                 className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition"
               >
-                {t('अर्को खण्ड (Next)', 'Next Section')}
+                {t('अर्को खण्ड', 'Next Section')}
               </button>
             ) : (
               <button

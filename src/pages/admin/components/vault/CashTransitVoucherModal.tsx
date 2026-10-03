@@ -178,7 +178,7 @@ export const CashTransitVoucherModal: React.FC<CashTransitVoucherModalProps> = (
                 {record.verificationOtp}
               </span>
               <span className="text-[10px] text-slate-400">
-                {record.status === 'VAULTED' ? t('दाखिला सम्पन्न (Vaulted)', 'Vaulted') : t('मार्गमा रहेको (In Transit)', 'In Transit')}
+                {record.status === 'VAULTED' ? t('दाखिला सम्पन्न', 'Vaulted') : t('मार्गमा रहेको', 'In Transit')}
               </span>
             </div>
           </div>
@@ -186,7 +186,7 @@ export const CashTransitVoucherModal: React.FC<CashTransitVoucherModalProps> = (
           {/* Denomination Table */}
           <div className="space-y-2">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-              {t('चलानी गरिएको नगद नोट विवरण (Denomination Breakdown)', 'Currency Denomination Breakdown')}
+              {t('चलानी गरिएको नगद नोट विवरण', 'Currency Denomination Breakdown')}
             </h4>
             <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
               <table className="w-full text-xs text-left">
@@ -194,7 +194,7 @@ export const CashTransitVoucherModal: React.FC<CashTransitVoucherModalProps> = (
                   <tr>
                     <th className="px-4 py-2.5 w-12 text-center">#</th>
                     <th className="px-4 py-2.5">{t('नोट दर (रु.)', 'Denomination')}</th>
-                    <th className="px-4 py-2.5 text-right">{t('थान (Count)', 'Pieces')}</th>
+                    <th className="px-4 py-2.5 text-right">{t('थान', 'Pieces')}</th>
                     <th className="px-4 py-2.5 text-right font-bold">{t('रकम (NPR)', 'Total Amount')}</th>
                   </tr>
                 </thead>
@@ -217,7 +217,7 @@ export const CashTransitVoucherModal: React.FC<CashTransitVoucherModalProps> = (
                 <tfoot className="bg-slate-100 dark:bg-slate-800 font-bold border-t border-slate-200 dark:border-slate-700">
                   <tr>
                     <td colSpan={3} className="px-4 py-3 text-right">
-                      {t('कुल चलानी रकम (Grand Total):', 'Grand Total:')}
+                      {t('कुल चलानी रकम:', 'Grand Total:')}
                     </td>
                     <td className="px-4 py-3 text-right font-mono text-emerald-600 dark:text-emerald-400 text-sm">
                       {fmtCurrency(record.amount, true)}

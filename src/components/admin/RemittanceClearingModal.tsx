@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { Member } from '../../types';
 import {
   RemittanceTransaction,
@@ -45,6 +46,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
   members,
 }) => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
+  const { addTransaction, coopSettings } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'SEND' | 'PAYOUT' | 'CLEARING' | 'RECORDS'>('SEND');
 
@@ -160,6 +162,19 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
 
     setTransactions((prev) => [newTxn, ...prev]);
     setSearchControlNo(newTxn.controlNo);
+
+    // Wire to store: add outgoing remittance transaction
+    const senderMember = members.find(
+      (m) => m.memberNo === senderMemberNo || m.name === senderName
+    );
+    addTransaction({
+      memberId: senderMember?.id,
+      type: 'WITHDRAWAL',
+      amount: newTxn.totalPaidBySender,
+      description: `आन्तरिक विप्रेषण पठाएको - MTCN: ${newTxn.controlNo} (To: ${newTxn.receiverName})`,
+      referenceNo: newTxn.controlNo,
+    });
+
     alert(
       `आन्तरिक विप्रेषण सफलतापूर्वक दर्ता भयो!\n\nControl No (MTCN): ${newTxn.controlNo}\nगोप्य PIN: ${securityPinInput}\nरकम: NPR ${newTxn.remitAmount.toLocaleString()}`
     );
@@ -185,6 +200,15 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
       setTransactions((prev) =>
         prev.map((t) => (t.controlNo === updated.controlNo ? updated : t))
       );
+
+      // Wire to store: add remittance payout transaction
+      addTransaction({
+        type: 'DEPOSIT',
+        amount: updated.remitAmount,
+        description: `आन्तरिक विप्रेषण भुक्तानी - MTCN: ${updated.controlNo} (Paid to: ${updated.receiverName})`,
+        referenceNo: `PAYOUT-${updated.controlNo}`,
+      });
+
       setPayoutResultMsg({
         success: true,
         msg: `रकम रु. ${updated.remitAmount.toLocaleString()} प्रापक श्री ${updated.receiverName} लाई सफलतापूर्वक भुक्तानी गरियो!`,
@@ -256,7 +280,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
             }`}
           >
             <Send className="size-4" />
-            <span>{t('१. रकम पठाउने (Send Remittance)', '1. Send Remittance')}</span>
+            <span>{t('१. रकम पठाउने', '1. Send Remittance')}</span>
           </button>
 
           <button
@@ -268,7 +292,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
             }`}
           >
             <KeyRound className="size-4" />
-            <span>{t('२. रकम भुक्तानी (Payout Disbursement)', '2. Payout Disbursement')}</span>
+            <span>{t('२. रकम भुक्तानी', '2. Payout Disbursement')}</span>
           </button>
 
           <button
@@ -310,7 +334,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
 
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">
-                      {t('पठाउने शाखा (Originating Branch)', 'Sending Branch')}
+                      {t('पठाउने शाखा', 'Sending Branch')}
                     </label>
                     <select
                       value={sendingBranchId}
@@ -327,7 +351,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
 
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">
-                      {t('भुक्तानी लिने शाखा (Receiving Branch)', 'Receiving Branch')}
+                      {t('भुक्तानी लिने शाखा', 'Receiving Branch')}
                     </label>
                     <select
                       value={receivingBranchId}
@@ -352,7 +376,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-slate-500 block mb-1">
-                        {t('विप्रेषण रकम (Remit Amount NPR)', 'Remit Amount (NPR)')}
+                        {t('विप्रेषण रकम', 'Remit Amount (NPR)')}
                       </label>
                       <input
                         type="number"
@@ -367,7 +391,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
 
                     <div>
                       <label className="text-xs text-slate-500 block mb-1">
-                        {t('गोप्य PIN (Secret 4-digit PIN)', 'Secret 4-digit PIN')}
+                        {t('गोप्य PIN', 'Secret 4-digit PIN')}
                       </label>
                       <input
                         type="password"
@@ -395,7 +419,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                 {/* Sender Details */}
                 <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    {t('पठाउने सदस्य विवरण (Sender Info)', 'Sender Details')}
+                    {t('पठाउने सदस्य विवरण', 'Sender Details')}
                   </h4>
 
                   <div className="grid grid-cols-2 gap-3">
@@ -441,12 +465,12 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                 {/* Receiver Details */}
                 <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-3">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
-                    {t('पाउने व्यक्तिको विवरण (Receiver/Beneficiary Info)', 'Receiver Details')}
+                    {t('पाउने व्यक्तिको विवरण', 'Receiver Details')}
                   </h4>
 
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">
-                      {t('प्रापकको पूरा नाम (Beneficiary Name)', 'Receiver Full Name')}
+                      {t('प्रापकको पूरा नाम', 'Receiver Full Name')}
                     </label>
                     <input
                       type="text"
@@ -473,7 +497,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
 
                     <div>
                       <label className="text-xs text-slate-500 block mb-1">
-                        {t('नागरिकता नं. (Citizenship)', 'Citizenship No')}
+                        {t('नागरिकता नं.', 'Citizenship No')}
                       </label>
                       <input
                         type="text"
@@ -491,7 +515,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-teal-700 dark:text-teal-400">
-                    {t('सेवा शुल्क (Service Fee)', 'Service Fee')}
+                    {t('सेवा शुल्क', 'Service Fee')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-teal-600 dark:text-teal-400 mt-1">
                     {fmtCurrency(feeBreakdown.fee, true)}
@@ -545,7 +569,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-md cursor-pointer"
                 >
                   <Send className="size-4" />
-                  <span>{t('विप्रेषण अर्डर जारी गर्नुहोस् (Issue Remittance)', 'Issue Remittance Order')}</span>
+                  <span>{t('विप्रेषण अर्डर जारी गर्नुहोस्', 'Issue Remittance Order')}</span>
                 </button>
               </div>
             </form>
@@ -559,7 +583,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                 <Search className="size-5 text-slate-400 shrink-0" />
                 <div className="grow">
                   <label className="text-xs text-slate-500 block mb-1">
-                    {t('विप्रेषण कन्ट्रोल नं. (Control No / MTCN)', 'Enter Control No (MTCN)')}
+                    {t('विप्रेषण कन्ट्रोल नं.', 'Enter Control No (MTCN)')}
                   </label>
                   <input
                     type="text"
@@ -622,7 +646,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl space-y-1">
                       <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        {t('पठाउने व्यक्ति (Sender)', 'Sender')}
+                        {t('पठाउने व्यक्ति', 'Sender')}
                       </p>
                       <p className="font-bold text-slate-900 dark:text-white">{targetPayoutTxn.senderName}</p>
                       <p className="font-mono text-slate-500">Phone: {targetPayoutTxn.senderPhone}</p>
@@ -630,7 +654,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
 
                     <div className="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl space-y-1">
                       <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">
-                        {t('प्रापक व्यक्ति (Receiver)', 'Receiver')}
+                        {t('प्रापक व्यक्ति', 'Receiver')}
                       </p>
                       <p className="font-bold text-slate-900 dark:text-white">{targetPayoutTxn.receiverName}</p>
                       <p className="font-mono text-slate-500">ना.प्र.नं: {targetPayoutTxn.receiverCitizenshipNo}</p>
@@ -683,7 +707,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md cursor-pointer"
                         >
                           <CheckCircle2 className="size-4" />
-                          <span>{t('नगद भुक्तानी फछ्र्यौट गर्नुहोस् (Disburse Cash)', 'Disburse Cash Payout')}</span>
+                          <span>{t('नगद भुक्तानी फछ्र्यौट गर्नुहोस्', 'Disburse Cash Payout')}</span>
                         </button>
                       </div>
                     </form>
@@ -703,11 +727,11 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {t('अन्तर-शाखा बहुपक्षीय नेट क्लियरिङ हिसाब (Multilateral Clearing Ledger)', 'Multilateral Inter-Branch Clearing Matrix')}
+                    {t('अन्तर-शाखा बहुपक्षीय नेट क्लियरिङ हिसाब', 'Multilateral Inter-Branch Clearing Matrix')}
                   </h3>
                   <p className="text-xs text-slate-500">
                     {t(
-                      'दैनिक विप्रेषण आदान-प्रदान अनुसार शाखाहरू बीच भुक्तानी दिनुपर्ने (Net Payable) वा लिनुपर्ने (Net Receivable) हिसाब',
+                      'दैनिक विप्रेषण आदान-प्रदान अनुसार शाखाहरू बीच भुक्तानी दिनुपर्ने वा लिनुपर्ने हिसाब',
                       'Daily net inter-branch cash settlement across service centers and earned revenue'
                     )}
                   </p>
@@ -719,7 +743,7 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                   className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-500 text-white shadow-xs cursor-pointer"
                 >
                   <Download className="size-4" />
-                  <span>{t('CSV डाउनलोड (Export CSV)', 'Export CSV')}</span>
+                  <span>{t('CSV डाउनलोड', 'Export CSV')}</span>
                 </button>
               </div>
 
@@ -728,12 +752,12 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-900 text-slate-500 font-semibold border-b border-slate-200 dark:border-slate-800">
                     <tr>
-                      <th className="px-4 py-3">{t('शाखा / सेवा केन्द्र (Branch)', 'Branch')}</th>
+                      <th className="px-4 py-3">{t('शाखा / सेवा केन्द्र', 'Branch')}</th>
                       <th className="px-4 py-3 text-center">{t('पठाएको संख्या', 'Sent Count')}</th>
-                      <th className="px-4 py-3 text-right">{t('पठाएको रकम (Sent NPR)', 'Sent Total')}</th>
+                      <th className="px-4 py-3 text-right">{t('पठाएको रकम', 'Sent Total')}</th>
                       <th className="px-4 py-3 text-center">{t('भुक्तानी संख्या', 'Paid Count')}</th>
-                      <th className="px-4 py-3 text-right">{t('भुक्तानी रकम (Paid NPR)', 'Paid Total')}</th>
-                      <th className="px-4 py-3 text-right">{t('खुद स्थिति (Net Balance)', 'Net Clearing')}</th>
+                      <th className="px-4 py-3 text-right">{t('भुक्तानी रकम', 'Paid Total')}</th>
+                      <th className="px-4 py-3 text-right">{t('खुद स्थिति', 'Net Clearing')}</th>
                       <th className="px-4 py-3 text-right">{t('आर्जित कमिसन', 'Commission Earned')}</th>
                     </tr>
                   </thead>

@@ -163,7 +163,7 @@ export const LiquidityStressTestingModal: React.FC<LiquidityStressTestingModalPr
           </div>
 
           <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
-            <span className="text-[10px] text-rose-500 font-semibold block">{t('तनाव निक्षेप माग (Run)', 'Stressed Outflow')}</span>
+            <span className="text-[10px] text-rose-500 font-semibold block">{t('तनाव निक्षेप माग', 'Stressed Outflow')}</span>
             <span className="text-base font-black text-rose-600 dark:text-rose-400">
               रु. {Math.round(result.stressedDepositWithdrawal / 100000).toLocaleString()} लाख
             </span>
@@ -258,7 +258,7 @@ export const LiquidityStressTestingModal: React.FC<LiquidityStressTestingModalPr
             {/* Scenario Preset Buttons */}
             <div className="space-y-2">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">
-                {t('तनाव परीक्षण परिदृश्य चयन गर्नुहोस् (Select Stress Scenario):', 'Select Stress Scenario:')}
+                {t('तनाव परीक्षण परिदृश्य चयन गर्नुहोस्:', 'Select Stress Scenario:')}
               </span>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 {Object.values(SCENARIO_PRESETS).map((sc) => (
@@ -288,7 +288,7 @@ export const LiquidityStressTestingModal: React.FC<LiquidityStressTestingModalPr
               <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-4">
                 <h4 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <Sliders className="size-4 text-rose-600" />
-                  <span>{t('स्वनिर्धारित तनाव प्यारामिटरहरू (Custom Parameters)', 'Custom Simulation Sliders')}</span>
+                  <span>{t('स्वनिर्धारित तनाव प्यारामिटरहरू', 'Custom Simulation Sliders')}</span>
                 </h4>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">

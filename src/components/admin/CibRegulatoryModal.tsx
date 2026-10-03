@@ -320,7 +320,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-rose-200 dark:border-rose-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wider block">
-              {t('सक्रिय कालोसूची (Active CIB Blacklist)', 'Active CIB Blacklisted')}
+              {t('सक्रिय कालोसूची', 'Active CIB Blacklisted')}
             </span>
             <span className="text-lg font-black text-rose-600 dark:text-rose-400 mt-0.5 block font-mono">
               {fmtCount(activeBlacklistCount)} {t('जना', 'Defaulters')}
@@ -340,7 +340,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
-              {t('फुकुवा सम्पन्न (Delisted & Cleared)', 'Delisted & Cleared')}
+              {t('फुकुवा सम्पन्न', 'Delisted & Cleared')}
             </span>
             <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block font-mono">
               {fmtCount(blacklistRecords.filter((r) => r.status === 'DELISTED_CLEARED').length)}
@@ -360,7 +360,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
             }`}
           >
             <Search className="size-4" />
-            <span>{t('कर्जा पूर्व CIB सोधपुछ (Pre-Loan Inquiry)', 'Pre-Loan CIB Inquiry')}</span>
+            <span>{t('कर्जा पूर्व CIB सोधपुछ', 'Pre-Loan CIB Inquiry')}</span>
           </button>
 
           <button
@@ -372,7 +372,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
             }`}
           >
             <ShieldAlert className="size-4" />
-            <span>{t('कालोसूची व्यवस्थापन तथा म्याद (Blacklist & Notices)', 'Blacklist Register & Notices')}</span>
+            <span>{t('कालोसूची व्यवस्थापन तथा म्याद', 'Blacklist Register & Notices')}</span>
           </button>
 
           <button
@@ -384,7 +384,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
             }`}
           >
             <Download className="size-4" />
-            <span>{t('CIB ब्याच डाटा निर्यात (CIB Batch Exporter)', 'CIB Nepal Batch Exporter')}</span>
+            <span>{t('CIB ब्याच डाटा निर्यात', 'CIB Nepal Batch Exporter')}</span>
           </button>
 
           <button
@@ -396,7 +396,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
             }`}
           >
             <FileCheck className="size-4" />
-            <span>{t('कालोसूची फुकुवा प्रमाणपत्र (Delisting Certificate)', 'Delisting Certificate Form 82')}</span>
+            <span>{t('कालोसूची फुकुवा प्रमाणपत्र', 'Delisting Certificate Form 82')}</span>
           </button>
         </div>
 
@@ -489,7 +489,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-bold text-slate-400 block uppercase">
-                      {t('सक्रिय कर्जा संख्या (Active Facilities)', 'Active Credit Facilities')}
+                      {t('सक्रिय कर्जा संख्या', 'Active Credit Facilities')}
                     </span>
                     <strong className="text-base font-black text-slate-900 dark:text-white block mt-1">
                       {inquiryResult.totalActiveLoansCount} {t('वटा खाताहरू', 'Accounts')}
@@ -499,7 +499,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
 
                   <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-bold text-slate-400 block uppercase">
-                      {t('कुल कर्जा भार (Total Debt Exposure)', 'Total Debt Exposure')}
+                      {t('कुल कर्जा भार', 'Total Debt Exposure')}
                     </span>
                     <strong className="text-base font-black text-slate-900 dark:text-white block mt-1 font-mono">
                       {fmtCurrency(inquiryResult.totalExposureAmount)}
@@ -509,13 +509,13 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
 
                   <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-bold text-rose-600 block uppercase">
-                      {t('भाखा नाघेको बक्यौता (Total Overdue)', 'Total Overdue Debt')}
+                      {t('भाखा नाघेको बक्यौता', 'Total Overdue Debt')}
                     </span>
                     <strong className="text-base font-black text-rose-600 block mt-1 font-mono">
                       {fmtCurrency(inquiryResult.totalOverdueAmount)}
                     </strong>
                     <span className="text-[10px] text-rose-500 font-bold">
-                      {inquiryResult.hasActiveDefault ? t('डिफल्ट सक्रिय (Default Detected)', 'Active Default') : t('शून्य बक्यौता', 'No Overdue')}
+                      {inquiryResult.hasActiveDefault ? t('डिफल्ट सक्रिय', 'Active Default') : t('शून्य बक्यौता', 'No Overdue')}
                     </span>
                   </div>
                 </div>
@@ -534,8 +534,8 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
                   <div>
                     <h4 className="font-bold text-xs">
                       {inquiryResult.isBlacklisted
-                        ? t('कर्जा अस्वीकृति तथा कालोसूची चेतावनी (Statutory Loan Debarment)', 'Statutory Credit Debarment Alert')
-                        : t('कर्जा स्वीकृति योग्यता प्रमाणित (CIB Clearance Verified)', 'CIB Credit Clearance Verified')}
+                        ? t('कर्जा अस्वीकृति तथा कालोसूची चेतावनी', 'Statutory Credit Debarment Alert')
+                        : t('कर्जा स्वीकृति योग्यता प्रमाणित', 'CIB Credit Clearance Verified')}
                     </h4>
                     <p className="text-xs mt-1">
                       {inquiryResult.inquirySummaryNepali}
@@ -556,7 +556,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
                       <Gavel className="size-4" />
-                      <span>{t('कानूनी सूचना मस्यौदा (Statutory Legal Notice Draft)', 'Statutory Legal Notice Draft')}</span>
+                      <span>{t('कानूनी सूचना मस्यौदा', 'Statutory Legal Notice Draft')}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <button
@@ -594,7 +594,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
                         <th className="py-3 px-3.5 text-right">{t('ब्याज रु.', 'Accrued Interest')}</th>
                         <th className="py-3 px-3.5 text-right">{t('कुल बक्यौता रु.', 'Total Overdue')}</th>
                         <th className="py-3 px-3.5 text-center">{t('भाखा नाघेको दिन', 'Days Overdue')}</th>
-                        <th className="py-3 px-3.5">{t('जमानतकर्ता (Guarantor)', 'Guarantor')}</th>
+                        <th className="py-3 px-3.5">{t('जमानतकर्ता', 'Guarantor')}</th>
                         <th className="py-3 px-3.5 text-center">{t('स्थिति', 'Status')}</th>
                         <th className="py-3 px-3.5 text-right">{t('कार्य', 'Actions')}</th>
                       </tr>
@@ -747,7 +747,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder={t('कालोसूची नं. वा सदस्य नं. प्रविष्ट गर्नुहोस् (e.g. CIB-BL-2081-01 or M-099)...', 'Enter Blacklist No or Member ID...')}
+                    placeholder={t('कालोसूची नं. वा सदस्य नं. प्रविष्ट गर्नुहोस्...', 'Enter Blacklist No or Member ID...')}
                     value={delistingSearchQuery}
                     onChange={(e) => setDelistingSearchQuery(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-mono font-bold"
@@ -759,7 +759,7 @@ export const CibRegulatoryModal: React.FC<CibRegulatoryModalProps> = ({
                     className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer shrink-0"
                   >
                     <Printer className="size-4" />
-                    <span>{t('फुकुवा पत्र प्रिन्ट (Print Clearance)', 'Print Clearance Certificate')}</span>
+                    <span>{t('फुकुवा पत्र प्रिन्ट', 'Print Clearance Certificate')}</span>
                   </button>
                 )}
               </div>

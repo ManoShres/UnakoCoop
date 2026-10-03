@@ -290,7 +290,7 @@ export function OpenFixedDepositModal({
                   <div className="text-xs font-black text-slate-900 dark:text-white">{scheme.nameNepali}</div>
                   <div className="text-xl font-black font-mono text-emerald-600 mt-1">{fmtPercent(scheme.rate)}</div>
                   <div className="text-[10px] text-slate-400 mt-0.5">
-                    {t('न्यूनतम: ', 'Min: ')}{fmtCurrency(scheme.minAmount, true)}
+                    {t('न्यूनतम:', 'Min: ')}{fmtCurrency(scheme.minAmount, true)}
                   </div>
                 </div>
               ))}
@@ -304,7 +304,7 @@ export function OpenFixedDepositModal({
                 {t('मुद्दती जम्मा गर्ने रकम (NPR) *', 'Deposit Principal Amount (NPR) *')}
               </label>
               <span className="text-[11px] text-slate-400">
-                {t('न्यूनतम सीमा: ', 'Minimum required: ')}{fmtCurrency(currentScheme.minAmount, true)}
+                {t('न्यूनतम सीमा:', 'Minimum required: ')}{fmtCurrency(currentScheme.minAmount, true)}
               </span>
             </div>
 
@@ -339,18 +339,18 @@ export function OpenFixedDepositModal({
             <div className="flex items-center justify-between text-xs pb-2 border-b border-emerald-200 dark:border-emerald-800/60">
               <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <Calendar className="size-4 text-emerald-600" />
-                <span>{t('परिपक्व हुने मिति (Maturity Date):', 'Maturity Date:')}</span>
+                <span>{t('परिपक्व हुने मिति:', 'Maturity Date:')}</span>
               </span>
               <span className="font-mono font-bold text-emerald-700 dark:text-emerald-300">{fmtDigits(maturityDateBs)} B.S.</span>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
               <div>
-                <span className="text-[10px] text-slate-400 block">{t('मूलधन (Principal)', 'Principal')}</span>
+                <span className="text-[10px] text-slate-400 block">{t('मूलधन', 'Principal')}</span>
                 <span className="font-mono font-bold text-slate-800 dark:text-white">{fmtCurrency(principal, true)}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block">{t('कुल ब्याज (Gross)', 'Gross Interest')}</span>
+                <span className="text-[10px] text-slate-400 block">{t('कुल ब्याज', 'Gross Interest')}</span>
                 <span className="font-mono font-bold text-emerald-600">+{fmtCurrency(grossInterest, true)}</span>
               </div>
               <div>
@@ -358,7 +358,7 @@ export function OpenFixedDepositModal({
                 <span className="font-mono font-bold text-rose-500">-{fmtCurrency(tdsDeduction, true)}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 block">{t('खुद प्रतिफल (Net Return)', 'Net Maturity Value')}</span>
+                <span className="text-[10px] text-slate-400 block">{t('खुद प्रतिफल', 'Net Maturity Value')}</span>
                 <span className="font-mono font-black text-emerald-700 dark:text-emerald-400">{fmtCurrency(netMaturityValue, true)}</span>
               </div>
             </div>
@@ -368,33 +368,33 @@ export function OpenFixedDepositModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('ब्याज भुक्तानी तरिका (Interest Payout)', 'Payout Frequency')}
+                {t('ब्याज भुक्तानी तरिका', 'Payout Frequency')}
               </label>
               <select
                 value={payoutFreq}
                 onChange={(e) => setPayoutFreq(e.target.value as any)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
               >
-                <option value="MATURITY">{t('परिपक्वतामा एकमुष्ठ (Cumulative at Maturity)', 'Cumulative at Maturity')}</option>
-                <option value="QUARTERLY">{t('त्रैमासिक ब्याज भुक्तानी (Quarterly)', 'Quarterly Payout')}</option>
-                <option value="MONTHLY">{t('मासिक ब्याज भुक्तानी (Monthly)', 'Monthly Payout')}</option>
+                <option value="MATURITY">{t('परिपक्वतामा एकमुष्ठ', 'Cumulative at Maturity')}</option>
+                <option value="QUARTERLY">{t('त्रैमासिक ब्याज भुक्तानी', 'Quarterly Payout')}</option>
+                <option value="MONTHLY">{t('मासिक ब्याज भुक्तानी', 'Monthly Payout')}</option>
               </select>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('स्रोत खुलाउने (Source of Funds - AML)', 'Source of Funds (AML)')}
+                {t('स्रोत खुलाउने', 'Source of Funds (AML)')}
               </label>
               <select
                 value={sourceOfFunds}
                 onChange={(e) => setSourceOfFunds(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-medium"
               >
-                <option value="व्यापार / उद्यम (Business)">{t('व्यापार / उद्यम (Business)', 'Business')}</option>
-                <option value="तलब / ज्याला (Salary/Wages)">{t('तलब / ज्याला (Salary/Wages)', 'Salary')}</option>
-                <option value="वैदेशिक रोजगार (Remittance)">{t('वैदेशिक रोजगार (Remittance)', 'Remittance')}</option>
-                <option value="कृषि तथा पशुपालन (Agriculture)">{t('कृषि तथा पशुपालन (Agriculture)', 'Agriculture')}</option>
-                <option value="उपदान / निवृत्तिभरण (Pension/Retirement)">{t('उपदान / निवृत्तिभरण (Pension/Retirement)', 'Pension')}</option>
+                <option value="व्यापार / उद्यम (Business)">{t('व्यापार / उद्यम', 'Business')}</option>
+                <option value="तलब / ज्याला (Salary/Wages)">{t('तलब / ज्याला', 'Salary')}</option>
+                <option value="वैदेशिक रोजगार (Remittance)">{t('वैदेशिक रोजगार', 'Remittance')}</option>
+                <option value="कृषि तथा पशुपालन (Agriculture)">{t('कृषि तथा पशुपालन', 'Agriculture')}</option>
+                <option value="उपदान / निवृत्तिभरण (Pension/Retirement)">{t('उपदान / निवृत्तिभरण', 'Pension')}</option>
               </select>
             </div>
           </div>
@@ -405,7 +405,7 @@ export function OpenFixedDepositModal({
               <RefreshCw className="size-4 text-emerald-600" />
               <div>
                 <div className="text-xs font-bold text-slate-900 dark:text-white">
-                  {t('स्वचालित मुद्दती नवीकरण (Auto-Renewal)', 'Auto-Renewal on Maturity')}
+                  {t('स्वचालित मुद्दती नवीकरण', 'Auto-Renewal on Maturity')}
                 </div>
                 <div className="text-[10px] text-slate-400">
                   {t('म्याद सकिएपछि स्वतः सोही अवधि र प्रचलित दरमा नवीकरण गर्ने', 'Roll over principal & interest at prevailing rate')}

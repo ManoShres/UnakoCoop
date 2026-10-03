@@ -60,7 +60,7 @@ export const LoanOriginationStep1Scheme: React.FC<LoanOriginationStep1SchemeProp
       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
         <div className="flex items-center justify-between">
           <label className="text-xs font-bold text-slate-800 dark:text-slate-200">
-            {t('आवेदक सदस्य चयन (Search Member) *', 'Select Applicant Member *')}
+            {t('आवेदक सदस्य चयन *', 'Select Applicant Member *')}
           </label>
           <span className="text-[11px] text-slate-400">
             {fmtCount(filteredMembers.length)} {t('सदस्यहरू उपलब्ध', 'members available')}
@@ -86,7 +86,7 @@ export const LoanOriginationStep1Scheme: React.FC<LoanOriginationStep1SchemeProp
           >
             {filteredMembers.map((m) => (
               <option key={m.id} value={m.id}>
-                {t(m.nameNepali || m.name, m.name)} ({fmtDigits(m.memberNo)}) • {t('मौज्दात: ', 'Balance: ')}{fmtCurrency(m.totalSavings, true)}
+                {t(m.nameNepali || m.name, m.name)} ({fmtDigits(m.memberNo)}) • {t('मौज्दात:', 'Balance: ')}{fmtCurrency(m.totalSavings, true)}
               </option>
             ))}
           </select>
@@ -126,7 +126,7 @@ export const LoanOriginationStep1Scheme: React.FC<LoanOriginationStep1SchemeProp
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            {t('कर्जा योजना (Loan Scheme) *', 'Loan Scheme *')}
+            {t('कर्जा योजना *', 'Loan Scheme *')}
           </label>
           <select
             value={loanType}
@@ -226,7 +226,7 @@ export const LoanOriginationStep1Scheme: React.FC<LoanOriginationStep1SchemeProp
             <Calculator className="size-4 text-emerald-600" />
             <span>
               {t(
-                'घट्दो मौज्दात अनुसार किस्ता गणना (Live Diminishing EMI Calculator)',
+                'घट्दो मौज्दात अनुसार किस्ता गणना',
                 'Live Diminishing EMI Calculation'
               )}
             </span>
@@ -245,7 +245,7 @@ export const LoanOriginationStep1Scheme: React.FC<LoanOriginationStep1SchemeProp
           </div>
 
           <div className="p-3 rounded-lg bg-white/80 dark:bg-slate-900/80 border border-emerald-100 dark:border-emerald-900/40">
-            <div className="text-[10px] text-slate-500 font-medium">{t('कुल ब्याज (Total Interest)', 'Total Interest')}</div>
+            <div className="text-[10px] text-slate-500 font-medium">{t('कुल ब्याज', 'Total Interest')}</div>
             <div className="text-base font-bold text-blue-700 dark:text-blue-400 font-mono mt-0.5">
               {fmtCurrency(totalInterest, true)}
             </div>

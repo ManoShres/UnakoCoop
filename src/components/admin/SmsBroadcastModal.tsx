@@ -315,7 +315,7 @@ export const SmsBroadcastModal: React.FC<SmsBroadcastModalProps> = ({
                 {/* Channel Selector */}
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    {t('१. प्रसारण माध्यम (Channel)', '1. Broadcast Channel')}
+                    {t('१. प्रसारण माध्यम', '1. Broadcast Channel')}
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     <button
@@ -344,7 +344,7 @@ export const SmsBroadcastModal: React.FC<SmsBroadcastModalProps> = ({
                     >
                       <MessageCircle className="size-5 text-emerald-600" />
                       <div>
-                        <div className="font-bold text-xs">{t('ह्वाट्सएप (WhatsApp API)', 'WhatsApp Direct')}</div>
+                        <div className="font-bold text-xs">{t('ह्वाट्सएप', 'WhatsApp Direct')}</div>
                         <div className="text-[10px] text-slate-400">Direct wa.me Click-to-Chat</div>
                       </div>
                     </button>
@@ -354,7 +354,7 @@ export const SmsBroadcastModal: React.FC<SmsBroadcastModalProps> = ({
                 {/* Audience Selection */}
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                    {t('२. लक्षित सदस्य समूह (Audience)', '2. Target Audience')}
+                    {t('२. लक्षित सदस्य समूह', '2. Target Audience')}
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
@@ -429,7 +429,7 @@ export const SmsBroadcastModal: React.FC<SmsBroadcastModalProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                      {t('३. सन्देश ढाँचा (Template)', '3. Message Template')}
+                      {t('३. सन्देश ढाँचा', '3. Message Template')}
                     </label>
                     <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-[10px] font-bold">
                       <button
@@ -459,28 +459,28 @@ export const SmsBroadcastModal: React.FC<SmsBroadcastModalProps> = ({
                     className="w-full text-xs font-bold p-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
                   >
                     <option value="AGM_ANNOUNCEMENT">
-                      {t('साधारण सभा सूचना (AGM Announcement)', 'AGM Announcement')}
+                      {t('साधारण सभा सूचना', 'AGM Announcement')}
                     </option>
                     <option value="LOAN_EMI_REMINDER">
-                      {t('ऋण किस्ता भुक्तानी ताकेता (Loan EMI Reminder)', 'Loan EMI Reminder')}
+                      {t('ऋण किस्ता भुक्तानी ताकेता', 'Loan EMI Reminder')}
                     </option>
                     <option value="DIVIDEND_CREDIT">
-                      {t('लाभांश वितरण जानकारी (Dividend Credit Notice)', 'Dividend Credit Notice')}
+                      {t('लाभांश वितरण जानकारी', 'Dividend Credit Notice')}
                     </option>
                     <option value="DEPOSIT_CONFIRMATION">
-                      {t('बचत रकम जम्मा सन्देश (Deposit Confirmation)', 'Deposit Confirmation')}
+                      {t('बचत रकम जम्मा सन्देश', 'Deposit Confirmation')}
                     </option>
                     <option value="WITHDRAWAL_CONFIRMATION">
-                      {t('रकम भुक्तानी सन्देश (Withdrawal Confirmation)', 'Withdrawal Confirmation')}
+                      {t('रकम भुक्तानी सन्देश', 'Withdrawal Confirmation')}
                     </option>
-                    <option value="CUSTOM">{t('स्वनिर्मित सन्देश (Custom Notice)', 'Custom Notice')}</option>
+                    <option value="CUSTOM">{t('स्वनिर्मित सन्देश', 'Custom Notice')}</option>
                   </select>
                 </div>
 
                 {/* Dynamic Variables Inputs */}
                 <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 space-y-2">
                   <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                    {t('ढाँचा चरहरू (Template Parameters)', 'Template Parameters')}
+                    {t('ढाँचा चरहरू', 'Template Parameters')}
                   </div>
 
                   {(templateType === 'DEPOSIT_CONFIRMATION' ||

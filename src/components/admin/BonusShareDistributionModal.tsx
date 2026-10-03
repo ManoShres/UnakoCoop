@@ -170,7 +170,7 @@ export const BonusShareDistributionModal: React.FC<BonusShareDistributionModalPr
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('आर्थिक वर्ष (Fiscal Year)', 'Fiscal Year')}
+                {t('आर्थिक वर्ष', 'Fiscal Year')}
               </label>
               <select
                 value={fiscalYear}
@@ -185,7 +185,7 @@ export const BonusShareDistributionModal: React.FC<BonusShareDistributionModalPr
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('प्रति कित्ता दर (Par Value)', 'Par Value')}
+                {t('प्रति कित्ता दर', 'Par Value')}
               </label>
               <div className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800/80 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
                 NPR {sharePool.parValue || 100} / {t('कित्ता', 'Unit')}

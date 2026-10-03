@@ -351,7 +351,7 @@ export const AdminAuditReportsPage: React.FC = () => {
             </span>
           </div>
           <div className="text-xl font-black text-blue-600 dark:text-blue-400">{fmtPercent('18.4')}</div>
-          <p className="text-[11px] text-slate-500">{t('नियामक न्यूनतम: ', 'Regulatory Min: ')}{fmtPercent('10.0')}</p>
+          <p className="text-[11px] text-slate-500">{t('नियामक न्यूनतम:', 'Regulatory Min: ')}{fmtPercent('10.0')}</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">
@@ -362,7 +362,7 @@ export const AdminAuditReportsPage: React.FC = () => {
             </span>
           </div>
           <div className="text-xl font-black text-emerald-600 dark:text-emerald-400">{fmtPercent('24.1')}</div>
-          <p className="text-[11px] text-slate-500">{t('मापदण्ड दायरा: ', 'Standard Band: ')}{fmtPercent(15)} - {fmtPercent(20)}</p>
+          <p className="text-[11px] text-slate-500">{t('मापदण्ड दायरा:', 'Standard Band: ')}{fmtPercent(15)} - {fmtPercent(20)}</p>
         </div>
 
         <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm space-y-2">

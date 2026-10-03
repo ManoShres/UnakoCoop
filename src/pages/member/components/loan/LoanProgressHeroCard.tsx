@@ -2,13 +2,14 @@ import React from 'react';
 import { Percent, ArrowDown, ShieldCheck } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { Loan } from '../../../../types';
+import { LOAN_SCHEMES } from '../../../../types/loan';
 
 interface LoanProgressHeroCardProps {
   activeLoan?: Loan;
 }
 
 export const LoanProgressHeroCard: React.FC<LoanProgressHeroCardProps> = ({ activeLoan }) => {
-  const { t, fmtCurrency } = useLanguageStore();
+  const { t, fmtCurrency, fmtDigits } = useLanguageStore();
 
   const sanctioned = activeLoan?.principalAmount ?? 500000;
   const remaining = activeLoan?.remainingBalance ?? 320000;
@@ -25,8 +26,10 @@ export const LoanProgressHeroCard: React.FC<LoanProgressHeroCardProps> = ({ acti
   const paidTenure = Math.round(tenure * clearedRatio);
   const remainingTenure = Math.max(0, tenure - paidTenure);
   const rate = activeLoan?.interestRate ?? 12.5;
-  const title = activeLoan?.loanType || 'Small Business Enterprise';
-  const collateralDesc = activeLoan?.collateralDescription || 'Commercial inventory pledge + personal guarantees';
+
+  const matchedScheme = activeLoan?.loanType ? LOAN_SCHEMES.find((s) => s.type === activeLoan.loanType) : undefined;
+  const title = matchedScheme ? t(matchedScheme.labelNe, matchedScheme.labelEn) : activeLoan?.loanType || t('साना व्यवसाय उद्यम कर्जा', 'Small Business Enterprise');
+  const collateralDesc = activeLoan?.collateralDescription || t('व्यापारिक मौज्दात धितो + व्यक्तिगत जमानी', 'Commercial inventory pledge + personal guarantees');
 
   return (
     <div className="bg-surface-card rounded-2xl p-6 shadow-sm relative overflow-hidden border border-outline-variant/15">
@@ -39,13 +42,13 @@ export const LoanProgressHeroCard: React.FC<LoanProgressHeroCardProps> = ({ acti
           <h2 className="font-headline text-lg sm:text-xl font-bold text-on-surface mt-0.5">
             {title}
           </h2>
-          <p className="font-body-sm text-xs text-on-surface-variant">
-            {activeLoan?.disbursedDate ? `Disbursed: ${activeLoan.disbursedDate}` : 'Active CBS Loan'} • Tenor: {tenure} Months Diminishing
+          <p className="font-body-sm text-xs text-on-surface-variant font-mono">
+            {t('स्वीकृत मिति:', 'Disbursed:')} {fmtDigits(activeLoan?.disbursedDate || '2081-04-15')} • {t('अवधि:', 'Tenor:')} {fmtDigits(tenure)} {t('महिना घट्दो किस्ता', 'Months Diminishing')}
           </p>
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-container text-primary font-label-sm text-xs rounded-full font-bold">
           <Percent className="w-3.5 h-3.5" />
-          {rate.toFixed(2)}% p.a. (Diminishing)
+          {fmtDigits(rate.toFixed(2))}% {t('वार्षिक (घट्दो)', 'p.a. (Diminishing)')}
         </span>
       </div>
 

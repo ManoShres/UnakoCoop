@@ -130,7 +130,7 @@ export const StatutoryFundsPage: React.FC = () => {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              {t('वैधानिक जगेडा तथा अन्य कोष खाता (Statutory Reserve Funds)', 'Statutory Reserve Funds Register')}
+              {t('वैधानिक जगेडा तथा अन्य कोष खाता', 'Statutory Reserve Funds Register')}
             </h1>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl">
               {t(
@@ -251,7 +251,7 @@ export const StatutoryFundsPage: React.FC = () => {
 
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
                 <span className="text-[10px] text-slate-400 uppercase font-bold">
-                  {t('हालको मौज्दात (Current Balance)', 'Current Balance')}
+                  {t('हालको मौज्दात', 'Current Balance')}
                 </span>
                 <div className="text-xl font-black text-indigo-600 dark:text-indigo-400 font-mono mt-0.5">
                   {fmtCurrency(fund.currentBalance, true)}
@@ -352,7 +352,7 @@ export const StatutoryFundsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/80">
               <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                {t('कुल सदस्य बचत मौज्दात (Total Savings Pool):', 'Total Member Savings Pool:')}
+                {t('कुल सदस्य बचत मौज्दात:', 'Total Member Savings Pool:')}
               </label>
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs font-bold text-slate-400">रु.</span>
@@ -387,7 +387,7 @@ export const StatutoryFundsPage: React.FC = () => {
 
             <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700/80">
               <label className="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">
-                {t('अवधि (Period):', 'Calculation Period:')}
+                {t('अवधि:', 'Calculation Period:')}
               </label>
               <div className="grid grid-cols-2 gap-2 mt-1">
                 <button
@@ -420,7 +420,7 @@ export const StatutoryFundsPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="p-5 rounded-2xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/40 space-y-1">
               <span className="text-[11px] font-bold text-blue-700 dark:text-blue-300 uppercase">
-                {t('कुल पाकेको सावाँ ब्याज (Gross Interest)', 'Gross Accrued Interest')}
+                {t('कुल पाकेको सावाँ ब्याज', 'Gross Accrued Interest')}
               </span>
               <div className="text-xl sm:text-2xl font-black font-mono text-blue-900 dark:text-blue-200">
                 रु. {closingInterest.grossInterest.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
@@ -433,7 +433,7 @@ export const StatutoryFundsPage: React.FC = () => {
             <div className="p-5 rounded-2xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/40 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 uppercase">
-                  {t('आ.रा.का. बुझाउने ५% कर (TDS Tax)', 'IRD 5% TDS Deducted')}
+                  {t('आ.रा.का. बुझाउने ५% कर', 'IRD 5% TDS Deducted')}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200">
                   5.0%
@@ -449,7 +449,7 @@ export const StatutoryFundsPage: React.FC = () => {
 
             <div className="p-5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/40 space-y-1">
               <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 uppercase">
-                {t('सदस्य खातामा जम्मा हुने (Net Interest)', 'Net Credited to Members')}
+                {t('सदस्य खातामा जम्मा हुने', 'Net Credited to Members')}
               </span>
               <div className="text-xl sm:text-2xl font-black font-mono text-emerald-900 dark:text-emerald-200">
                 रु. {closingInterest.netInterest.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
@@ -490,7 +490,7 @@ export const StatutoryFundsPage: React.FC = () => {
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    {t('+ नाफाबाट थप (Allocate)', '+ Allocate')}
+                    {t('+ नाफाबाट थप', '+ Allocate')}
                   </button>
                   <button
                     type="button"
@@ -501,7 +501,7 @@ export const StatutoryFundsPage: React.FC = () => {
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    {t('- कोष खर्च (Utilize)', '- Expense / Relief')}
+                    {t('- कोष खर्च', '- Expense / Relief')}
                   </button>
                 </div>
               </div>
@@ -583,7 +583,7 @@ export const StatutoryFundsPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('वार्षिक खुद नाफा (Net Surplus)', 'Annual Net Surplus (NPR)')}
+                    {t('वार्षिक खुद नाफा', 'Annual Net Surplus (NPR)')}
                   </label>
                   <input
                     type="number"
@@ -608,7 +608,7 @@ export const StatutoryFundsPage: React.FC = () => {
               {/* Statutory Splits Table */}
               <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-xs">
                 <div className="p-2.5 bg-slate-50 dark:bg-slate-800/60 font-bold border-b border-slate-200 dark:border-slate-800 flex justify-between">
-                  <span>{t('दफा ६८ वैधानिक कोष बाँडफाँड (Statutory Split)', 'Section 68 Statutory Splits')}</span>
+                  <span>{t('दफा ६८ वैधानिक कोष बाँडफाँड', 'Section 68 Statutory Splits')}</span>
                   <span>{t('रकम (NPR)', 'Amount')}</span>
                 </div>
                 <div className="divide-y divide-slate-100 dark:divide-slate-800 font-mono text-[11px] p-2 space-y-1.5">
@@ -633,7 +633,7 @@ export const StatutoryFundsPage: React.FC = () => {
                     <span>{fmtCurrency(appropriation.employeeWelfareFund, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-emerald-600 font-black border-t border-slate-200 dark:border-slate-700 pt-1.5">
-                    <span>{t('वितरणयोग्य खुद बचत (Distributable Surplus):', 'Distributable Surplus Pool:')}</span>
+                    <span>{t('वितरणयोग्य खुद बचत:', 'Distributable Surplus Pool:')}</span>
                     <span>{fmtCurrency(appropriation.distributableSurplus, true)}</span>
                   </div>
                   <div className="flex justify-between items-center text-[10px] text-amber-600 dark:text-amber-400 font-semibold">

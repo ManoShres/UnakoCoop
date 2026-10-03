@@ -349,10 +349,10 @@ export const AmlComplianceCard: React.FC<AmlComplianceCardProps> = ({
                           onChange={(e) => handleStatusChange(a.id, e.target.value as AmlStatus)}
                           className="text-[11px] py-1 px-2 rounded-lg border border-slate-700 bg-slate-900 text-slate-200 font-medium"
                         >
-                          <option value="PENDING_REVIEW">{t('समीक्षा बाँकी (Pending)', 'Pending')}</option>
-                          <option value="CLEARED">{t('प्रमाणीकरण सम्पन्न (Cleared)', 'Cleared')}</option>
-                          <option value="FIU_REPORTED">{t('FIU मा प्रेषित (Reported)', 'Reported')}</option>
-                          <option value="ESCALATED">{t('थप अनुसन्धान (Escalated)', 'Escalated')}</option>
+                          <option value="PENDING_REVIEW">{t('समीक्षा बाँकी', 'Pending')}</option>
+                          <option value="CLEARED">{t('प्रमाणीकरण सम्पन्न', 'Cleared')}</option>
+                          <option value="FIU_REPORTED">{t('FIU मा प्रेषित', 'Reported')}</option>
+                          <option value="ESCALATED">{t('थप अनुसन्धान', 'Escalated')}</option>
                         </select>
                       </td>
                       <td className="p-3 text-center">

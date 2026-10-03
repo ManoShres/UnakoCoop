@@ -222,7 +222,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
             }`}
           >
             <FileCode className="size-4" />
-            <span>{t('goAML XML कोड (Schema 2.0)', 'goAML XML (Schema 2.0)')}</span>
+            <span>{t('goAML XML कोड', 'goAML XML (Schema 2.0)')}</span>
           </button>
 
           <button
@@ -235,7 +235,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
             }`}
           >
             <ClipboardList className="size-4" />
-            <span>{t('STR अनुसन्धान मिसिल (Dossier)', 'STR Investigation Dossier')}</span>
+            <span>{t('STR अनुसन्धान मिसिल', 'STR Investigation Dossier')}</span>
           </button>
 
           <button
@@ -248,7 +248,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
             }`}
           >
             <ShieldCheck className="size-4" />
-            <span>{t('FIU प्रेषण कार्यविधि (Checklist)', 'FIU Submission Checklist')}</span>
+            <span>{t('FIU प्रेषण कार्यविधि', 'FIU Submission Checklist')}</span>
           </button>
         </div>
 
@@ -330,7 +330,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
                 <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
                   <div className="flex items-center gap-2 text-rose-400 font-bold">
                     <User className="size-4" />
-                    <span>{t('सदस्य विवरण (Member Subject)', 'Member Subject')}</span>
+                    <span>{t('सदस्य विवरण', 'Member Subject')}</span>
                   </div>
                   <div className="space-y-1 text-slate-300">
                     <div>
@@ -359,7 +359,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
                 <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
                   <div className="flex items-center gap-2 text-rose-400 font-bold">
                     <Building className="size-4" />
-                    <span>{t('अनुपालन अधिकृत (AMLCO Particulars)', 'AMLCO Officer')}</span>
+                    <span>{t('अनुपालन अधिकृत', 'AMLCO Officer')}</span>
                   </div>
                   <div className="space-y-1 text-slate-300">
                     <div>
@@ -386,7 +386,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
                 <div className="flex items-center gap-2 text-rose-400 font-bold">
                   <AlertOctagon className="size-4 text-rose-500" />
-                  <span>{t('शंकाको आधार तथा कारण (Grounds of Suspicion)', 'Grounds of Suspicion')}</span>
+                  <span>{t('शंकाको आधार तथा कारण', 'Grounds of Suspicion')}</span>
                 </div>
                 <div className="bg-slate-900/80 p-3 rounded-lg border border-slate-800 text-slate-200 leading-relaxed">
                   <p className="font-medium">{reportData.suspicionNarrativeNepali || alert.triggerReasonNepali}</p>
@@ -395,7 +395,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
 
                 <div>
                   <label className="block text-slate-400 font-bold mb-1">
-                    {t('AMLCO को थप राय तथा सिफारिस (Officer Note & Recommendation):', 'Officer Note & Recommendation:')}
+                    {t('AMLCO को थप राय तथा सिफारिस:', 'Officer Note & Recommendation:')}
                   </label>
                   <textarea
                     rows={2}
@@ -418,7 +418,7 @@ export const GoAmlDispatchModal: React.FC<GoAmlDispatchModalProps> = ({
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition cursor-pointer"
                 >
                   <Printer className="size-4 text-rose-400" />
-                  <span>{t('आधिकारिक A4 मिसिल प्रिन्ट (Print Dossier)', 'Print Official A4 Dossier')}</span>
+                  <span>{t('आधिकारिक A4 मिसिल प्रिन्ट', 'Print Official A4 Dossier')}</span>
                 </button>
               </div>
             </div>

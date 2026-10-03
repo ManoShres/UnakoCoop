@@ -143,7 +143,7 @@ export const NepalDynamicQrModal: React.FC<NepalDynamicQrModalProps> = ({
             </div>
             <div>
               <div className="text-[10px] font-mono tracking-wider uppercase text-blue-200 font-bold">
-                {t('राष्ट्रिय भुक्तानी प्रणाली (NPS NepalQR)', 'NATIONAL PAYMENT SWITCH (NEPALQR)')}
+                {t('राष्ट्रिय भुक्तानी प्रणाली', 'NATIONAL PAYMENT SWITCH (NEPALQR)')}
               </div>
               <h3 className="font-black text-sm text-white">
                 {t(titleNepali, title)}
@@ -198,7 +198,7 @@ export const NepalDynamicQrModal: React.FC<NepalDynamicQrModalProps> = ({
                 {/* Amount Banner */}
                 <div className="mt-3.5 text-center">
                   <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                    {t('भुक्तानी रकम (Payable Amount)', 'Payable Amount')}
+                    {t('भुक्तानी रकम', 'Payable Amount')}
                   </div>
                   <div className="text-2xl font-black font-mono text-emerald-600 dark:text-emerald-400">
                     रु. {amount.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
@@ -274,7 +274,7 @@ export const NepalDynamicQrModal: React.FC<NepalDynamicQrModalProps> = ({
                     <>
                       <ShieldCheck className="size-4" />
                       <span>
-                        {t('भुक्तानी पुष्टि गर्नुहोस् (Simulate Payment)', 'Confirm & Record Deposit')}
+                        {t('भुक्तानी पुष्टि गर्नुहोस्', 'Confirm & Record Deposit')}
                       </span>
                     </>
                   )}
@@ -333,7 +333,7 @@ export const NepalDynamicQrModal: React.FC<NepalDynamicQrModalProps> = ({
                   onClick={onClose}
                   className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition shadow-md cursor-pointer"
                 >
-                  <span>{t('सम्पन्न (Close)', 'Done')}</span>
+                  <span>{t('सम्पन्न', 'Done')}</span>
                 </button>
               </div>
             </div>

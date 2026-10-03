@@ -196,7 +196,7 @@ export const AgmElectionPortalModal: React.FC<AgmElectionPortalModalProps> = ({
           </div>
 
           <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
-            <span className="text-[10px] text-emerald-500 font-semibold block">{t('गणपूरक संख्या (Quorum)', 'Statutory Quorum')}</span>
+            <span className="text-[10px] text-emerald-500 font-semibold block">{t('गणपूरक संख्या', 'Statutory Quorum')}</span>
             <span className={`text-base font-black ${results.isQuorumMet ? 'text-emerald-600' : 'text-rose-600'}`}>
               {results.isQuorumMet ? '५१% पुगेको (MET)' : 'अपुग'}
             </span>
@@ -251,7 +251,7 @@ export const AgmElectionPortalModal: React.FC<AgmElectionPortalModalProps> = ({
             }`}
           >
             <Vote className="size-4" />
-            <span>{t('विद्युतीय मतपत्र बुथ (Ballot Booth)', 'Electronic Ballot Booth')}</span>
+            <span>{t('विद्युतीय मतपत्र बुथ', 'Electronic Ballot Booth')}</span>
           </button>
 
           <button
@@ -480,7 +480,7 @@ export const AgmElectionPortalModal: React.FC<AgmElectionPortalModalProps> = ({
                   className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-2"
                 >
                   <Send className="size-4" />
-                  <span>{t('गोप्य मत पेश गर्नुहोस् (Submit Secret Ballot)', 'Submit Secret Ballot')}</span>
+                  <span>{t('गोप्य मत पेश गर्नुहोस्', 'Submit Secret Ballot')}</span>
                 </button>
               </div>
             </form>

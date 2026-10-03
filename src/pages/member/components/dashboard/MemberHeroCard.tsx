@@ -64,12 +64,12 @@ export function MemberHeroCard({
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold tracking-wider text-slate-400 uppercase">
-              {t('कुल सदस्य सम्पत्ति (Total Net Worth)', 'Total Net Worth in Unako')}
+              {t('कुल सदस्य सम्पत्ति', 'Total Net Worth in Unako')}
             </span>
             <button
               type="button"
               onClick={() => setBalanceVisible(!balanceVisible)}
-              className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+              className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
               title={balanceVisible ? t('मौज्दात लुकाउनुहोस्', 'Hide Balance') : t('मौज्दात देखाउनुहोस्', 'Show Balance')}
             >
               {balanceVisible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -77,11 +77,8 @@ export function MemberHeroCard({
           </div>
 
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-white">
-              {balanceVisible ? `रु. ${fmtCurrency(totalNetWorth, false)}` : '••••••••••••'}
-            </span>
-            <span className="text-xs font-bold text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
-              NPR
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-black font-mono tracking-tight text-white tabular-nums">
+              {balanceVisible ? fmtCurrency(totalNetWorth, false) : '••••••••••••'}
             </span>
           </div>
 
@@ -122,7 +119,7 @@ export function MemberHeroCard({
         {/* Member Name */}
         <div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {t('सदस्यको नाम (Member Name)', 'Member Name')}
+            {t('सदस्यको नाम', 'Member Name')}
           </div>
           <div className="font-bold text-sm text-white tracking-wide uppercase mt-0.5">
             {member.name}
@@ -137,7 +134,7 @@ export function MemberHeroCard({
         {/* Member Number with Copy */}
         <div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {t('सदस्य परिचयपत्र नं. (Member No.)', 'Member ID')}
+            {t('सदस्य परिचयपत्र नं.', 'Member ID')}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="font-mono font-bold text-sm text-emerald-300">
@@ -146,7 +143,7 @@ export function MemberHeroCard({
             <button
               type="button"
               onClick={() => copyToClipboard(member.memberNo, 'mem')}
-              className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 transition"
+              className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 transition cursor-pointer"
               title={t('कपी गर्नुहोस्', 'Copy Member No')}
             >
               {copiedField === 'mem' ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}
@@ -157,7 +154,7 @@ export function MemberHeroCard({
         {/* Primary Account Number with Copy */}
         <div>
           <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {t('प्राथमिक बचत खाता (Primary A/C)', 'Primary Savings A/C')}
+            {t('प्राथमिक बचत खाता', 'Primary Savings A/C')}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="font-mono font-bold text-sm text-white">
@@ -166,7 +163,7 @@ export function MemberHeroCard({
             <button
               type="button"
               onClick={() => copyToClipboard(primaryAccountNo, 'acct')}
-              className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 transition"
+              className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 transition cursor-pointer"
               title={t('खाता नं. कपी गर्नुहोस्', 'Copy Account No')}
             >
               {copiedField === 'acct' ? <Check className="size-3 text-emerald-400" /> : <Copy className="size-3" />}

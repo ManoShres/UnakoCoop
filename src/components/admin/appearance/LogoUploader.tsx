@@ -78,7 +78,7 @@ export const LogoUploader: React.FC = () => {
       <div>
         <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <Image className="size-4 text-primary" />
-          <span>{t('सहकारीको आधिकारिक लोगो (Custom Logo)', 'Cooperative Official Brand Logo')}</span>
+          <span>{t('सहकारीको आधिकारिक लोगो', 'Cooperative Official Brand Logo')}</span>
         </h4>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {t(

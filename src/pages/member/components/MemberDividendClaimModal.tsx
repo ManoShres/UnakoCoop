@@ -243,7 +243,7 @@ export const MemberDividendClaimModal: React.FC<MemberDividendClaimModalProps> =
                 </select>
               ) : (
                 <div className="text-xs text-on-surface-variant">
-                  {t('नियमित बचत खाता (Regular Savings Passbook)', 'Primary Regular Savings Passbook')}
+                  {t('नियमित बचत खाता', 'Primary Regular Savings Passbook')}
                 </div>
               )}
               <span className="text-[11px] text-on-surface-variant block">

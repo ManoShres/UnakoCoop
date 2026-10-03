@@ -20,6 +20,7 @@ import {
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useDesignStore } from '../../store/useDesignStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { signOutOfSupabase } from '../../services/employeeService';
 import { LanguageToggle } from '../ui/LanguageToggle';
@@ -36,6 +37,7 @@ export function MemberLayout() {
   const customLogoUrl = useDesignStore((s) => s.settings.customLogoUrl);
   const features = useDesignStore((s) => s.settings.features);
   const logoUrl = customLogoUrl || '/unako-logo.png';
+  const coopSettings = useCoopStore((s) => s.coopSettings);
 
   const handleLogout = () => {
     void signOutOfSupabase();
@@ -151,9 +153,10 @@ export function MemberLayout() {
           <Link
             to="/member/profile"
             className="size-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs"
-            title={currentMember?.name || 'Member Profile'}
+            title={currentMember?.name || t('सदस्य प्रोफाइल', 'Member Profile')}
+            aria-label={t('सदस्य प्रोफाइल', 'Member Profile')}
           >
-            {currentMember?.name ? currentMember.name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase() : 'HP'}
+            {currentMember?.name ? currentMember.name.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase() : '?'}
           </Link>
         </div>
       </div>
@@ -242,8 +245,8 @@ export function MemberLayout() {
           <div className="flex items-center gap-3 min-w-0">
             <span className="font-bold text-sm sm:text-base text-slate-900 dark:text-white truncate">
               {t(
-                'उनको बचत तथा ऋण सहकारी संस्था लि. | सदस्य पोर्टल',
-                'Unako Saving & Credit Cooperative Ltd. | Member Portal'
+                `${coopSettings.nameNepali} | सदस्य पोर्टल`,
+                `${coopSettings.name} | Member Portal`
               )}
             </span>
           </div>

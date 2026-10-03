@@ -114,7 +114,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
         <div className="bg-slate-950 px-5 py-3 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">
-              {t('प्राथमिक पूँजी कोष (Core Capital)', 'Primary Core Capital')}
+              {t('प्राथमिक पूँजी कोष', 'Primary Core Capital')}
             </span>
             <strong className="text-white text-base block mt-0.5 font-mono">
               {fmtCurrency(baseline.totalCoreCapital, true)}
@@ -146,7 +146,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
             }`}
           >
             <span className="block text-[10px] uppercase font-semibold">
-              {t('निक्षेप/पूँजी अनुपात (Ratio)', 'Deposit/Capital Multiplier')}
+              {t('निक्षेप/पूँजी अनुपात', 'Deposit/Capital Multiplier')}
             </span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <strong className="text-base font-mono font-black">
@@ -156,16 +156,16 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
             </div>
             <span className="text-[10px] block">
               {baseline.complianceStatus === 'COMPLIANT'
-                ? t('कानूनी सीमाभित्र (Compliant)', 'Fully Compliant')
+                ? t('कानूनी सीमाभित्र', 'Fully Compliant')
                 : baseline.complianceStatus === 'WARNING'
-                ? t('सीमा नजिक ९०%+ (Warning)', 'Near Statutory Ceiling')
+                ? t('सीमा नजिक ९०%+', 'Near Statutory Ceiling')
                 : t('कानून उल्लंघन (Breached!)', 'Statutory Breach!')}
             </span>
           </div>
 
           <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">
-              {t('उपलब्ध निक्षेप क्षमता (Headroom)', 'Available Headroom')}
+              {t('उपलब्ध निक्षेप क्षमता', 'Available Headroom')}
             </span>
             <strong className="text-emerald-400 text-base block mt-0.5 font-mono">
               {fmtCurrency(baseline.headroomCapacity, true)}
@@ -215,7 +215,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
               }`}
             >
               <Sliders className="size-4" />
-              <span>{t('पूँजी विस्तार सिमुलेटर (Simulator)', 'Expansion Simulator')}</span>
+              <span>{t('पूँजी विस्तार सिमुलेटर', 'Expansion Simulator')}</span>
             </button>
 
             <button
@@ -253,7 +253,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-white">
-                    {t('कानूनी निक्षेप संकलन क्षमता उपयोग (Headroom Utilization):', 'Capacity Utilization:')}
+                    {t('कानूनी निक्षेप संकलन क्षमता उपयोग:', 'Capacity Utilization:')}
                   </span>
                   <span className="font-mono font-bold text-emerald-400">
                     {baseline.headroomUtilizationPercent}% ({baseline.depositToCoreCapitalRatio}x / १५.०x)
@@ -282,28 +282,28 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
                 <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
                   <h4 className="font-bold text-white flex items-center gap-2">
                     <Building className="size-4 text-emerald-400" />
-                    <span>{t('प्राथमिक पूँजी कोषको संरचना (Core Capital Components)', 'Core Capital Structure')}</span>
+                    <span>{t('प्राथमिक पूँजी कोषको संरचना', 'Core Capital Structure')}</span>
                   </h4>
 
                   <div className="space-y-1.5 divide-y divide-slate-800/80 text-slate-300">
                     <div className="flex items-center justify-between pt-1">
-                      <span>{t('१. चुक्ता शेयर पूँजी (Paid-up Share Capital)', 'Paid-up Share Capital')}</span>
+                      <span>{t('१. चुक्ता शेयर पूँजी', 'Paid-up Share Capital')}</span>
                       <strong className="font-mono text-white">{fmtCurrency(capital.paidUpShareCapital, true)}</strong>
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <span>{t('२. साधारण जगेडा कोष (General Statutory Reserve)', 'General Reserve')}</span>
+                      <span>{t('२. साधारण जगेडा कोष', 'General Reserve')}</span>
                       <strong className="font-mono text-white">{fmtCurrency(capital.generalReserveFund, true)}</strong>
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <span>{t('३. पूँजीगत जगेडा कोष (Capital Reserve)', 'Capital Reserve')}</span>
+                      <span>{t('३. पूँजीगत जगेडा कोष', 'Capital Reserve')}</span>
                       <strong className="font-mono text-white">{fmtCurrency(capital.capitalReserveFund, true)}</strong>
                     </div>
                     <div className="flex items-center justify-between pt-1">
-                      <span>{t('४. अविभाजित नाफा/घाटा (Retained Surplus)', 'Retained Surplus')}</span>
+                      <span>{t('४. अविभाजित नाफा/घाटा', 'Retained Surplus')}</span>
                       <strong className="font-mono text-white">{fmtCurrency(capital.undividedProfit, true)}</strong>
                     </div>
                     <div className="flex items-center justify-between pt-2 font-bold text-emerald-300">
-                      <span>{t('जम्मा प्राथमिक पूँजी (Total Core Capital):', 'Total Core Capital:')}</span>
+                      <span>{t('जम्मा प्राथमिक पूँजी:', 'Total Core Capital:')}</span>
                       <strong className="font-mono text-base">{fmtCurrency(baseline.totalCoreCapital, true)}</strong>
                     </div>
                   </div>
@@ -313,7 +313,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
                 <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
                   <h4 className="font-bold text-white flex items-center gap-2">
                     <PieChart className="size-4 text-sky-400" />
-                    <span>{t('निक्षेप योजना अनुसार वितरण (Product Breakdown)', 'Deposit Distribution by Product')}</span>
+                    <span>{t('निक्षेप योजना अनुसार वितरण', 'Deposit Distribution by Product')}</span>
                   </h4>
 
                   <div className="space-y-1.5 divide-y divide-slate-800/80 text-slate-300">
@@ -360,7 +360,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
                     <strong className="block text-white">{t('निक्षेप विविधीकरण सन्तोषजनक', 'Deposit Diversification Healthy')}</strong>
                     <span className="text-[11px]">
                       {t(
-                        'कुनै पनि एकल सदस्यको निक्षेप कुल दायित्वको १०% सीमाभन्दा बढी छैन। HHI Index: ',
+                        'कुनै पनि एकल सदस्यको निक्षेप कुल दायित्वको १०% सीमाभन्दा बढी छैन। HHI Index:',
                         'No single member exceeds the 10% deposit concentration ceiling. HHI Index: '
                       )}
                       <span className="font-mono font-bold text-white">{baseline.hhiIndex}</span>
@@ -443,7 +443,7 @@ export const DepositCeilingModal: React.FC<DepositCeilingModalProps> = ({
               {/* Projected Result Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                  <span className="text-slate-400 text-[11px] block">{t('प्रक्षेपित अनुपात (Projected Ratio)', 'Projected Ratio')}</span>
+                  <span className="text-slate-400 text-[11px] block">{t('प्रक्षेपित अनुपात', 'Projected Ratio')}</span>
                   <div className="flex items-center gap-2 mt-1">
                     <strong
                       className={`text-lg font-mono font-black ${

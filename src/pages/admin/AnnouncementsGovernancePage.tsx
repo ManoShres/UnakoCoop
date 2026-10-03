@@ -158,7 +158,7 @@ export function AnnouncementsGovernancePage() {
             )}
           >
             <BookOpen className="size-4" />
-            <span>{t('सञ्चालक बैठक (Minute Book)', 'Board Minute Book')}</span>
+            <span>{t('सञ्चालक बैठक', 'Board Minute Book')}</span>
           </button>
           <button
             onClick={() => setShowElectionModal(true)}
@@ -174,7 +174,7 @@ export function AnnouncementsGovernancePage() {
             type="button"
           >
             <GitMerge className="size-4" />
-            <span>{t('सहकारी एकीकरण (Merger)', 'Coop Merger')}</span>
+            <span>{t('सहकारी एकीकरण', 'Coop Merger')}</span>
           </button>
           <button
             onClick={() => setShowSupervisoryModal(true)}
@@ -182,7 +182,7 @@ export function AnnouncementsGovernancePage() {
             type="button"
           >
             <Scale className="size-4" />
-            <span>{t('लेखा सुपरीवेक्षण समिति (Audit)', 'Supervisory Audit')}</span>
+            <span>{t('लेखा सुपरीवेक्षण समिति', 'Supervisory Audit')}</span>
           </button>
           <button
             onClick={() => setShowSmsModal(true)}

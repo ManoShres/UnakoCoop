@@ -108,7 +108,7 @@ export function CoopSettingsPage() {
           }`}
         >
           <Palette className="size-4" />
-          <span>{t('रूपरेखा तथा सुविधाहरू (Appearance & Features)', 'Appearance & Features')}</span>
+          <span>{t('रूपरेखा तथा सुविधाहरू', 'Appearance & Features')}</span>
         </button>
 
         <button
@@ -121,7 +121,7 @@ export function CoopSettingsPage() {
           }`}
         >
           <Building2 className="size-4" />
-          <span>{t('संस्थागत दर्ता विवरण (Organization Details)', 'Organization Details')}</span>
+          <span>{t('संस्थागत दर्ता विवरण', 'Organization Details')}</span>
         </button>
       </div>
 
@@ -264,7 +264,7 @@ export function CoopSettingsPage() {
             <div className="mt-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <div>
                 <div className="font-bold text-slate-900 dark:text-white text-xs">
-                  {t('प्रणाली मोड: ', 'System Mode: ')}
+                  {t('प्रणाली मोड:', 'System Mode: ')}
                   {status === 'NORMAL'
                     ? t('नियमित २४/७ सञ्चालन', 'Standard 24/7 Operations')
                     : t('तालिकाबद्ध मर्मत विन्डो', 'Scheduled Maintenance Window')}

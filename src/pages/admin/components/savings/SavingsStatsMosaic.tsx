@@ -21,7 +21,7 @@ export function SavingsStatsMosaic({ totalDeposits, activeAccountsCount }: Savin
 
       <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="text-xs text-slate-500 font-bold uppercase">{t('साधारण बचत प्रतिफल', 'Regular Savings APY')}</div>
-        <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 mt-1">{fmtPercent('8.00')} p.a.</div>
+        <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 mt-1">{fmtPercent('8.00')} {t('वार्षिक', 'p.a.')}</div>
         <div className="text-[11px] text-emerald-500 mt-0.5">{t('त्रैमासिक सीबीएस चक्र', 'Quarterly CBS Compound Cycle')}</div>
       </div>
 

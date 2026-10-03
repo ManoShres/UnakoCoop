@@ -29,7 +29,7 @@ export const CollectionStatsStrip: React.FC<CollectionStatsStripProps> = ({
         <div className="text-2xl font-black text-blue-600 dark:text-blue-400">{fmtCurrency(entryTotal, true)}</div>
         {activeMeeting && (
           <div className="text-[10px] text-slate-400 mt-1">
-            {t('बैठकमा दर्ता: ', 'Meeting total: ')}
+            {t('बैठकमा दर्ता:', 'Meeting total: ')}
             {fmtCurrency(activeMeeting.totalCollected, true)}
           </div>
         )}

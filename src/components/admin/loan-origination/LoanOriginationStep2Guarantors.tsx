@@ -40,7 +40,7 @@ export const LoanOriginationStep2Guarantors: React.FC<LoanOriginationStep2Guaran
       {/* Guarantor 1 */}
       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
         <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-          <span>{t('पहिलो जमानीकर्ता सदस्य (Guarantor 1) *', 'First Co-Guarantor *')}</span>
+          <span>{t('पहिलो जमानीकर्ता सदस्य *', 'First Co-Guarantor *')}</span>
           {guarantor1 && (
             <span className="text-[11px] font-mono text-emerald-600 font-bold">
               {fmtDigits(guarantor1.memberNo)}
@@ -55,7 +55,7 @@ export const LoanOriginationStep2Guarantors: React.FC<LoanOriginationStep2Guaran
           <option value="">{t('-- सदस्य छान्नुहोस् --', '-- Select Member --')}</option>
           {members.map((m) => (
             <option key={m.id} value={m.id}>
-              {t(m.nameNepali || m.name, m.name)} ({fmtDigits(m.memberNo)}) • {t('फोन: ', 'Phone: ')}{fmtPhone(m.phone)} • {t('बचत: ', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
+              {t(m.nameNepali || m.name, m.name)} ({fmtDigits(m.memberNo)}) • {t('फोन:', 'Phone: ')}{fmtPhone(m.phone)} • {t('बचत:', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
             </option>
           ))}
         </select>
@@ -82,7 +82,7 @@ export const LoanOriginationStep2Guarantors: React.FC<LoanOriginationStep2Guaran
       {/* Guarantor 2 */}
       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
         <div className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-          <span>{t('दोस्रो जमानीकर्ता सदस्य (Guarantor 2) *', 'Second Co-Guarantor *')}</span>
+          <span>{t('दोस्रो जमानीकर्ता सदस्य *', 'Second Co-Guarantor *')}</span>
           {guarantor2 && (
             <span className="text-[11px] font-mono text-emerald-600 font-bold">
               {fmtDigits(guarantor2.memberNo)}
@@ -97,7 +97,7 @@ export const LoanOriginationStep2Guarantors: React.FC<LoanOriginationStep2Guaran
           <option value="">{t('-- सदस्य छान्नुहोस् --', '-- Select Member --')}</option>
           {members.map((m) => (
             <option key={m.id} value={m.id}>
-              {t(m.nameNepali || m.name, m.name)} ({fmtDigits(m.memberNo)}) • {t('फोन: ', 'Phone: ')}{fmtPhone(m.phone)} • {t('बचत: ', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
+              {t(m.nameNepali || m.name, m.name)} ({fmtDigits(m.memberNo)}) • {t('फोन:', 'Phone: ')}{fmtPhone(m.phone)} • {t('बचत:', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
             </option>
           ))}
         </select>

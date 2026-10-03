@@ -64,7 +64,7 @@ export function MudhatiBookingModal({ isOpen, onClose, onSubmit }: MudhatiBookin
                 <div className="flex flex-col items-center sm:items-end gap-1.5">
                   <span className="px-3 py-1 rounded-full bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold flex items-center gap-1.5 shadow-xs">
                     <Medal className="w-4 h-4" />
-                    {t('१०.०% p.a. वार्षिक निश्चित दर', '10.0% p.a. Fixed Rate')}
+                    {t('१०.०% वार्षिक निश्चित दर', '10.0% p.a. Fixed Rate')}
                   </span>
                   <span className="text-xs font-semibold text-on-surface flex items-center gap-1">
                     <Calendar className="w-3.5 h-3.5 text-primary" />

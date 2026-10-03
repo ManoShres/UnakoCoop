@@ -31,7 +31,7 @@ export function MemberStandingAndAdvisory() {
           <div className="flex items-center gap-2">
             <Repeat className="size-4 text-emerald-600" />
             <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-              {t('स्थायी निर्देशनहरू (Standing Rules)', 'Standing Auto-Debits')}
+              {t('स्थायी निर्देशनहरू', 'Standing Auto-Debits')}
             </h3>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-400">

@@ -32,7 +32,14 @@ export const MemberPatronageSection: React.FC<MemberPatronageSectionProps> = ({
   onSuccessToast,
 }) => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
-  const { members, savings, addTransaction, coopSettings } = useCoopStore();
+  const {
+    members,
+    savings,
+    transactions,
+    adjustSavingsBalance,
+    issueShareCertificate,
+    coopSettings,
+  } = useCoopStore();
 
   const currentMember = members[0];
   const memberSavings = currentMember
@@ -40,57 +47,68 @@ export const MemberPatronageSection: React.FC<MemberPatronageSectionProps> = ({
     : [];
 
   const [selectedSavingsAcc, setSelectedSavingsAcc] = useState<string>(
-    memberSavings[0]?.accountNo || '004-10294-88-01'
+    memberSavings[0]?.accountNo || 'SAV-001-88219'
   );
   const [claimMode, setClaimMode] = useState<'SAVINGS' | 'SHARES'>('SAVINGS');
-  const [isClaimed, setIsClaimed] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
 
   // Compute this member's patronage data
+  const memberId = currentMember?.id || 'm1';
   const metric = useMemo(() => {
-    return getMemberPatronageMetric(currentMember?.id || 'mem-1');
-  }, [currentMember?.id]);
+    return getMemberPatronageMetric(memberId);
+  }, [memberId]);
+
+  const rawDistribution = useMemo<MemberPatronageDistribution>(() => {
+    return getMemberPatronageDistribution(memberId);
+  }, [memberId]);
+
+  // Persistently determine if already claimed from cooperative transaction ledger
+  const alreadyClaimed = useMemo(() => {
+    return transactions.some(
+      (tx) =>
+        tx.referenceNo === rawDistribution.warrantNumber ||
+        tx.description.includes(rawDistribution.warrantNumber)
+    );
+  }, [transactions, rawDistribution.warrantNumber]);
+
+  const isClaimed = alreadyClaimed;
 
   const distribution = useMemo<MemberPatronageDistribution>(() => {
-    const dist = getMemberPatronageDistribution(currentMember?.id || 'mem-1');
     if (isClaimed) {
       return {
-        ...dist,
+        ...rawDistribution,
         status: 'DISBURSED',
         payoutMode: claimMode === 'SAVINGS' ? 'SAVINGS_ACCOUNT' : 'SHARE_CAPITAL',
       };
     }
-    return dist;
-  }, [currentMember?.id, isClaimed, claimMode]);
+    return rawDistribution;
+  }, [rawDistribution, isClaimed, claimMode]);
 
   const eligibleKitta = Math.floor(distribution.netPatronageRefund / 100);
 
   const handleClaim = () => {
-    if (distribution.netPatronageRefund <= 0 || isClaimed) return;
+    if (distribution.netPatronageRefund <= 0 || isClaimed || alreadyClaimed) return;
     setIsProcessing(true);
 
     try {
       if (claimMode === 'SAVINGS') {
-        addTransaction({
-          memberId: currentMember?.id || 'mem-1',
-          type: 'DEPOSIT',
-          amount: distribution.netPatronageRefund,
-          description: `संरक्षित पूँजी फिर्ता कोष (Patronage Refund Warrant: ${distribution.warrantNumber})`,
-          referenceNo: distribution.warrantNumber,
-        });
+        adjustSavingsBalance(
+          selectedSavingsAcc,
+          distribution.netPatronageRefund,
+          'DEPOSIT',
+          `संरक्षित पूँजी फिर्ता कोष (Patronage Refund Warrant: ${distribution.warrantNumber})`
+        );
       } else {
-        addTransaction({
-          memberId: currentMember?.id || 'mem-1',
-          type: 'SHARE_PURCHASE',
-          amount: eligibleKitta * 100,
-          description: `संरक्षित पुँजी फिर्ताबाट थप सेयर पुँजीकरण (${eligibleKitta} कित्ता, Warrant: ${distribution.warrantNumber})`,
-          referenceNo: distribution.warrantNumber,
-        });
+        if (currentMember && eligibleKitta > 0) {
+          issueShareCertificate(
+            currentMember.id,
+            eligibleKitta,
+            distribution.warrantNumber
+          );
+        }
       }
 
-
-      setIsClaimed(true);
       try {
         confetti({
           particleCount: 80,
@@ -137,7 +155,7 @@ export const MemberPatronageSection: React.FC<MemberPatronageSectionProps> = ({
               <span>{t('सहकारी ऐन २०७४ दफा ४१ • वैधानिक अधिकार', 'Cooperative Act 2074 Sec 41 • Statutory Right')}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              {t('सदस्य संरक्षित पूँजी फिर्ता कोष (Patronage Refund)', 'Member Patronage Refund Fund')}
+              {t('सदस्य संरक्षित पूँजी फिर्ता कोष', 'Member Patronage Refund Fund')}
             </h2>
             <p className="text-sm text-emerald-100/90 leading-relaxed">
               {t(
@@ -254,7 +272,7 @@ export const MemberPatronageSection: React.FC<MemberPatronageSectionProps> = ({
               </h3>
             </div>
             <p className="text-xs text-on-surface-variant mt-1">
-              {t('पुर्जी नम्बर (Warrant No):', 'Warrant Number:')}{' '}
+              {t('पुर्जी नम्बर:', 'Warrant Number:')}{' '}
               <span className="font-mono font-bold text-on-surface">{distribution.warrantNumber}</span>
               {' • '}{t('आर्थिक वर्ष:', 'Fiscal Year:')}{' '}
               <span className="font-bold text-on-surface">२०८०/०८१</span>
@@ -376,7 +394,7 @@ export const MemberPatronageSection: React.FC<MemberPatronageSectionProps> = ({
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>
                   {t(
-                    'आयकर ऐन २०५८ अनुसार कारोबार फिर्ता (Patronage Rebate) मा ०% अग्रिम कर कट्टी हुन्छ।',
+                    'आयकर ऐन २०५८ अनुसार कारोबार फिर्ता मा ०% अग्रिम कर कट्टी हुन्छ।',
                     'As per Income Tax Act 2058, 0% withholding tax applies to transaction patronage rebates.'
                   )}
                 </span>
@@ -433,10 +451,10 @@ export const MemberPatronageSection: React.FC<MemberPatronageSectionProps> = ({
         <div className="p-8 max-w-[210mm] mx-auto bg-white text-black font-sans border-2 border-emerald-900 rounded-xl space-y-6">
           <div className="text-center border-b-2 border-emerald-900 pb-4">
             <h1 className="text-2xl font-black uppercase text-emerald-900">
-              {coopSettings?.name || 'उनाको सामाजिक बचत तथा ऋण सहकारी संस्था लिमिटेड'}
+              {coopSettings?.nameNepali || coopSettings?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}
             </h1>
             <p className="text-xs font-medium text-gray-700">
-              गढवा गाउँपालिका, दाङ, लुम्बिनी प्रदेश | दर्ता नं: २०२/०६५/०६६ | पान: ३००१२४८९०
+              {coopSettings?.addressNepali || coopSettings?.address || 'गढवा-५, चैनपुर, दाङ'} | दर्ता नं: {coopSettings?.regNo || '१२९०/०६७/०६८'} | पान: {coopSettings?.panNo || '३००१२४८९०'}
             </p>
             <h2 className="text-lg font-bold text-emerald-800 mt-2 uppercase tracking-wide">
               संरक्षित पूँजी फिर्ता पुर्जी (Patronage Refund Warrant)

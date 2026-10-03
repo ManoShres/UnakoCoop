@@ -76,7 +76,7 @@ export const OnboardingStep4NomineeShares: React.FC<OnboardingStep4NomineeShares
       <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 space-y-3">
         <div className="text-xs font-black text-amber-900 dark:text-amber-300 flex items-center gap-2">
           <HeartHandshake className="size-4 text-amber-600" />
-          <span>{t('इच्छाइएको कानुनी हकवाला (Nominee Information)', 'Designated Legal Nominee')}</span>
+          <span>{t('इच्छाइएको कानुनी हकवाला', 'Designated Legal Nominee')}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -93,7 +93,7 @@ export const OnboardingStep4NomineeShares: React.FC<OnboardingStep4NomineeShares
           </div>
           <div>
             <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-              {t('नाता (Relationship) *', 'Relationship *')}
+              {t('नाता *', 'Relationship *')}
             </label>
             <select
               value={nomineeRelation}
@@ -144,21 +144,21 @@ export const OnboardingStep4NomineeShares: React.FC<OnboardingStep4NomineeShares
               className="size-3.5 rounded text-amber-600 focus:ring-amber-500"
             />
             <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-              {t('हकवाला १८ वर्ष मुनिको नाबालक छ (Nominee is a minor under 18 years)', 'Nominee is a minor under 18')}
+              {t('हकवाला १८ वर्ष मुनिको नाबालक छ', 'Nominee is a minor under 18')}
             </span>
           </label>
           {nomineeIsMinor && (
             <div className="grid grid-cols-2 gap-3 mt-2">
               <input
                 type="text"
-                placeholder={t('संरक्षकको नाम (Guardian Name)', 'Guardian Name')}
+                placeholder={t('संरक्षकको नाम', 'Guardian Name')}
                 value={nomineeGuardianName}
                 onChange={(e) => setNomineeGuardianName(e.target.value)}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
               />
               <input
                 type="text"
-                placeholder={t('संरक्षकको नाता (Guardian Relation)', 'Guardian Relation')}
+                placeholder={t('संरक्षकको नाता', 'Guardian Relation')}
                 value={nomineeGuardianRelation}
                 onChange={(e) => setNomineeGuardianRelation(e.target.value)}
                 className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
@@ -183,13 +183,13 @@ export const OnboardingStep4NomineeShares: React.FC<OnboardingStep4NomineeShares
             className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-mono font-bold"
           />
           <div className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-bold mt-1">
-            = रु. {fmtCurrency(shareKitta * 100, true)}
+            = {fmtCurrency(shareKitta * 100, true)}
           </div>
         </div>
 
         <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            {t('प्रवेश शुल्क (Entrance Fee)', 'Entrance Fee (NPR)')}
+            {t('प्रवेश शुल्क', 'Entrance Fee (NPR)')}
           </label>
           <input
             type="number"
@@ -226,7 +226,7 @@ export const OnboardingStep4NomineeShares: React.FC<OnboardingStep4NomineeShares
       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-2">
         <div className="text-xs font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">
           <CreditCard className="size-4 text-blue-500" />
-          <span>{t('लाभांश भुक्तानी बैंक खाता (Dividend Payout Bank Account)', 'Dividend Payout Bank Account')}</span>
+          <span>{t('लाभांश भुक्तानी बैंक खाता', 'Dividend Payout Bank Account')}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <input

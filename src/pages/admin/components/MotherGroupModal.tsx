@@ -127,7 +127,7 @@ export function MotherGroupModal({
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('केन्द्र कोड (Center Code) *', 'Center Code *')}
+                  {t('केन्द्र कोड *', 'Center Code *')}
                 </label>
                 <input
                   value={gGroupCode}
@@ -142,7 +142,7 @@ export function MotherGroupModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('कार्यक्षेत्र / स्थान (Location) *', 'Location / Village *')}
+                  {t('कार्यक्षेत्र / स्थान *', 'Location / Village *')}
                 </label>
                 <input
                   value={gLocation}
@@ -203,12 +203,12 @@ export function MotherGroupModal({
           {/* SECTION 3: Committee Leadership */}
           <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 space-y-3">
             <div className="text-xs font-bold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider">
-              {t('३. समूह कार्यसमिति नेतृत्व (Committee Leadership)', '3. Committee Leadership')}
+              {t('३. समूह कार्यसमिति नेतृत्व', '3. Committee Leadership')}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('समूह अध्यक्ष (Chairperson)', 'Chairperson')}
+                  {t('समूह अध्यक्ष', 'Chairperson')}
                 </label>
                 <input
                   value={gChairperson}
@@ -219,7 +219,7 @@ export function MotherGroupModal({
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('समूह सचिव (Secretary)', 'Secretary')}
+                  {t('समूह सचिव', 'Secretary')}
                 </label>
                 <input
                   value={gSecretary}
@@ -230,7 +230,7 @@ export function MotherGroupModal({
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('समूह कोषाध्यक्ष (Treasurer)', 'Treasurer')}
+                  {t('समूह कोषाध्यक्ष', 'Treasurer')}
                 </label>
                 <input
                   value={gTreasurer}

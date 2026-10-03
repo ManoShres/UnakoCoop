@@ -179,7 +179,7 @@ export const KeyboardShortcutGuide: React.FC<KeyboardShortcutGuideProps> = ({ is
           <div>
             <div className="flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
               <Globe className="size-3.5" />
-              <span>{t('सार्वभौमिक सर्टकटहरू (Global Shortcuts)', 'Global Action Shortcuts')}</span>
+              <span>{t('सार्वभौमिक सर्टकटहरू', 'Global Action Shortcuts')}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {globalShortcuts.map((item, idx) => (
@@ -209,7 +209,7 @@ export const KeyboardShortcutGuide: React.FC<KeyboardShortcutGuideProps> = ({ is
           <div>
             <div className="flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
               <Compass className="size-3.5" />
-              <span>{t('प्रशासक कन्सोल द्रुत नेभिगेसन (Admin Navigation)', 'Admin Console Navigation')}</span>
+              <span>{t('प्रशासक कन्सोल द्रुत नेभिगेसन', 'Admin Console Navigation')}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {adminShortcuts.map((item, idx) => (
@@ -239,7 +239,7 @@ export const KeyboardShortcutGuide: React.FC<KeyboardShortcutGuideProps> = ({ is
           <div>
             <div className="flex items-center gap-2 mb-3 text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
               <Layers className="size-3.5" />
-              <span>{t('सदस्य पोर्टल द्रुत नेभिगेसन (Member Portal)', 'Member Portal Navigation')}</span>
+              <span>{t('सदस्य पोर्टल द्रुत नेभिगेसन', 'Member Portal Navigation')}</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
               {memberShortcuts.map((item, idx) => (

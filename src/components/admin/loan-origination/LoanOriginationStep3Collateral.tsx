@@ -48,20 +48,20 @@ export const LoanOriginationStep3Collateral: React.FC<LoanOriginationStep3Collat
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            {t('धितो प्रकार (Collateral Type) *', 'Collateral Type *')}
+            {t('धितो प्रकार *', 'Collateral Type *')}
           </label>
           <select
             value={collateralType}
             onChange={(e) => onCollateralTypeChange(e.target.value as CollateralType)}
             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
           >
-            <option value="LAND_LALPURJA">{t('जग्गा लालपुर्जा (Land Lalpurja)', 'Land Lalpurja')}</option>
-            <option value="BUILDING">{t('घर तथा जग्गा (House & Land)', 'House & Land')}</option>
-            <option value="CASH_FD_PLEDGE">{t('मुद्दती रसिद रोक्का (Fixed Deposit Pledge)', 'FD Pledge')}</option>
-            <option value="SHARE_PLEDGE">{t('सहकारी शेयर रोक्का (Share Pledge)', 'Share Pledge')}</option>
-            <option value="LIVESTOCK">{t('गाई/भैंसी पशुपालन (Livestock)', 'Livestock')}</option>
-            <option value="GOLD_JEWELLERY">{t('सुन/चाँदी गहना (Gold Jewellery)', 'Gold Jewellery')}</option>
-            <option value="VEHICLE">{t('सवारी साधन (Vehicle)', 'Vehicle')}</option>
+            <option value="LAND_LALPURJA">{t('जग्गा लालपुर्जा', 'Land Lalpurja')}</option>
+            <option value="BUILDING">{t('घर तथा जग्गा', 'House & Land')}</option>
+            <option value="CASH_FD_PLEDGE">{t('मुद्दती रसिद रोक्का', 'FD Pledge')}</option>
+            <option value="SHARE_PLEDGE">{t('सहकारी शेयर रोक्का', 'Share Pledge')}</option>
+            <option value="LIVESTOCK">{t('गाई/भैंसी पशुपालन', 'Livestock')}</option>
+            <option value="GOLD_JEWELLERY">{t('सुन/चाँदी गहना', 'Gold Jewellery')}</option>
+            <option value="VEHICLE">{t('सवारी साधन', 'Vehicle')}</option>
           </select>
         </div>
 
@@ -109,7 +109,7 @@ export const LoanOriginationStep3Collateral: React.FC<LoanOriginationStep3Collat
 
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            {t('कर्जा-धितो अनुपात (LTV Ratio)', 'Loan-to-Value (LTV)')}
+            {t('कर्जा-धितो अनुपात', 'Loan-to-Value (LTV)')}
           </label>
           <div className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono font-bold flex items-center justify-between">
             <span>{fmtPercent(ltvRatio)}</span>
@@ -135,7 +135,7 @@ export const LoanOriginationStep3Collateral: React.FC<LoanOriginationStep3Collat
       {/* Disbursement Channel */}
       <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-2">
         <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
-          {t('कर्जा रकम भुक्तानी हुने माध्यम (Disbursement Method) *', 'Disbursement Channel *')}
+          {t('कर्जा रकम भुक्तानी हुने माध्यम *', 'Disbursement Channel *')}
         </label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <label

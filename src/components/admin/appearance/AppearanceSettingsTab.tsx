@@ -40,7 +40,7 @@ export const AppearanceSettingsTab: React.FC = () => {
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs font-bold text-primary">
             <Sparkles className="size-4" />
-            <span>{t('प्रत्यक्ष दृश्य इन्जिन (Real-time Live Engine)', 'Real-time Live Theming Engine')}</span>
+            <span>{t('प्रत्यक्ष दृश्य इन्जिन', 'Real-time Live Theming Engine')}</span>
           </div>
           <h3 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white">
             {t('सहकारी ब्रान्डिङ तथा सुविधाहरू अनुकूलन', 'Cooperative Branding & Feature Management')}

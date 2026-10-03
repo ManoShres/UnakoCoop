@@ -189,7 +189,7 @@ export const MemberAgriQuotaSection: React.FC = () => {
             <Wheat className="size-4 text-amber-500" />
           </div>
           <div className="text-xl font-black text-amber-600 dark:text-amber-400">
-            {t('बर्खे धान (Paddy)', 'Monsoon Paddy')}
+            {t('बर्खे धान', 'Monsoon Paddy')}
           </div>
           <div className="text-xs text-slate-500 mt-1">
             {t('२०८१/८२ सिजन • साउन-कात्तिक', 'FY 2081/82 Season')}

@@ -229,19 +229,19 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
             </span>
           </div>
           <div>
-            <span className="text-slate-400 block font-medium">{t('क वर्ग (Prime 85-100):', 'Grade A (Prime):')}</span>
+            <span className="text-slate-400 block font-medium">{t('क वर्ग:', 'Grade A (Prime):')}</span>
             <span className="text-sm font-black text-emerald-600 font-mono">
               {fmtCount(gradeCounts.gradeA)} {t('जना', 'members')}
             </span>
           </div>
           <div>
-            <span className="text-slate-400 block font-medium">{t('ख वर्ग (Standard 70-84):', 'Grade B (Standard):')}</span>
+            <span className="text-slate-400 block font-medium">{t('ख वर्ग:', 'Grade B (Standard):')}</span>
             <span className="text-sm font-black text-blue-600 font-mono">
               {fmtCount(gradeCounts.gradeB)} {t('जना', 'members')}
             </span>
           </div>
           <div>
-            <span className="text-slate-400 block font-medium">{t('ग वर्ग (Conditional 50-69):', 'Grade C (Conditional):')}</span>
+            <span className="text-slate-400 block font-medium">{t('ग वर्ग:', 'Grade C (Conditional):')}</span>
             <span className="text-sm font-black text-amber-600 font-mono">
               {fmtCount(gradeCounts.gradeC)} {t('जना', 'members')}
             </span>
@@ -276,7 +276,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
             }`}
           >
             <FileText className="size-4" />
-            <span>{t('२. कर्जा मूल्याङ्कन फाराम (Appraisal Sheet)', '2. Credit Appraisal Sheet')}</span>
+            <span>{t('२. कर्जा मूल्याङ्कन फाराम', '2. Credit Appraisal Sheet')}</span>
           </button>
           <button
             onClick={() => setActiveTab('PORTFOLIO_MATRIX')}
@@ -383,7 +383,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-medium text-slate-500 mb-1">{t('प्रमाणित मासिक आय (Monthly Income)', 'Monthly Income')}</label>
+                        <label className="block font-medium text-slate-500 mb-1">{t('प्रमाणित मासिक आय', 'Monthly Income')}</label>
                         <input
                           type="number"
                           step={5000}
@@ -393,7 +393,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="block font-medium text-slate-500 mb-1">{t('प्रस्तावित कुल मासिक किस्ता (Monthly Debt)', 'Monthly Debt')}</label>
+                        <label className="block font-medium text-slate-500 mb-1">{t('प्रस्तावित कुल मासिक किस्ता', 'Monthly Debt')}</label>
                         <input
                           type="number"
                           step={2000}
@@ -406,7 +406,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-medium text-slate-500 mb-1">{t('सेयर पुँजी मौज्दात (Share Capital)', 'Share Capital')}</label>
+                        <label className="block font-medium text-slate-500 mb-1">{t('सेयर पुँजी मौज्दात', 'Share Capital')}</label>
                         <input
                           type="number"
                           step={5000}
@@ -416,7 +416,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                         />
                       </div>
                       <div>
-                        <label className="block font-medium text-slate-500 mb-1">{t('नियमित बचत मौज्दात (Savings)', 'Regular Savings')}</label>
+                        <label className="block font-medium text-slate-500 mb-1">{t('नियमित बचत मौज्दात', 'Regular Savings')}</label>
                         <input
                           type="number"
                           step={5000}
@@ -431,7 +431,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                   {/* Risk Gate Toggles */}
                   <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/40 space-y-2.5">
                     <div className="font-bold text-slate-900 dark:text-white">
-                      {t('साख इतिहास तथा सुरक्षण सर्तहरू (Risk Controls)', 'Risk Controls')}
+                      {t('साख इतिहास तथा सुरक्षण सर्तहरू', 'Risk Controls')}
                     </div>
 
                     <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
@@ -442,7 +442,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                         className="size-4 rounded accent-rose-600"
                       />
                       <span className="font-bold text-rose-600">
-                        {t('CIB मा कालोसूची वा खराब कर्जा इतिहास रहेको (Default Flag)', 'CIB Default Flag')}
+                        {t('CIB मा कालोसूची वा खराब कर्जा इतिहास रहेको', 'CIB Default Flag')}
                       </span>
                     </label>
 
@@ -463,12 +463,12 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                         onChange={(e) => setHasStrongGuarantor(e.target.checked)}
                         className="size-4 rounded accent-emerald-600"
                       />
-                      <span>{t('सबल व्यक्तिगत जमानीकर्ता (Guarantor with verifiable income)', 'Verifiable Guarantor')}</span>
+                      <span>{t('सबल व्यक्तिगत जमानीकर्ता', 'Verifiable Guarantor')}</span>
                     </label>
 
                     <div className="pt-2">
                       <div className="flex justify-between mb-1">
-                        <span className="font-medium text-slate-500">{t('परियोजना सम्भाव्यता स्कोर (Feasibility):', 'Feasibility:')}</span>
+                        <span className="font-medium text-slate-500">{t('परियोजना सम्भाव्यता स्कोर:', 'Feasibility:')}</span>
                         <span className="font-mono font-bold text-blue-600">{projectFeasibilityScore} / 15</span>
                       </div>
                       <input
@@ -489,7 +489,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                   <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white space-y-4 shadow-md">
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">
-                        {t('कुल प्राप्ताङ्क (Total Score)', 'Total Score')}
+                        {t('कुल प्राप्ताङ्क', 'Total Score')}
                       </span>
                       {getGradeBadge(currentEvaluation.grade)}
                     </div>
@@ -541,7 +541,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                       {/* Character */}
                       <div>
                         <div className="flex justify-between text-[11px] font-medium">
-                          <span>{t('१. चरित्र तथा साख (Character):', 'Character:')}</span>
+                          <span>{t('१. चरित्र तथा साख:', 'Character:')}</span>
                           <span className="font-mono font-bold text-blue-600">
                             {currentEvaluation.pillarScores.CHARACTER.score} / 25
                           </span>
@@ -557,7 +557,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                       {/* Capacity */}
                       <div>
                         <div className="flex justify-between text-[11px] font-medium">
-                          <span>{t('२. भुक्तानी क्षमता (Capacity):', 'Capacity:')}</span>
+                          <span>{t('२. भुक्तानी क्षमता:', 'Capacity:')}</span>
                           <span className="font-mono font-bold text-emerald-600">
                             {currentEvaluation.pillarScores.CAPACITY.score} / 25
                           </span>
@@ -573,7 +573,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                       {/* Capital */}
                       <div>
                         <div className="flex justify-between text-[11px] font-medium">
-                          <span>{t('३. पुँजी तथा सेयर (Capital):', 'Capital:')}</span>
+                          <span>{t('३. पुँजी तथा सेयर:', 'Capital:')}</span>
                           <span className="font-mono font-bold text-purple-600">
                             {currentEvaluation.pillarScores.CAPITAL.score} / 15
                           </span>
@@ -589,7 +589,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                       {/* Collateral */}
                       <div>
                         <div className="flex justify-between text-[11px] font-medium">
-                          <span>{t('४. धितो सुरक्षण (Collateral):', 'Collateral:')}</span>
+                          <span>{t('४. धितो सुरक्षण:', 'Collateral:')}</span>
                           <span className="font-mono font-bold text-amber-600">
                             {currentEvaluation.pillarScores.COLLATERAL.score} / 20
                           </span>
@@ -605,7 +605,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                       {/* Conditions */}
                       <div>
                         <div className="flex justify-between text-[11px] font-medium">
-                          <span>{t('५. व्यावसायिक सर्त (Conditions):', 'Conditions:')}</span>
+                          <span>{t('५. व्यावसायिक सर्त:', 'Conditions:')}</span>
                           <span className="font-mono font-bold text-teal-600">
                             {currentEvaluation.pillarScores.CONDITIONS.score} / 15
                           </span>
@@ -631,7 +631,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                 {/* Formal Header */}
                 <div className="text-center space-y-1 pb-4 border-b border-slate-200 dark:border-slate-800">
                   <div className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-widest">
-                    {t('ऋण उपसमिति मूल्याङ्कन प्रतिवेदन (Credit Subcommittee Appraisal)', 'Credit Subcommittee Appraisal')}
+                    {t('ऋण उपसमिति मूल्याङ्कन प्रतिवेदन', 'Credit Subcommittee Appraisal')}
                   </div>
                   <h3 className="text-lg font-black text-slate-900 dark:text-white">
                     {t('उनको बचत तथा ऋण सहकारी संस्था लिमिटेड', 'UNAKO SAVING & CREDIT COOPERATIVE SOCIETY LTD.')}
@@ -656,7 +656,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                     <span className="font-bold text-emerald-600 font-mono">{fmtCurrency(currentEvaluation.requestedAmount)}</span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block">{t('जोखिम वर्ग (Grade):', 'Risk Grade:')}</span>
+                    <span className="text-slate-400 block">{t('जोखिम वर्ग:', 'Risk Grade:')}</span>
                     <span className="font-bold text-slate-900 dark:text-white">{currentEvaluation.gradeLabelNe}</span>
                   </div>
                 </div>
@@ -666,10 +666,10 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                   <table className="w-full text-xs text-left">
                     <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
                       <tr>
-                        <th className="p-3">{t('५ स्तम्भ (Pillar)', '5 Cs Pillar')}</th>
-                        <th className="p-3 text-center">{t('पूर्णाङ्क (Max)', 'Max')}</th>
-                        <th className="p-3 text-center">{t('प्राप्ताङ्क (Score)', 'Score')}</th>
-                        <th className="p-3">{t('मूल्याङ्कन निष्कर्ष (Assessment Summary)', 'Assessment Summary')}</th>
+                        <th className="p-3">{t('५ स्तम्भ', '5 Cs Pillar')}</th>
+                        <th className="p-3 text-center">{t('पूर्णाङ्क', 'Max')}</th>
+                        <th className="p-3 text-center">{t('प्राप्ताङ्क', 'Score')}</th>
+                        <th className="p-3">{t('मूल्याङ्कन निष्कर्ष', 'Assessment Summary')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -726,7 +726,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                     </tbody>
                     <tfoot className="bg-slate-100 dark:bg-slate-800 font-bold border-t border-slate-300 dark:border-slate-700">
                       <tr>
-                        <td className="p-3 text-slate-900 dark:text-white">{t('समग्र कुल प्राप्ताङ्क (Total Score)', 'Aggregate Score')}</td>
+                        <td className="p-3 text-slate-900 dark:text-white">{t('समग्र कुल प्राप्ताङ्क', 'Aggregate Score')}</td>
                         <td className="p-3 text-center font-mono">100</td>
                         <td className="p-3 text-center font-mono font-black text-amber-600 text-sm">
                           {currentEvaluation.totalScore}
@@ -745,19 +745,19 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                     <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                       {t('दिलीप कुमार थारु', 'Dilip Kumar Tharu')}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('कर्जा अधिकृत (Loan Officer)', 'Loan Officer')}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('कर्जा अधिकृत', 'Loan Officer')}</div>
                   </div>
                   <div>
                     <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                       {t('शान्ति चौधरी', 'Shanti Chaudhary')}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('ऋण उपसमिति संयोजक (Credit Convener)', 'Credit Convener')}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('ऋण उपसमिति संयोजक', 'Credit Convener')}</div>
                   </div>
                   <div>
                     <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                       {t('अर्जुन प्रसाद शर्मा', 'Arjun Prasad Sharma')}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('व्यवस्थापक (General Manager)', 'General Manager')}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('व्यवस्थापक', 'General Manager')}</div>
                   </div>
                 </div>
 
@@ -788,7 +788,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
                   }`}
                 >
-                  {t('सबै आवेदक (All Grades)', 'All Applicants')}
+                  {t('सबै आवेदक', 'All Applicants')}
                 </button>
                 <button
                   onClick={() => setGradeFilter('GRADE_A_PRIME')}
@@ -954,7 +954,7 @@ export const CreditRiskRatingModal: React.FC<CreditRiskRatingModalProps> = ({
                     )}
                   </li>
                   <li>
-                    <strong>{t('DSTI सीमा (Debt Service to Income):', 'DSTI Benchmark:')}</strong>{' '}
+                    <strong>{t('DSTI सीमा:', 'DSTI Benchmark:')}</strong>{' '}
                     {t(
                       'ऋणीको कुल आम्दानीको अधिकतम ५०% सम्म मात्र मासिक किस्ता भार कायम हुनुपर्ने PEARLS मापदण्ड कडाइका साथ पालना गर्नुपर्नेछ।',
                       'Debt service ratio must not exceed 50% of verified monthly disposable income.'

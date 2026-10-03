@@ -248,14 +248,14 @@ export function MemberManagementPage() {
                   {/* Financials */}
                   <td className="py-3.5 px-4">
                     <div className="font-bold text-slate-900 dark:text-white">
-                      {t('बचत: ', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
+                      {t('बचत:', 'Savings: ')}{fmtCurrency(m.totalSavings, true)}
                     </div>
                     <div className="text-[11px] text-emerald-600 font-semibold">
-                      {t('सेयर: ', 'Shares: ')}{fmtCurrency(m.shareCapital, true)}
+                      {t('सेयर:', 'Shares: ')}{fmtCurrency(m.shareCapital, true)}
                     </div>
                     {m.activeLoanBalance > 0 && (
                       <div className="text-[10px] text-amber-600 font-medium">
-                        {t('कर्जा: ', 'Loan: ')}{fmtCurrency(m.activeLoanBalance, true)}
+                        {t('कर्जा:', 'Loan: ')}{fmtCurrency(m.activeLoanBalance, true)}
                       </div>
                     )}
                   </td>
@@ -286,7 +286,7 @@ export function MemberManagementPage() {
                         ? t('कारबाही आवश्यक', 'ACTION_REQUIRED')
                         : t('अस्वीकृत', 'REJECTED')}
                     </span>
-                    <div className="text-[10px] text-slate-400 mt-1 font-mono">{t('स्कोर: ', 'Score: ')}{fmtDigits(m.creditScore)}/{fmtDigits(850)}</div>
+                    <div className="text-[10px] text-slate-400 mt-1 font-mono">{t('स्कोर:', 'Score: ')}{fmtDigits(m.creditScore)}/{fmtDigits(850)}</div>
                   </td>
 
                   {/* Actions */}

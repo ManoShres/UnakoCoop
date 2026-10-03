@@ -74,7 +74,7 @@ export function MotherGroupDirectoryTab({
             {(g.chairpersonName || g.secretaryName || g.treasurerName) && (
               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/60 text-[11px] space-y-1">
                 <div className="font-bold text-slate-700 dark:text-slate-300 text-[10px] uppercase tracking-wider">
-                  {t('समिति पदाधिकारीहरू (Leadership)', 'Committee Leadership')}
+                  {t('समिति पदाधिकारीहरू', 'Committee Leadership')}
                 </div>
                 <div className="text-slate-600 dark:text-slate-300 flex flex-wrap gap-x-2 gap-y-0.5">
                   {g.chairpersonName && (

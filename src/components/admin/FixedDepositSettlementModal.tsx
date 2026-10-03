@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { SavingsAccount, Member } from '../../types';
 import {
   FdSettlementType,
@@ -46,6 +47,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
   onConfirmSettlement,
 }) => {
   const { t, fmtCurrency, fmtDigits, fmtPercent } = useLanguageStore();
+  const { adjustSavingsBalance, addTransaction, coopSettings } = useCoopStore();
 
   const fdAccounts = useMemo(() => {
     return accounts.filter((a) => a.accountType.includes('Fixed Deposit') || a.accountType.includes('मुद्दती'));
@@ -121,6 +123,41 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
       currentAccount.accountType,
       payoutDestination
     );
+
+    // 1. Discharge FD balance
+    adjustSavingsBalance(
+      currentAccount.accountNo,
+      currentAccount.balance,
+      'WITHDRAWAL',
+      `Fixed Deposit Discharge (${currentAccount.accountNo}) - Voucher #${voucher.voucherNo}`
+    );
+
+    // 2. If payout is to regular savings, credit member's regular savings
+    if (payoutDestination === 'REGULAR_SAVINGS') {
+      const regSavings = accounts.find(
+        (s) =>
+          currentMember &&
+          s.memberId === currentMember.id &&
+          (s.accountType.includes('Regular') || s.accountType.includes('साधारण'))
+      );
+      if (regSavings) {
+        adjustSavingsBalance(
+          regSavings.accountNo,
+          settlementCalc.totalPayoutAmount,
+          'DEPOSIT',
+          `FD Settlement Payout (${currentAccount.accountNo}) Principal + Net Interest`
+        );
+      }
+    } else {
+      addTransaction({
+        memberId: currentMember?.id,
+        type: 'WITHDRAWAL',
+        amount: settlementCalc.totalPayoutAmount,
+        description: `FD Counter Cash Discharge (${currentAccount.accountNo})`,
+        referenceNo: voucher.voucherNo,
+      });
+    }
+
     setCompletedVoucher(voucher);
     setActiveTab('VOUCHER');
     onConfirmSettlement?.(currentAccount.accountNo, settlementCalc.totalPayoutAmount, false);
@@ -140,6 +177,18 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
       `${currentAccount.accountType} (नविकरण)`,
       'REGULAR_SAVINGS'
     );
+
+    // If renewed with additional compound interest
+    const diff = renewalCalc.newPrincipalAmount - currentAccount.balance;
+    if (diff !== 0) {
+      adjustSavingsBalance(
+        currentAccount.accountNo,
+        Math.abs(diff),
+        diff > 0 ? 'DEPOSIT' : 'WITHDRAWAL',
+        `FD Renewal Capitalization Adjustment (${currentAccount.accountNo})`
+      );
+    }
+
     setCompletedVoucher(voucher);
     setActiveTab('VOUCHER');
     onConfirmSettlement?.(currentAccount.accountNo, renewalCalc.newPrincipalAmount, true);
@@ -178,9 +227,9 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">उनको बचत तथा ऋण सहकारी संस्था लि.</p>
-          <p class="inst-sub">गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश</p>
-          <p class="inst-sub">दर्ता नं: २८३/०६५/०६६ | पान नं: ३०२९५८४८१</p>
+          <p class="inst-name">${coopSettings?.nameNepali || coopSettings?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
+          <p class="inst-sub">${coopSettings?.addressNepali || coopSettings?.address || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश'}</p>
+          <p class="inst-sub">दर्ता नं: ${coopSettings?.regNo || '१२९०/०६७/०६८'} | पान नं: ${coopSettings?.panNo || '३००१२४८९०'}</p>
         </div>
         <div class="meta-row">
           <span>भौचर नं: <b>${completedVoucher.voucherNo}</b></span>
@@ -326,7 +375,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
             }`}
           >
             <RotateCcw className="size-4" />
-            <span>{t('मुद्दती नविकरण (Auto-Renewal)', 'Auto-Renewal Rollover')}</span>
+            <span>{t('मुद्दती नविकरण', 'Auto-Renewal Rollover')}</span>
           </button>
 
           <button
@@ -381,7 +430,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-900 dark:text-white">
-                      {t('समयपूर्व भुक्तानी (Premature Liquidation)', 'Premature Break / Liquidation')}
+                      {t('समयपूर्व भुक्तानी', 'Premature Break / Liquidation')}
                     </span>
                     <AlertTriangle className={`size-4 ${settlementType === 'PREMATURE_BREAK' ? 'text-amber-500' : 'text-slate-300'}`} />
                   </div>
@@ -396,7 +445,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                      {t('वास्तविक जम्मा दिन (Days Held):', 'Actual Days Held:')}
+                      {t('वास्तविक जम्मा दिन:', 'Actual Days Held:')}
                     </label>
                     <input
                       type="number"
@@ -467,8 +516,8 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                     onChange={(e) => setPayoutDestination(e.target.value as 'REGULAR_SAVINGS' | 'CASH_COUNTER')}
                     className="text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                   >
-                    <option value="REGULAR_SAVINGS">{t('सदस्यको साधारण बचत खातामा जम्मा (Regular Savings)', 'Credit Member Regular Savings A/C')}</option>
-                    <option value="CASH_COUNTER">{t('काउन्टरबाट नगदै भुक्तानी (Cash Counter)', 'Cash Counter Payout')}</option>
+                    <option value="REGULAR_SAVINGS">{t('सदस्यको साधारण बचत खातामा जम्मा', 'Credit Member Regular Savings A/C')}</option>
+                    <option value="CASH_COUNTER">{t('काउन्टरबाट नगदै भुक्तानी', 'Cash Counter Payout')}</option>
                   </select>
                 </div>
 
@@ -533,7 +582,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('नयाँ मुद्दती अवधि (Tenure):', 'New Deposit Tenure:')}
+                    {t('नयाँ मुद्दती अवधि:', 'New Deposit Tenure:')}
                   </label>
                   <select
                     value={renewalYears}
@@ -604,7 +653,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md"
                   >
                     <RotateCcw className="size-4" />
-                    <span>{t('नविकरण सम्पन्न गर्नुहोस् (Confirm Renewal)', 'Confirm Renewal')}</span>
+                    <span>{t('नविकरण सम्पन्न गर्नुहोस्', 'Confirm Renewal')}</span>
                   </button>
                 </div>
               </div>
@@ -618,7 +667,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500">
-                      {t('आधिकारिक फरफारक भरपाई तथा कर कट्टी विवरण (TDS Certificate)', 'Official Discharge Voucher & TDS Slip')}
+                      {t('आधिकारिक फरफारक भरपाई तथा कर कट्टी विवरण', 'Official Discharge Voucher & TDS Slip')}
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -627,7 +676,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"
                       >
                         {copiedVoucher ? <CheckCircle2 className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                        <span>{copiedVoucher ? t('कपी भयो!', 'Copied!') : t('प्रतिलिपि (Copy)', 'Copy')}</span>
+                        <span>{copiedVoucher ? t('कपी भयो!', 'Copied!') : t('प्रतिलिपि', 'Copy')}</span>
                       </button>
                       <button
                         type="button"
@@ -635,7 +684,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
                         className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs"
                       >
                         <Printer className="size-3.5" />
-                        <span>{t('भरपाई छाप्नुहोस् (Print Voucher)', 'Print Voucher')}</span>
+                        <span>{t('भरपाई छाप्नुहोस्', 'Print Voucher')}</span>
                       </button>
                     </div>
                   </div>
@@ -708,7 +757,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold transition-all shadow-xs"
           >
-            {t('बन्द गर्नुहोस् (Close)', 'Close')}
+            {t('बन्द गर्नुहोस्', 'Close')}
           </button>
         </div>
       </div>

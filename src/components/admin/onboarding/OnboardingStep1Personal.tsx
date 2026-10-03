@@ -95,16 +95,16 @@ export const OnboardingStep1Personal: React.FC<OnboardingStep1PersonalProps> = (
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            {t('लिङ्ग (Gender) *', 'Gender *')}
+            {t('लिङ्ग *', 'Gender *')}
           </label>
           <select
             value={gender}
             onChange={(e) => setGender(e.target.value as GenderType)}
             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
           >
-            <option value="FEMALE">{t('महिला (Female)', 'Female')}</option>
-            <option value="MALE">{t('पुरुष (Male)', 'Male')}</option>
-            <option value="OTHER">{t('अन्य (Other)', 'Other')}</option>
+            <option value="FEMALE">{t('महिला', 'Female')}</option>
+            <option value="MALE">{t('पुरुष', 'Male')}</option>
+            <option value="OTHER">{t('अन्य', 'Other')}</option>
           </select>
         </div>
         <div>
@@ -116,10 +116,10 @@ export const OnboardingStep1Personal: React.FC<OnboardingStep1PersonalProps> = (
             onChange={(e) => setMaritalStatus(e.target.value as MaritalStatusType)}
             className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
           >
-            <option value="MARRIED">{t('विवाहित (Married)', 'Married')}</option>
-            <option value="UNMARRIED">{t('अविवाहित (Unmarried)', 'Unmarried')}</option>
-            <option value="WIDOWED">{t('एकल/विधवा/विदुर (Widowed)', 'Widowed')}</option>
-            <option value="DIVORCED">{t('पारपाचुके (Divorced)', 'Divorced')}</option>
+            <option value="MARRIED">{t('विवाहित', 'Married')}</option>
+            <option value="UNMARRIED">{t('अविवाहित', 'Unmarried')}</option>
+            <option value="WIDOWED">{t('एकल/विधवा/विदुर', 'Widowed')}</option>
+            <option value="DIVORCED">{t('पारपाचुके', 'Divorced')}</option>
           </select>
         </div>
         <div>

@@ -49,4 +49,41 @@ describe('useAuthStore member session handling', () => {
 
     expect(useAuthStore.getState().currentMember).toBe(INITIAL_MEMBERS[0]);
   });
+
+  it('signInStaff assigns ADMIN role and links employee and staffRole', () => {
+    const mockEmp = {
+      id: 'emp-101',
+      employeeNo: 'EMP-2081-9999',
+      name: 'Test Teller',
+      designation: 'Counter Teller',
+      department: 'Cash Operations',
+      branch: 'Main Branch',
+      phone: '9800000000',
+      email: 'teller@unako.coop',
+      joinedDate: '2024-01-01',
+      status: 'ACTIVE' as const,
+      accessRole: 'TELLER' as const,
+      assignedWards: ['Ward 1'],
+      avatarUrl: '/avatar.png',
+    };
+
+    useAuthStore.getState().signInStaff(mockEmp);
+
+    expect(useAuthStore.getState().role).toBe('ADMIN');
+    expect(useAuthStore.getState().currentEmployee).toBe(mockEmp);
+    expect(useAuthStore.getState().staffRole).toBe('TELLER');
+    expect(useAuthStore.getState().currentMember).toBeNull();
+  });
+
+  it('signOut resets auth state back to GUEST', async () => {
+    useAuthStore.getState().switchToPreset('admin');
+    expect(useAuthStore.getState().role).toBe('ADMIN');
+
+    await useAuthStore.getState().signOut();
+
+    expect(useAuthStore.getState().role).toBe('GUEST');
+    expect(useAuthStore.getState().currentMember).toBeNull();
+    expect(useAuthStore.getState().currentEmployee).toBeNull();
+    expect(useAuthStore.getState().staffRole).toBeNull();
+  });
 });

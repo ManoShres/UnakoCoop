@@ -77,26 +77,47 @@ GUIDELINES:
 - Do not discuss topics unrelated to the cooperative, finance, or member services. Politely redirect off-topic conversations.`.trim();
 };
 
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
+
 /**
- * Send a chat completion request to OpenRouter.
+ * Send a chat completion request to OpenRouter (proxied via Supabase Edge Function if available).
  */
 export const chatWithOpenRouter = async (
     history: ChatMessage[],
     coopSettings?: CoopSettings,
     lang: 'ne' | 'en' = 'ne'
 ): Promise<OpenRouterResponse> => {
-    if (!isOpenRouterConfigured()) {
-        return {
-            success: false,
-            content: '',
-            error: 'OpenRouter API key is not configured. Please set VITE_OPENROUTER_API_KEY in your .env file.',
-        };
-    }
-
     const messages: ChatMessage[] = [
         { role: 'system', content: buildSystemPrompt(coopSettings, lang) },
         ...history,
     ];
+
+    // 1. Production Secure Path: Proxy through Supabase Edge Function (keeps secret server-side)
+    if (isSupabaseConfigured() && supabase) {
+        try {
+            const { data, error } = await supabase.functions.invoke('ai-assistant', {
+                body: { messages, model: MODEL },
+            });
+            if (!error && data?.choices?.[0]?.message?.content) {
+                return { success: true, content: data.choices[0].message.content.trim() };
+            }
+            // If Edge Function returned specific error, report it
+            if (error) {
+                console.warn('Supabase Edge Function ai-assistant unavailable, falling back:', error.message);
+            }
+        } catch (edgeErr) {
+            console.warn('Edge function invoke error, falling back to local client:', edgeErr);
+        }
+    }
+
+    // 2. Local Development Fallback: Direct client fetch using VITE_OPENROUTER_API_KEY
+    if (!isOpenRouterConfigured()) {
+        return {
+            success: false,
+            content: '',
+            error: 'OpenRouter AI सेवा कन्फिगर गरिएको छैन। कृपया Supabase Edge Function वा VITE_OPENROUTER_API_KEY जाँच गर्नुहोस्।',
+        };
+    }
 
     try {
         const response = await fetch(OPENROUTER_API_URL, {

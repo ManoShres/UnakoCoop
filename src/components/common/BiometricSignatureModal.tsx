@@ -77,8 +77,8 @@ export const BiometricSignatureModal: React.FC<BiometricSignatureModalProps> = (
     ctx.textAlign = 'center';
     ctx.fillText(
       mode === 'SIGNATURE'
-        ? t('यहाँ हस्ताक्षर गर्नुहोस् (Sign inside the box)', 'Sign inside the box')
-        : t('यहाँ ल्याप्चे लगाउनुहोस् (Stamp thumbprint here)', 'Stamp thumbprint here'),
+        ? t('यहाँ हस्ताक्षर गर्नुहोस्', 'Sign inside the box')
+        : t('यहाँ ल्याप्चे लगाउनुहोस्', 'Stamp thumbprint here'),
       canvas.width / 2,
       canvas.height / 2
     );
@@ -295,7 +295,7 @@ export const BiometricSignatureModal: React.FC<BiometricSignatureModalProps> = (
         {/* Controls Toolbar: Ink, Stroke Width, Undo, Clear */}
         <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-bold text-slate-400">{t('मसी (Ink):', 'Ink:')}</span>
+            <span className="text-[11px] font-bold text-slate-400">{t('मसी:', 'Ink:')}</span>
             <div className="flex gap-1.5">
               {[
                 { color: '#1d4ed8', label: 'Royal Blue' },

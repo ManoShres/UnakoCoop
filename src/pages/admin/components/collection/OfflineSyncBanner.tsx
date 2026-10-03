@@ -168,7 +168,7 @@ export const OfflineSyncBanner: React.FC<OfflineSyncBannerProps> = ({
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <HardDrive className="size-4 text-slate-500" />
-              <span>{t('स्थानीय फिल्ड संकलन सूची (Queue)', 'Local Offline Collection Queue')}</span>
+              <span>{t('स्थानीय फिल्ड संकलन सूची', 'Local Offline Collection Queue')}</span>
             </span>
 
             {queue.some((q) => q.synced) && (

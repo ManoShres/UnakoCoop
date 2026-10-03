@@ -46,7 +46,15 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
   onClose,
 }) => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
-  const { members } = useCoopStore();
+  const {
+    members,
+    savings,
+    loans,
+    adjustSavingsBalance,
+    recordLoanRepayment,
+    addTransaction,
+    coopSettings,
+  } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'REGISTER' | 'CLAIMS_LIST' | 'NOMINEE_SETTLEMENT' | 'COPAS_VOUCHERS'>('CLAIMS_LIST');
   const [claims, setClaims] = useState<WelfareClaimRecord[]>(INITIAL_WELFARE_CLAIMS);
@@ -224,6 +232,54 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
         };
       })
     );
+
+    // Wire to store on disbursement
+    if (newStatus === 'DISBURSED') {
+      const targetClaim = claims.find((c) => c.id === claimId);
+      if (targetClaim) {
+        if (targetClaim.disbursementMethod === 'SAVINGS_ACCOUNT') {
+          const savingsAcc = savings.find((s) => s.memberId === targetClaim.memberId);
+          if (savingsAcc) {
+            adjustSavingsBalance(
+              savingsAcc.accountNo,
+              targetClaim.claimAmount,
+              'DEPOSIT',
+              `कल्याणकारी राहत निकासा - ${targetClaim.claimNo} (${targetClaim.claimType})`
+            );
+          } else {
+            addTransaction({
+              memberId: targetClaim.memberId,
+              type: 'DEPOSIT',
+              amount: targetClaim.claimAmount,
+              description: `कल्याणकारी राहत निकासा - ${targetClaim.claimNo}`,
+              referenceNo: targetClaim.claimNo,
+            });
+          }
+        } else {
+          addTransaction({
+            memberId: targetClaim.memberId,
+            type: 'DEPOSIT',
+            amount: targetClaim.claimAmount,
+            description: `कल्याणकारी राहत निकासा (${targetClaim.disbursementMethod}) - ${targetClaim.claimNo}`,
+            referenceNo: targetClaim.claimNo,
+          });
+        }
+
+        if (targetClaim.waivedLoanAmount && targetClaim.waivedLoanAmount > 0) {
+          const targetLoan = loans.find(
+            (l) => l.loanNo === targetClaim.loanAccountNo || l.memberId === targetClaim.memberId
+          );
+          if (targetLoan) {
+            recordLoanRepayment(
+              targetLoan.loanNo,
+              targetClaim.waivedLoanAmount,
+              `राहत कोषबाट कर्जा मिनाहा - ${targetClaim.claimNo}`
+            );
+          }
+        }
+      }
+    }
+
     showToast(t(`दाबी स्थिति ${newStatus} मा अद्यावधिक भयो`, `Claim status updated to ${newStatus}`));
   };
 
@@ -424,7 +480,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
                     onChange={(e) => setFilterType(e.target.value)}
                     className="bg-slate-50 dark:bg-slate-800 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold"
                   >
-                    <option value="ALL">{t('सबै प्रकार (All Types)', 'All Types')}</option>
+                    <option value="ALL">{t('सबै प्रकार', 'All Types')}</option>
                     <option value="MEMBER_DEATH">{t('सदस्य मृत्यु राहत', 'Member Death')}</option>
                     <option value="FUNERAL_EXPENSE">{t('काजकिरिया खर्च', 'Funeral Expense')}</option>
                     <option value="MATERNITY_ALLOWANCE">{t('सुत्केरी पोषण भत्ता', 'Maternity')}</option>
@@ -436,11 +492,11 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
                     onChange={(e) => setFilterStatus(e.target.value)}
                     className="bg-slate-50 dark:bg-slate-800 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold"
                   >
-                    <option value="ALL">{t('सबै स्थिति (All Status)', 'All Status')}</option>
-                    <option value="SUBMITTED">{t('दर्ता भएको (Submitted)', 'Submitted')}</option>
-                    <option value="VERIFIED">{t('कागजात प्रमाणित (Verified)', 'Verified')}</option>
-                    <option value="APPROVED">{t('स्वीकृत (Approved)', 'Approved')}</option>
-                    <option value="DISBURSED">{t('निकासा सम्पन्न (Disbursed)', 'Disbursed')}</option>
+                    <option value="ALL">{t('सबै स्थिति', 'All Status')}</option>
+                    <option value="SUBMITTED">{t('दर्ता भएको', 'Submitted')}</option>
+                    <option value="VERIFIED">{t('कागजात प्रमाणित', 'Verified')}</option>
+                    <option value="APPROVED">{t('स्वीकृत', 'Approved')}</option>
+                    <option value="DISBURSED">{t('निकासा सम्पन्न', 'Disbursed')}</option>
                   </select>
 
                   <button
@@ -634,7 +690,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('दाबीको प्रकार (Claim Type)', 'Claim Type')} *
+                    {t('दाबीको प्रकार', 'Claim Type')} *
                   </label>
                   <select
                     value={formClaimType}
@@ -652,7 +708,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('सदस्य चयन गर्नुहोस् (Select Member)', 'Select Member')} *
+                    {t('सदस्य चयन गर्नुहोस्', 'Select Member')} *
                   </label>
                   <select
                     value={formMemberId}
@@ -696,7 +752,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('हकवाला वा प्राप्तकर्ताको नाम (Nominee Name)', 'Nominee Name')} *
+                    {t('हकवाला वा प्राप्तकर्ताको नाम', 'Nominee Name')} *
                   </label>
                   <input
                     type="text"
@@ -709,7 +765,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('नाता सम्बन्ध (Relation)', 'Relation')} *
+                    {t('नाता सम्बन्ध', 'Relation')} *
                   </label>
                   <input
                     type="text"
@@ -778,7 +834,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
 
                 <div>
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('निकासा भुक्तानी विधि (Payment Mode)', 'Disbursement Method')}
+                    {t('निकासा भुक्तानी विधि', 'Disbursement Method')}
                   </label>
                   <select
                     value={formDisbursementMethod}
@@ -838,7 +894,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  {t('विशेष कैफियत / निर्णय टिपोट (Remarks)', 'Remarks')}
+                  {t('विशेष कैफियत / निर्णय टिपोट', 'Remarks')}
                 </label>
                 <textarea
                   rows={2}
@@ -1014,9 +1070,9 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
               >
                 <div className="text-center pb-3 border-b border-slate-200 dark:border-slate-800">
                   <h4 className="text-base font-black text-slate-900 dark:text-white">
-                    उनको बचत तथा ऋण सहकारी संस्था लिमिटेड
+                    {coopSettings.nameNepali}
                   </h4>
-                  <p className="text-xs text-slate-500">गढवा-५, दाङ • दर्ता नं. १४८/०६४/०६५</p>
+                  <p className="text-xs text-slate-500">{coopSettings.addressNepali} • {t('दर्ता नं.', 'Reg No.')} {coopSettings.regNo}</p>
                   <h5 className="text-xs font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 mt-2">
                     मृतक सदस्य वित्तीय दायित्व फरफारक तथा हकवाला भरपाई पत्र
                   </h5>
@@ -1094,7 +1150,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
               <div className="bg-slate-50 dark:bg-slate-800/40 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-2 mb-2 text-rose-600 dark:text-rose-400 font-bold text-xs">
                   <Receipt className="size-4" />
-                  <span>{t('COPAS दोहोरो लेखा प्रविष्टि (COPAS Double-Entry Journal Voucher)', 'COPAS Accounting Journal')}</span>
+                  <span>{t('COPAS दोहोरो लेखा प्रविष्टि', 'COPAS Accounting Journal')}</span>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
                   सहकारी लेखा मापदण्ड (COPAS) अनुसार सदस्य राहत तथा सामुदायिक विकास कोषबाट निकासा हुने रकमको डेबिट/क्रेडिट प्रविष्टि।
@@ -1164,7 +1220,7 @@ export const MemberWelfareReliefModal: React.FC<MemberWelfareReliefModalProps> =
               {/* By-Law Norms Reference Table */}
               <div className="p-5 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3">
                 <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  {t('संस्थागत राहत मापदण्ड निर्देशिका (Welfare Policy Norms)', 'Institutional Welfare Policy Norms')}
+                  {t('संस्थागत राहत मापदण्ड निर्देशिका', 'Institutional Welfare Policy Norms')}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {Object.entries(WELFARE_STANDARD_BENEFITS).map(([key, val]) => (

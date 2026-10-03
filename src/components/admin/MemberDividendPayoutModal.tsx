@@ -158,7 +158,7 @@ export const MemberDividendPayoutModal: React.FC<MemberDividendPayoutModalProps>
           {/* Amount Input */}
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              {t('भुक्तानी हुने स्थूल रकम (Gross Payout Amount)', 'Gross Payout Amount (NPR)')}
+              {t('भुक्तानी हुने स्थूल रकम', 'Gross Payout Amount (NPR)')}
             </label>
             <input
               type="number"
@@ -176,7 +176,7 @@ export const MemberDividendPayoutModal: React.FC<MemberDividendPayoutModalProps>
                 {t('५% आयकर कट्टी (5% Statutory TDS)', '5% Statutory TDS')}
               </span>
               <span className="text-[10px] text-slate-400">
-                {t('कर कट्टी रकम: ', 'Tax deducted: ')}
+                {t('कर कट्टी रकम:', 'Tax deducted: ')}
                 {fmtCurrency(tax, true)}
               </span>
             </div>
@@ -187,14 +187,14 @@ export const MemberDividendPayoutModal: React.FC<MemberDividendPayoutModalProps>
                 deductTax ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-slate-700'
               }`}
             >
-              {deductTax ? t('लागू (TDS On)', 'ON (5%)') : t('छुट (Exempt)', 'OFF')}
+              {deductTax ? t('लागू', 'ON (5%)') : t('छुट', 'OFF')}
             </button>
           </div>
 
           {/* Net Calculation Highlight */}
           <div className="p-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-              {t('सदस्यले पाउने खुद रकम (Net Payout):', 'Net Payable to Member:')}
+              {t('सदस्यले पाउने खुद रकम:', 'Net Payable to Member:')}
             </span>
             <span className="font-mono font-black text-lg text-emerald-600 dark:text-emerald-400">
               {fmtCurrency(net, true)}
@@ -204,7 +204,7 @@ export const MemberDividendPayoutModal: React.FC<MemberDividendPayoutModalProps>
           {/* Destination Selector */}
           <div className="space-y-2">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              {t('भुक्तानी माध्यम (Disbursement Method)', 'Disbursement Method')}
+              {t('भुक्तानी माध्यम', 'Disbursement Method')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button

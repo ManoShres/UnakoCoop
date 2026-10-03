@@ -17,7 +17,7 @@ export function ProfileVaultSection({ onViewDoc }: ProfileVaultSectionProps) {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white font-headline">
-              {t('प्रमाणित कागजात अभिलेख (KYC Document Vault)', 'KYC Document Vault')}
+              {t('प्रमाणित कागजात अभिलेख', 'KYC Document Vault')}
             </h2>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -278,7 +278,7 @@ export function ProfileVaultSection({ onViewDoc }: ProfileVaultSectionProps) {
           <div className="flex items-center gap-2">
             <History className="w-5 h-5 text-emerald-600" />
             <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-headline">
-              {t('अनुपालन तथा केवाइसी लेखापरीक्षण इतिहास (Compliance & Audit Log)', 'Compliance & Audit Log')}
+              {t('अनुपालन तथा केवाइसी लेखापरीक्षण इतिहास', 'Compliance & Audit Log')}
             </h3>
           </div>
           <span className="text-xs text-slate-500 font-medium">

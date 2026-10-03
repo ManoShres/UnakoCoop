@@ -168,11 +168,11 @@ export const EmployeeTableSection: React.FC<EmployeeTableSectionProps> = ({
                     </span>
                     <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
                       <CalendarDays className="size-3" />
-                      {t('जोइन: ', 'Joined: ')}{emp.joinedDate}
+                      {t('जोइन:', 'Joined: ')}{emp.joinedDate}
                     </div>
                     {emp.assignedWards.length > 0 && (
                       <div className="text-[10px] text-slate-400 mt-0.5">
-                        {t('क्षेत्र: ', 'Wards: ')}{emp.assignedWards.join(', ')}
+                        {t('क्षेत्र:', 'Wards: ')}{emp.assignedWards.join(', ')}
                       </div>
                     )}
                   </td>

@@ -227,7 +227,10 @@ export function App() {
           <Route
             path="/field"
             element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'MEMBER']}>
+              <ProtectedRoute
+                allowedRoles={['ADMIN']}
+                requiredPermission="record_mother_group_meetings"
+              >
                 <ErrorBoundary>
                   <FieldCollectorPage />
                 </ErrorBoundary>

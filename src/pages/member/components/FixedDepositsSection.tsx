@@ -211,9 +211,9 @@ export function FixedDepositsSection({
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-xs" id="tenorGroup">
                     {[
-                      { years: 1, rate: 9.5, desc: 'p.a.' },
+                      { years: 1, rate: 9.5, desc: t('वार्षिक', 'p.a.') },
                       { years: 2, rate: 10.0, desc: t('वार्षिक • लोकप्रिय', 'p.a. Popular') },
-                      { years: 3, rate: 10.5, desc: 'p.a.' },
+                      { years: 3, rate: 10.5, desc: t('वार्षिक', 'p.a.') },
                       { years: 5, rate: 11.0, desc: t('वार्षिक • उच्चतम', 'p.a. Maximum') },
                     ].map((opt) => (
                       <button

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { Member, Loan, SavingsAccount } from '../../types';
 import {
   MembershipExitReason,
@@ -93,6 +94,39 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
       nomineeName.trim() || undefined
     );
 
+    // Update member status and balances in core store
+    useCoopStore.setState((state) => ({
+      members: state.members.map((m) =>
+        m.id === currentMember.id
+          ? {
+              ...m,
+              status: 'INACTIVE',
+              shareCapital: 0,
+              shareKitta: 0,
+              totalSavings: 0,
+            }
+          : m
+      ),
+      savings: state.savings.map((s) =>
+        s.memberId === currentMember.id
+          ? { ...s, balance: 0, status: 'CLOSED' as const }
+          : s
+      ),
+      transactions: [
+        {
+          id: 'tx-exit-' + Date.now(),
+          memberId: currentMember.id,
+          date: new Date().toISOString().split('T')[0],
+          type: 'WITHDRAWAL',
+          description: `Membership Exit Settlement - ${currentMember.memberNo} (${exitReason})`,
+          amount: settlementCalc.netPayableAmount,
+          referenceNo: cert.certificateNo,
+          status: 'COMPLETED',
+        },
+        ...state.transactions,
+      ],
+    }));
+
     setCompletedCertificate(cert);
     setActiveTab('CERTIFICATE');
     onConfirmExit?.(currentMember.id, settlementCalc.netPayableAmount);
@@ -108,6 +142,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
     if (!completedCertificate) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
+    const coop = useCoopStore.getState().coopSettings;
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -132,9 +167,9 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">उनको बचत तथा ऋण सहकारी संस्था लि.</p>
-          <p class="inst-sub">गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश</p>
-          <p class="inst-sub">दर्ता नं: २८३/०६५/०६६ | पान नं: ३०२९५८४८१</p>
+          <p class="inst-name">${coop?.nameNepali || coop?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
+          <p class="inst-sub">${coop?.addressNepali || coop?.address || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश'}</p>
+          <p class="inst-sub">दर्ता नं: ${coop?.regNo || '१२९०/०६७/०६८'} | पान नं: ${coop?.panNo || '३००१२४८९०'}</p>
         </div>
         <div class="meta-row">
           <span>प्रमाणपत्र नं: <b>${completedCertificate.certificateNo}</b></span>
@@ -326,8 +361,8 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                 <div className="text-xs space-y-1">
                   <h4 className={`font-bold ${clearanceCheck.canExit ? 'text-emerald-800 dark:text-emerald-200' : 'text-rose-800 dark:text-rose-200'}`}>
                     {clearanceCheck.canExit
-                      ? t('सदस्यता त्याग तथा फरफारक योग्य (Clearance Approved)', 'Eligible for Membership Exit & Settlement')
-                      : t('सदस्यता त्याग रोकिएको छ (Clearance Blocked)', 'Clearance Blocked by Outstanding Liabilities')}
+                      ? t('सदस्यता त्याग तथा फरफारक योग्य', 'Eligible for Membership Exit & Settlement')
+                      : t('सदस्यता त्याग रोकिएको छ', 'Clearance Blocked by Outstanding Liabilities')}
                   </h4>
                   <p className={clearanceCheck.canExit ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'}>
                     {clearanceCheck.canExit
@@ -442,10 +477,10 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     onChange={(e) => setExitReason(e.target.value as MembershipExitReason)}
                     className="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                   >
-                    <option value="VOLUNTARY_RESIGNATION">{t('स्वेच्छिक राजीनामा (Voluntary Resignation)', 'Voluntary Resignation')}</option>
-                    <option value="OUT_OF_DISTRICT_RELOCATION">{t('दाङ बाहिर स्थायी बसाईसराई (Relocation)', 'Permanent Relocation')}</option>
-                    <option value="DECEASED_LEGAL_HEIR">{t('सदस्यको मृत्यु (Deceased - Legal Heir)', 'Deceased (Heir Settlement)')}</option>
-                    <option value="STATUTORY_EXPULSION">{t('साधारण सभा निर्णयद्वारा निष्कासन (Expulsion)', 'Statutory Expulsion')}</option>
+                    <option value="VOLUNTARY_RESIGNATION">{t('स्वेच्छिक राजीनामा', 'Voluntary Resignation')}</option>
+                    <option value="OUT_OF_DISTRICT_RELOCATION">{t('दाङ बाहिर स्थायी बसाईसराई', 'Permanent Relocation')}</option>
+                    <option value="DECEASED_LEGAL_HEIR">{t('सदस्यको मृत्यु', 'Deceased (Heir Settlement)')}</option>
+                    <option value="STATUTORY_EXPULSION">{t('साधारण सभा निर्णयद्वारा निष्कासन', 'Statutory Expulsion')}</option>
                   </select>
                 </div>
 
@@ -458,9 +493,9 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     onChange={(e) => setPayoutMethod(e.target.value as 'CASH_COUNTER' | 'ACCOUNT_TRANSFER' | 'CHEQUE')}
                     className="w-full text-xs font-bold px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                   >
-                    <option value="CASH_COUNTER">{t('नगद काउन्टर भुक्तानी (Cash Counter)', 'Cash Counter Desk')}</option>
-                    <option value="ACCOUNT_TRANSFER">{t('बैंक खाता ट्रान्सफर (Bank Transfer)', 'Bank Account Transfer')}</option>
-                    <option value="CHEQUE">{t('सहकारी चेक जारी (Cooperative Cheque)', 'Account Payee Cheque')}</option>
+                    <option value="CASH_COUNTER">{t('नगद काउन्टर भुक्तानी', 'Cash Counter Desk')}</option>
+                    <option value="ACCOUNT_TRANSFER">{t('बैंक खाता ट्रान्सफर', 'Bank Account Transfer')}</option>
+                    <option value="CHEQUE">{t('सहकारी चेक जारी', 'Account Payee Cheque')}</option>
                   </select>
                 </div>
 
@@ -499,14 +534,14 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                 <table className="w-full text-left">
                   <thead className="bg-slate-100 dark:bg-slate-800 text-slate-500 uppercase text-[10px] tracking-wider">
                     <tr>
-                      <th className="px-4 py-3">{t('हिसाब शीर्षक (Headings)', 'Description')}</th>
+                      <th className="px-4 py-3">{t('हिसाब शीर्षक', 'Description')}</th>
                       <th className="px-4 py-3 text-right">{t('रकम (NPR)', 'Amount (NPR)')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
                     <tr>
                       <td className="px-4 py-2.5 font-sans font-medium text-slate-700 dark:text-slate-300">
-                        {t('१. सेयर पूँजी फिर्ता (Share Capital Refund)', 'Share Capital Refund')}
+                        {t('१. सेयर पूँजी फिर्ता', 'Share Capital Refund')}
                       </td>
                       <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">
                         {fmtCurrency(settlementCalc.shareCapitalRefund, true)}
@@ -514,7 +549,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     </tr>
                     <tr>
                       <td className="px-4 py-2.5 font-sans font-medium text-slate-700 dark:text-slate-300">
-                        {t('२. साधारण तथा मुद्दती बचत मौज्दात (Savings Balance Refund)', 'Savings Balance Refund')}
+                        {t('२. साधारण तथा मुद्दती बचत मौज्दात', 'Savings Balance Refund')}
                       </td>
                       <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">
                         {fmtCurrency(settlementCalc.regularSavingsRefund, true)}
@@ -522,7 +557,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     </tr>
                     <tr>
                       <td className="px-4 py-2.5 font-sans font-medium text-slate-700 dark:text-slate-300">
-                        {t('३. पाकेको कुल ब्याज (Gross Accrued Interest)', 'Gross Accrued Interest')}
+                        {t('३. पाकेको कुल ब्याज', 'Gross Accrued Interest')}
                       </td>
                       <td className="px-4 py-2.5 text-right font-bold text-emerald-600">
                         + {fmtCurrency(settlementCalc.grossAccruedInterest, true)}
@@ -538,7 +573,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     </tr>
                     <tr>
                       <td className="px-4 py-2.5 font-sans font-medium text-slate-700 dark:text-slate-300">
-                        {t('५. अवितरित लाभांश तथा बोनस (Unpaid Dividends & Bonus)', 'Unpaid Dividends & Bonus')}
+                        {t('५. अवितरित लाभांश तथा बोनस', 'Unpaid Dividends & Bonus')}
                       </td>
                       <td className="px-4 py-2.5 text-right font-bold text-emerald-600">
                         + {fmtCurrency(settlementCalc.unpaidDividendsAndPatronage, true)}
@@ -546,7 +581,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     </tr>
                     <tr>
                       <td className="px-4 py-2.5 font-sans font-medium text-slate-500">
-                        {t('६. सदस्यता खारेजी प्रशासनिक दस्तुर (Exit Administrative Fee)', 'Exit Fee')}
+                        {t('६. सदस्यता खारेजी प्रशासनिक दस्तुर', 'Exit Fee')}
                       </td>
                       <td className="px-4 py-2.5 text-right font-bold text-rose-600">
                         - {fmtCurrency(settlementCalc.membershipExitAdminFee, true)}
@@ -554,7 +589,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                     </tr>
                     <tr className="bg-rose-50/50 dark:bg-rose-950/20 text-sm">
                       <td className="px-4 py-3 font-sans font-black text-slate-900 dark:text-white">
-                        {t('कुल खुद भुक्तानी फर्छ्यौट रकम (Net Payable Settlement NPR):', 'Net Payable Settlement (NPR):')}
+                        {t('कुल खुद भुक्तानी फर्छ्यौट रकम:', 'Net Payable Settlement (NPR):')}
                       </td>
                       <td className="px-4 py-3 text-right font-black text-rose-600 dark:text-rose-400 font-mono">
                         {fmtCurrency(settlementCalc.netPayableAmount, true)}
@@ -585,7 +620,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-slate-500">
-                      {t('आधिकारिक सदस्यता खारेजी तथा फरफारक भरपाई (Statutory Certificate)', 'Official Exit Certificate & Discharge Deed')}
+                      {t('आधिकारिक सदस्यता खारेजी तथा फरफारक भरपाई', 'Official Exit Certificate & Discharge Deed')}
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -594,7 +629,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"
                       >
                         {copiedCertificate ? <CheckCircle2 className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                        <span>{copiedCertificate ? t('कपी भयो!', 'Copied!') : t('प्रतिलिपि (Copy)', 'Copy')}</span>
+                        <span>{copiedCertificate ? t('कपी भयो!', 'Copied!') : t('प्रतिलिपि', 'Copy')}</span>
                       </button>
                       <button
                         type="button"
@@ -610,7 +645,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
                         className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-xs"
                       >
                         <Printer className="size-3.5" />
-                        <span>{t('प्रमाणपत्र छाप्नुहोस् (Print Certificate)', 'Print Certificate')}</span>
+                        <span>{t('प्रमाणपत्र छाप्नुहोस्', 'Print Certificate')}</span>
                       </button>
                     </div>
                   </div>
@@ -704,7 +739,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold transition-all shadow-xs"
           >
-            {t('बन्द गर्नुहोस् (Close)', 'Close')}
+            {t('बन्द गर्नुहोस्', 'Close')}
           </button>
         </div>
       </div>

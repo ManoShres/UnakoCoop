@@ -23,7 +23,7 @@ export const LoanRepaymentHealthBanner: React.FC = () => {
             </div>
             <p className="font-body-sm text-xs text-on-surface-variant mt-1 leading-relaxed">
               {t(
-                'तपाईं नेपाल कृषि मन्त्रालयको १.५% ब्याज अनुदानका लागि योग्य हुनुहुन्छ। हालसम्म प्राप्त छुट: ',
+                'तपाईं नेपाल कृषि मन्त्रालयको १.५% ब्याज अनुदानका लागि योग्य हुनुहुन्छ। हालसम्म प्राप्त छुट:',
                 'You qualify for the Nepal Ministry of Agriculture 1.5% interest subsidy. Cumulative rebate earned to date: '
               )}
               <strong className="text-on-surface font-bold">NPR 4,120</strong>

@@ -136,7 +136,7 @@ export const MemberOnboardingWizard: React.FC<MemberOnboardingWizardProps> = ({
     }
     if (step === 4) {
       if (!nomineeName.trim()) {
-        setErrorMsg(t('कानुनी हकवाला (Nominee) को नाम प्रविष्ट गर्नुहोस्।', 'Legal nominee name is required.'));
+        setErrorMsg(t('कानुनी हकवाला को नाम प्रविष्ट गर्नुहोस्।', 'Legal nominee name is required.'));
         return false;
       }
       if (shareKitta < 10) {

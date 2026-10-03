@@ -90,7 +90,7 @@ export const CollectionSheetTable: React.FC<CollectionSheetTableProps> = ({
               <th className="px-2 py-3 text-right font-bold">{t('कर्जा साँवा', 'Loan Prin.')}</th>
               <th className="px-2 py-3 text-right font-bold">{t('कर्जा ब्याज', 'Interest')}</th>
               <th className="px-2 py-3 text-right font-bold">{t('हर्जाना', 'Fine')}</th>
-              <th className="px-3 py-3 text-right font-bold text-slate-900 dark:text-white">{t('जम्मा (Total)', 'Total (NPR)')}</th>
+              <th className="px-3 py-3 text-right font-bold text-slate-900 dark:text-white">{t('जम्मा', 'Total (NPR)')}</th>
               <th className="px-3 py-3 text-center font-bold">{t('स्थिति', 'Status')}</th>
             </tr>
           </thead>
@@ -258,8 +258,8 @@ export const CollectionSheetTable: React.FC<CollectionSheetTableProps> = ({
                   </td>
 
                   {/* Row Total */}
-                  <td className="px-3 py-3 text-right font-mono font-black text-slate-900 dark:text-white">
-                    रु. {fmtCurrency(rowTotal, true)}
+                  <td className="px-3 py-3 text-right font-mono font-black text-slate-900 dark:text-white tabular-nums">
+                    {fmtCurrency(rowTotal, true)}
                   </td>
 
                   {/* Status */}

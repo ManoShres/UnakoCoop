@@ -519,7 +519,7 @@ export const PassbookDeskModal: React.FC<PassbookDeskModalProps> = ({
                     >
                       {savings.map((s) => (
                         <option key={s.id} value={s.accountNo}>
-                          {s.accountNo} - {s.accountType} (रु. {fmtCurrency(s.balance, false)})
+                          {s.accountNo} - {s.accountType} ({fmtCurrency(s.balance, false)})
                         </option>
                       ))}
                     </select>
@@ -527,7 +527,7 @@ export const PassbookDeskModal: React.FC<PassbookDeskModalProps> = ({
 
                   <div>
                     <label className="block text-[10px] font-bold uppercase text-slate-500 mb-1">
-                      {t('सुरुवात लाइन (Start Line)', 'Start Line (1-20)')}
+                      {t('सुरुवात लाइन', 'Start Line (1-20)')}
                     </label>
                     <select
                       value={startLine}
@@ -663,7 +663,7 @@ export const PassbookDeskModal: React.FC<PassbookDeskModalProps> = ({
                     {t('मुद्रण समय:', 'Printed at:')} {new Date().toLocaleDateString()} • {coopSettings.name}
                   </div>
                   <div className="font-bold text-slate-700 dark:text-slate-300">
-                    {t('अन्तिम मौज्दात:', 'Closing Balance:')} रु. {fmtCurrency(printBatch.closingBalance, false)}
+                    {t('अन्तिम मौज्दात:', 'Closing Balance:')} {fmtCurrency(printBatch.closingBalance, false)}
                   </div>
                 </div>
               </div>
@@ -765,7 +765,7 @@ export const PassbookDeskModal: React.FC<PassbookDeskModalProps> = ({
                 <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="flex-1 flex flex-col items-center sm:items-start">
                     <span className="text-[10px] font-bold uppercase text-slate-400 mb-1">
-                      {t('आधिकारिक बारकोड (Code-39)', 'Machine-Readable Barcode')}
+                      {t('आधिकारिक बारकोड', 'Machine-Readable Barcode')}
                     </span>
                     <div
                       dangerouslySetInnerHTML={{
@@ -832,11 +832,11 @@ export const PassbookDeskModal: React.FC<PassbookDeskModalProps> = ({
                     onChange={(e) => setRegistryFilter(e.target.value as any)}
                     className="px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300"
                   >
-                    <option value="ALL">{t('सबै स्थिति (All Status)', 'All Status')}</option>
-                    <option value="ACTIVE">{t('सक्रिय (Active)', 'Active')}</option>
-                    <option value="LOST_STOLEN">{t('हराएको (Lost/Stolen)', 'Lost/Stolen')}</option>
-                    <option value="REPLACED_FULL">{t('पाना भरिएको (Full)', 'Pages Full')}</option>
-                    <option value="DAMAGED">{t('क्षति भएको (Damaged)', 'Damaged')}</option>
+                    <option value="ALL">{t('सबै स्थिति', 'All Status')}</option>
+                    <option value="ACTIVE">{t('सक्रिय', 'Active')}</option>
+                    <option value="LOST_STOLEN">{t('हराएको', 'Lost/Stolen')}</option>
+                    <option value="REPLACED_FULL">{t('पाना भरिएको', 'Pages Full')}</option>
+                    <option value="DAMAGED">{t('क्षति भएको', 'Damaged')}</option>
                   </select>
                 </div>
 

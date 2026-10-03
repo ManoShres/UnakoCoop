@@ -61,11 +61,22 @@ export const AdminLayout: React.FC = () => {
   const pendingDeposits = useCoopStore((s) =>
     s.motherGroupDeposits.filter((deposit) => deposit.status === 'PENDING').length
   );
-  const { role, authLoading, switchToPreset, theme: storedTheme } = useAuthStore();
+  const { role, authLoading, switchToPreset, theme: storedTheme, currentEmployee } = useAuthStore();
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', storedTheme === 'dark');
   }, [storedTheme]);
-  const { t } = useLanguageStore();
+  const { t, lang } = useLanguageStore();
+  const staffDisplayName = currentEmployee
+    ? (lang === 'ne' && currentEmployee.nameNepali) || currentEmployee.name
+    : t('केन्द्रीय प्रशासकीय अधिकार', 'Central Admin Authority');
+  const staffInitials = currentEmployee
+    ? currentEmployee.name
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('')
+    : t('प्र', 'AD');
 
   const pendingMembersCount = members.filter((m) => m.status === 'PENDING' || m.status === 'ACTION_REQUIRED').length;
   const pendingLoansCount = applications.filter((a) => a.status === 'SUBMITTED' || a.status === 'UNDER_COMMITTEE_REVIEW').length;
@@ -123,7 +134,7 @@ export const AdminLayout: React.FC = () => {
       badge: pendingDeposits > 0 ? pendingDeposits : undefined,
     },
     { to: '/admin/collection-entry', label: t('कलेक्सन प्रवेश', 'Collection Entry'), icon: TrendingUp, badge: pendingDeposits > 0 ? pendingDeposits : undefined },
-    { to: '/admin/field-collector', label: t('फिल्ड संकलक मोड (Mobile)', 'Field Collector Mode'), icon: Smartphone },
+    { to: '/admin/field-collector', label: t('फिल्ड संकलक मोड', 'Field Collector Mode'), icon: Smartphone },
     { to: '/admin/trading-pl', label: t('ट्रेडिङ नाफा नोक्सान', 'Trading Profit & Loss'), icon: TrendingUp },
 
     { to: '/admin/pearls-analysis', label: t('पर्ल्स विश्लेषण', 'PEARLS Analysis'), icon: Landmark },
@@ -165,16 +176,17 @@ export const AdminLayout: React.FC = () => {
         >
           {/* Sidebar Header */}
           <div className="h-16 px-4 border-b border-slate-800 flex items-center justify-between shrink-0">
-            <Link to="/admin" className="flex items-center group shrink-0" title="Admin Dashboard">
+            <Link to="/admin" className="flex items-center group shrink-0" title={t('प्रशासन ड्यासबोर्ड', 'Admin Dashboard')}>
               <img
                 src={logoUrl}
-                alt="Unako SACCOS Logo"
+                alt={t('उनको साकोस लोगो', 'Unako SACCOS Logo')}
                 className="h-11 w-auto object-contain shrink-0"
               />
             </Link>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 text-slate-400 hover:text-white"
+              className="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer"
+              aria-label={t('मेनु बन्द गर्नुहोस्', 'Close menu')}
             >
               <X className="size-5" />
             </button>
@@ -182,14 +194,17 @@ export const AdminLayout: React.FC = () => {
 
           {/* Admin badge */}
           <div className="p-3 mx-3 my-2.5 rounded-xl bg-slate-800/80 border border-slate-700/60 flex items-center gap-3 shrink-0">
-            <div className="size-9 rounded-full bg-blue-600/30 border border-blue-400/30 flex items-center justify-center text-blue-400 font-bold text-xs">
-              AD
+            <div
+              className="size-9 rounded-full bg-blue-600/30 border border-blue-400/30 flex items-center justify-center text-blue-400 font-bold text-xs shrink-0"
+              aria-hidden="true"
+            >
+              {staffInitials}
             </div>
             <div className="min-w-0 flex-1">
-              <h4 className="text-xs font-bold text-white truncate">{t('केन्द्रीय प्रशासकीय अधिकार', 'Central Admin Authority')}</h4>
+              <h4 className="text-xs font-bold text-white truncate" title={staffDisplayName}>{staffDisplayName}</h4>
               <p className="text-[10px] text-emerald-400 font-mono flex items-center gap-1 mt-0.5">
                 <span className="size-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-                CBS Live
+                {t('सीबीएस सक्रिय', 'CBS Live')}
               </p>
             </div>
           </div>
@@ -257,7 +272,8 @@ export const AdminLayout: React.FC = () => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg"
+                className="lg:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg cursor-pointer"
+                aria-label={t('मेनु खोल्नुहोस्', 'Open menu')}
               >
                 <Menu className="size-5" />
               </button>
@@ -325,7 +341,9 @@ export const AdminLayout: React.FC = () => {
               <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-3">
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 rounded-lg border border-rose-200 dark:border-rose-900/40 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 rounded-lg border border-rose-200 dark:border-rose-900/40 transition-colors cursor-pointer"
+                  aria-label={t('लगआउट', 'Log Out')}
+                  title={t('लगआउट', 'Log Out')}
                 >
                   <LogOut className="size-3.5" />
                   <span className="hidden sm:inline">{t('लगआउट', 'Log Out')}</span>

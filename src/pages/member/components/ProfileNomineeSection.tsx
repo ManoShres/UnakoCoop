@@ -21,7 +21,7 @@ export function ProfileNomineeSection({
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-emerald-600" />
             <h3 className="text-base font-bold text-slate-900 dark:text-white font-headline">
-              {t('हकवाला विवरण (Nominee)', 'Nominee Details')}
+              {t('हकवाला विवरण', 'Nominee Details')}
             </h3>
           </div>
           <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 text-xs font-bold border border-emerald-200 dark:border-emerald-800">
@@ -45,7 +45,7 @@ export function ProfileNomineeSection({
             <h4 className="font-bold text-slate-900 dark:text-white text-sm">
               {t('श्रीमती सुनिता कुमारी चौधरी', 'Sunita Kumari Chaudhary')}
             </h4>
-            <p className="text-xs text-slate-500">{t('नाता: श्रीमती (Spouse)', 'Relation: Spouse')}</p>
+            <p className="text-xs text-slate-500">{t('नाता: श्रीमती', 'Relation: Spouse')}</p>
           </div>
         </div>
 
@@ -149,7 +149,7 @@ export function ProfileNomineeSection({
             <span className="font-mono font-semibold text-emerald-600">९८५७८-४०१२३</span>
           </div>
           <div className="flex justify-between">
-            <span>{t('उपसमूह (Self-help Unit):', 'Self-help Unit:')}</span>
+            <span>{t('उपसमूह:', 'Self-help Unit:')}</span>
             <span className="font-semibold text-slate-800 dark:text-slate-200">
               {t('गढवा महिला-पुरुष स्वावलम्बी एकाइ #०३', 'Gadhwa Self-Reliance Unit #03')}
             </span>

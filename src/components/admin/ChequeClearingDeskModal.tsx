@@ -46,7 +46,7 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
   onClose,
 }) => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
-  const { members } = useCoopStore();
+  const { members, savings, adjustSavingsBalance } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'CLEARING' | 'STOP_PAYMENT' | 'BOUNCE_LEDGER' | 'CHEQUE_BOOKS'>('CLEARING');
   const [transactions, setTransactions] = useState<ChequeTransactionRecord[]>(INITIAL_CHEQUE_TRANSACTIONS);
@@ -56,7 +56,9 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
   // Present Cheque Form State
   const [presChequeNo, setPresChequeNo] = useState('042103');
   const [presMemberId, setPresMemberId] = useState(members[0]?.id || 'm-101');
-  const [presAccountNo, setPresAccountNo] = useState('SAV-00101-01');
+  const [presAccountNo, setPresAccountNo] = useState(
+    savings.find((s) => s.memberId === (members[0]?.id || 'm-101'))?.accountNo || 'SAV-00101-01'
+  );
   const [presPayeeName, setPresPayeeName] = useState('शान्ति चौधरी');
   const [presAmount, setPresAmount] = useState<number>(45000);
   const [presChequeDateBs, setPresChequeDateBs] = useState('2081-06-02');
@@ -138,6 +140,20 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
       voucherNo: `CQ-VCH-${Date.now().toString().slice(-6)}`,
       remarks: 'काउन्टरबाट चेक भुक्तानी सम्पन्न।',
     };
+
+    const targetMember = selectedMember;
+    const targetAccount = savings.find(
+      (s) => s.accountNo === presAccountNo || (targetMember && s.memberId === targetMember.id)
+    );
+    const effectiveAccNo = targetAccount?.accountNo || presAccountNo;
+
+    // Execute actual ledger debit on savings account
+    adjustSavingsBalance(
+      effectiveAccNo,
+      presAmount,
+      'WITHDRAWAL',
+      `काउन्टरबाट चेक नं. ${presChequeNo} भुक्तानी (Payee: ${presPayeeName})`
+    );
 
     setTransactions((prev) => [newTx, ...prev]);
     showToast(t(`चेक नं. ${presChequeNo} भुक्तानी (CLEARED) भयो!`, `Cheque ${presChequeNo} successfully cleared!`));
@@ -340,7 +356,7 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
             }`}
           >
             <Ban className="size-4" />
-            <span>{t('चेक भुक्तानी रोक्का (Stop-Payment)', 'Stop-Payment Register')}</span>
+            <span>{t('चेक भुक्तानी रोक्का', 'Stop-Payment Register')}</span>
           </button>
 
           <button
@@ -410,7 +426,12 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
                         const mId = e.target.value;
                         setPresMemberId(mId);
                         const m = members.find((x) => x.id === mId);
-                        if (m) setPresAccountNo(`SAV-${m.memberNo.slice(-5)}-01`);
+                        const mSavings = savings.find((s) => s.memberId === mId);
+                        if (mSavings) {
+                          setPresAccountNo(mSavings.accountNo);
+                        } else if (m) {
+                          setPresAccountNo(`SAV-${m.memberNo.slice(-5)}-01`);
+                        }
                       }}
                       className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-medium"
                     >
@@ -553,10 +574,10 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="bg-slate-50 dark:bg-slate-800 text-xs px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 font-semibold"
                   >
-                    <option value="ALL">{t('सबै स्थिति (All Status)', 'All Status')}</option>
-                    <option value="CLEARED">{t('भुक्तानी भएको (Cleared)', 'Cleared')}</option>
-                    <option value="BOUNCED">{t('चेक अनादर (Bounced)', 'Bounced')}</option>
-                    <option value="STOP_PAYMENT">{t('रोक्का (Stopped)', 'Stopped')}</option>
+                    <option value="ALL">{t('सबै स्थिति', 'All Status')}</option>
+                    <option value="CLEARED">{t('भुक्तानी भएको', 'Cleared')}</option>
+                    <option value="BOUNCED">{t('चेक अनादर', 'Bounced')}</option>
+                    <option value="STOP_PAYMENT">{t('रोक्का', 'Stopped')}</option>
                   </select>
 
                   <button
@@ -709,7 +730,7 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
               <form onSubmit={handleRegisterStopPayment} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
                 <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold text-xs">
                   <Ban className="size-4" />
-                  <span>{t('नयाँ चेक भुक्तानी रोक्का दर्ता (New Stop-Payment Request)', 'Register Stop-Payment')}</span>
+                  <span>{t('नयाँ चेक भुक्तानी रोक्का दर्ता', 'Register Stop-Payment')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
@@ -910,7 +931,7 @@ export const ChequeClearingDeskModal: React.FC<ChequeClearingDeskModalProps> = (
               <form onSubmit={handleIssueChequeBook} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800 space-y-4">
                 <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 font-bold text-xs">
                   <PlusCircle className="size-4" />
-                  <span>{t('नयाँ चेक बुक जारी गर्नुहोस् (Issue Cheque Book)', 'Issue Cheque Book')}</span>
+                  <span>{t('नयाँ चेक बुक जारी गर्नुहोस्', 'Issue Cheque Book')}</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">

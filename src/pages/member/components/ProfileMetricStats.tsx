@@ -27,10 +27,10 @@ export function ProfileMetricStats() {
         <div>
           <p className="text-xs text-slate-500 font-medium">{t('सदस्य कल्याण कोष', 'Member Welfare Fund')}</p>
           <h3 className="text-lg font-bold text-emerald-700 dark:text-emerald-400 font-mono">
-            {t('सक्रिय (Active)', 'Active')}
+            {t('सक्रिय', 'Active')}
           </h3>
           <p className="text-[11px] text-slate-500 font-medium">
-            {t('प्रीमियम चुक्ता (Paid in Full)', 'Paid in Full')}
+            {t('प्रीमियम चुक्ता', 'Paid in Full')}
           </p>
         </div>
       </div>
@@ -43,7 +43,7 @@ export function ProfileMetricStats() {
         <div>
           <p className="text-xs text-slate-500 font-medium">{t('साधारण सभा मताधिकार', 'AGM Voting Right')}</p>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-            {t('योग्य (Eligible)', 'Eligible')}
+            {t('योग्य', 'Eligible')}
           </h3>
           <p className="text-[11px] text-slate-500 font-medium">
             {t('१ सदस्य १ मत सुरक्षित', '1 Member 1 Vote Guaranteed')}
@@ -62,7 +62,7 @@ export function ProfileMetricStats() {
             {t('१००% पूर्ण', '100% Complete')}
           </h3>
           <p className="text-[11px] text-emerald-600 font-medium">
-            {t('केन्द्रीय सीबीएस सिंक (Live CBS)', 'Synced with Live CBS')}
+            {t('केन्द्रीय सीबीएस सिंक', 'Synced with Live CBS')}
           </p>
         </div>
       </div>

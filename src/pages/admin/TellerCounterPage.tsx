@@ -133,11 +133,11 @@ export const TellerCounterPage: React.FC = () => {
               </span>
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300">
                 <ShieldCheck className="size-3" />
-                {t('दोहोरो नियन्त्रण (Dual Control)', 'Dual Control Verified')}
+                {t('दोहोरो नियन्त्रण', 'Dual Control Verified')}
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              {t('काउन्टर नगद मिलान तथा दैनिक बन्द (Day-End Balancing)', 'Teller Cash Drawer & Day-End Balancing')}
+              {t('काउन्टर नगद मिलान तथा दैनिक बन्द', 'Teller Cash Drawer & Day-End Balancing')}
             </h1>
             <p className="text-xs text-slate-500 mt-1">
               {session.branch} • {session.tellerName} • {t('मिति:', 'Date:')}{' '}
@@ -221,7 +221,7 @@ export const TellerCounterPage: React.FC = () => {
           }`}
         >
           <Banknote className="size-4" />
-          <span>{t('काउन्टर नगद मिलान (Counter Drawer)', 'Counter Drawer Balancing')}</span>
+          <span>{t('काउन्टर नगद मिलान', 'Counter Drawer Balancing')}</span>
         </button>
 
         <button
@@ -234,7 +234,7 @@ export const TellerCounterPage: React.FC = () => {
           }`}
         >
           <Building2 className="size-4" />
-          <span>{t('शाखा तथा केन्द्रीय तिजोरी मौज्दात (Multi-Branch Vault & CIT)', 'Multi-Branch Vault & CIT')}</span>
+          <span>{t('शाखा तथा केन्द्रीय तिजोरी मौज्दात', 'Multi-Branch Vault & CIT')}</span>
         </button>
       </div>
 
@@ -250,7 +250,7 @@ export const TellerCounterPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Banknote className="size-5 text-emerald-500" />
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  {t('भौतिक नोट गन्ती तालिका (Banknote Tally Sheet)', 'Banknote & Coin Denomination Tally')}
+                  {t('भौतिक नोट गन्ती तालिका', 'Banknote & Coin Denomination Tally')}
                 </h3>
               </div>
               <button
@@ -348,26 +348,26 @@ export const TellerCounterPage: React.FC = () => {
           {/* Balancing Audit Card */}
           <div className="glass-panel rounded-2xl border border-slate-200 dark:border-slate-800 p-6 space-y-4">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">
-              {t('दैनिक नगद मिलान हिसाब (Cash Ledger Balancing)', 'Cash Ledger Balancing')}
+              {t('दैनिक नगद मिलान हिसाब', 'Cash Ledger Balancing')}
             </h3>
 
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                <span className="text-slate-500">{t('बिहानी भल्ट मौज्दात (Opening Float)', 'Opening Vault Float')}</span>
+                <span className="text-slate-500">{t('बिहानी भल्ट मौज्दात', 'Opening Vault Float')}</span>
                 <span className="font-mono font-bold text-slate-900 dark:text-white">
                   {fmtCurrency(openingFloat, true)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                <span className="text-emerald-600 font-bold">{t('+ आजको नगद संकलन (Cash Receipts)', '+ Cash Received')}</span>
+                <span className="text-emerald-600 font-bold">{t('+ आजको नगद संकलन', '+ Cash Received')}</span>
                 <span className="font-mono font-bold text-emerald-600">
                   +{fmtCurrency(cashReceived, true)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-800">
-                <span className="text-rose-600 font-bold">{t('- आजको नगद भुक्तानी (Cash Payments)', '- Cash Disbursed')}</span>
+                <span className="text-rose-600 font-bold">{t('- आजको नगद भुक्तानी', '- Cash Disbursed')}</span>
                 <span className="font-mono font-bold text-rose-600">
                   -{fmtCurrency(cashDisbursed, true)}
                 </span>
@@ -409,13 +409,13 @@ export const TellerCounterPage: React.FC = () => {
                 <div>
                   <h4 className="font-bold text-xs">
                     {reconciliation.variance === 0
-                      ? t('नगद ठ्याक्कै मिलान भयो (Balanced)', 'Cash Drawer Perfectly Balanced')
+                      ? t('नगद ठ्याक्कै मिलान भयो', 'Cash Drawer Perfectly Balanced')
                       : reconciliation.variance > 0
-                      ? t('नगद बचत (Cash Surplus)', 'Cash Surplus Detected')
-                      : t('नगद घाटा (Cash Shortage)', 'Cash Shortage Detected')}
+                      ? t('नगद बचत', 'Cash Surplus Detected')
+                      : t('नगद घाटा', 'Cash Shortage Detected')}
                   </h4>
                   <p className="text-[11px] font-mono mt-0.5">
-                    {t('फरक रकम (Variance):', 'Variance:')}{' '}
+                    {t('फरक रकम:', 'Variance:')}{' '}
                     {reconciliation.variance === 0
                       ? 'NPR 0.00'
                       : fmtCurrency(reconciliation.variance, true)}
@@ -435,7 +435,7 @@ export const TellerCounterPage: React.FC = () => {
             <div className="space-y-3 text-xs">
               <div>
                 <label className="block text-slate-500 font-bold mb-1">
-                  {t('नगद जिम्मा लिने अधिकृत / साक्षी (Witness / Vault Custodian)', 'Witness / Vault Custodian')}
+                  {t('नगद जिम्मा लिने अधिकृत / साक्षी', 'Witness / Vault Custodian')}
                 </label>
                 <input
                   type="text"

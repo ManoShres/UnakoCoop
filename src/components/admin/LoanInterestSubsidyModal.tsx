@@ -383,7 +383,7 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                       <th className="p-3">{t('ऋणी विवरण', 'Member & Loan')}</th>
                       <th className="p-3">{t('सहुलियतपूर्ण योजना', 'Scheme & Title')}</th>
                       <th className="p-3 text-right">{t('बाँकी साँवा', 'Balance')}</th>
-                      <th className="p-3 text-center">{t('ब्याज विभाजन (Split)', 'Interest Split')}</th>
+                      <th className="p-3 text-center">{t('ब्याज विभाजन', 'Interest Split')}</th>
                       <th className="p-3">{t('बीमा / अनुगमन', 'Insurance & Monitoring')}</th>
                       <th className="p-3 text-center">{t('अवस्था', 'Status')}</th>
                     </tr>
@@ -554,7 +554,7 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                         <th className="p-2.5 text-right">{t('कुल पाकेको ब्याज', 'Total Interest')}</th>
                         <th className="p-2.5 text-right">{t('ऋणीले तिर्ने खुद', 'Member Due')}</th>
                         <th className="p-2.5 text-right text-emerald-600 font-bold">
-                          {t('सोधभर्ना दाबी (Claim)', 'Reimbursement Claim')}
+                          {t('सोधभर्ना दाबी', 'Reimbursement Claim')}
                         </th>
                       </tr>
                     </thead>
@@ -583,7 +583,7 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                     <tfoot className="bg-slate-100 dark:bg-slate-800 font-bold border-t border-slate-300 dark:border-slate-700">
                       <tr>
                         <td colSpan={2} className="p-2.5 text-slate-900 dark:text-white">
-                          {t('कुल जम्मा (Total Claimable Amount)', 'Grand Total')}
+                          {t('कुल जम्मा', 'Grand Total')}
                         </td>
                         <td className="p-2.5 text-right font-mono">{fmtCurrency(currentBatch.totalActivePrincipal)}</td>
                         <td className="p-2.5 text-center font-mono">-</td>
@@ -620,19 +620,19 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                       <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                         {t('दिलीप कुमार थारु', 'Dilip Kumar Tharu')}
                       </div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('कर्जा अधिकृत (Loan Officer)', 'Loan Officer')}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('कर्जा अधिकृत', 'Loan Officer')}</div>
                     </div>
                     <div>
                       <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                         {t('सीता कुमारी चौधरी', 'Sita Kumari Chaudhary')}
                       </div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('लेखापाल (Accountant)', 'Accountant')}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('लेखापाल', 'Accountant')}</div>
                     </div>
                     <div>
                       <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                         {t('अर्जुन प्रसाद शर्मा', 'Arjun Prasad Sharma')}
                       </div>
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('व्यवस्थापक (Manager)', 'Manager')}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('व्यवस्थापक', 'Manager')}</div>
                     </div>
                   </div>
                 </div>
@@ -678,7 +678,7 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block font-bold text-slate-600 dark:text-slate-400 mb-1">
-                        {t('आवेदकको उमेर (Age)', 'Age')}
+                        {t('आवेदकको उमेर', 'Age')}
                       </label>
                       <input
                         type="number"
@@ -722,7 +722,7 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                         onChange={(e) => setEligHasDegree(e.target.checked)}
                         className="size-4 rounded accent-emerald-600"
                       />
-                      <span>{t('स्नातक (Bachelor) उत्तीर्ण प्रमाणपत्र उपलब्ध', 'Bachelor Degree Available')}</span>
+                      <span>{t('स्नातक उत्तीर्ण प्रमाणपत्र उपलब्ध', 'Bachelor Degree Available')}</span>
                     </label>
 
                     <label className="flex items-center gap-2 cursor-pointer">
@@ -732,7 +732,7 @@ export const LoanInterestSubsidyModal: React.FC<LoanInterestSubsidyModalProps> =
                         onChange={(e) => setEligIsReturnee(e.target.checked)}
                         className="size-4 rounded accent-emerald-600"
                       />
-                      <span>{t('वैदेशिक रोजगारबाट फर्केको प्रमाण (Returnee Migrant)', 'Returnee Migrant')}</span>
+                      <span>{t('वैदेशिक रोजगारबाट फर्केको प्रमाण', 'Returnee Migrant')}</span>
                     </label>
 
                     <label className="flex items-center gap-2 cursor-pointer">

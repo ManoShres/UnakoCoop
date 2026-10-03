@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { Employee } from '../../types';
 import {
   StaffSalaryRecord,
@@ -40,6 +41,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
   employees,
 }) => {
   const { t, fmtCurrency, fmtDigits, fmtPercent } = useLanguageStore();
+  const { coopSettings, addTransaction } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'PAYROLL' | 'PF_LOAN' | 'RINGFENCE' | 'SETTLEMENT' | 'LEDGER'>('PAYROLL');
 
@@ -139,10 +141,87 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
     return calculateRetirementSettlement(selectedStaff, settlementDateBS);
   }, [selectedStaff, settlementDateBS]);
 
+  const [isSettled, setIsSettled] = useState(false);
+
   if (!isOpen) return null;
 
   const handlePrint = () => {
-    window.print();
+    if (!settlementVoucher || !selectedStaff) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>अवकाश फछ्र्यौट भौचर - ${settlementVoucher.voucherNo}</title>
+        <style>
+          body { font-family: 'Mukti', 'Kalimati', 'Arial', sans-serif; padding: 30px; line-height: 1.6; color: #111; }
+          .header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 12px; margin-bottom: 20px; }
+          .inst-name { font-size: 20px; font-weight: bold; margin: 0; }
+          .inst-sub { font-size: 13px; margin: 2px 0; }
+          .title { font-size: 14px; font-weight: bold; text-align: center; margin: 12px 0; }
+          .meta { font-size: 12px; margin-bottom: 12px; display: flex; justify-content: space-between; }
+          .table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+          .table th, .table td { border: 1px solid #444; padding: 6px 10px; text-align: left; }
+          .table th { background: #f0f0f0; }
+          .signatures { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; text-align: center; margin-top: 50px; font-size: 12px; }
+          .sig-line { border-bottom: 1px dotted #555; height: 35px; margin-bottom: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <p class="inst-name">${coopSettings.nameNepali}</p>
+          <p class="inst-sub">${coopSettings.addressNepali} | दर्ता नं. ${coopSettings.regNo} | पान नं. ${coopSettings.panNo}</p>
+          <div class="title">कर्मचारी सञ्चय कोष, उपदान तथा संचित बिदा फछ्र्यौट पत्र (Discharge Voucher)</div>
+        </div>
+        <div class="meta">
+          <span>कर्मचारी: <b>${selectedStaff.employeeName} (${selectedStaff.employeeNo})</b></span>
+          <span>भौचर नं: <b>${settlementVoucher.voucherNo}</b></span>
+          <span>मिति: <b>${settlementVoucher.settlementDateBS}</b></span>
+        </div>
+        <table class="table">
+          <thead>
+            <tr><th>दाबी / हिसाब विवरण</th><th style="text-align: right;">रकम (रु.)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>१. कुल संचित कर्मचारी सञ्चय कोष (PF Principal + Interest)</td><td style="text-align: right;">रु. ${settlementVoucher.totalPfPayable.toLocaleString()}</td></tr>
+            <tr><td>२. संचित उपदान (Gratuity)</td><td style="text-align: right;">रु. ${settlementVoucher.gratuityPayable.toLocaleString()}</td></tr>
+            <tr><td>३. संचित बिदा बापतको रकम (${selectedStaff.accumulatedLeaveDays} दिन)</td><td style="text-align: right;">रु. ${settlementVoucher.leaveEncashmentPayable.toLocaleString()}</td></tr>
+            <tr style="font-weight: bold; background: #fafafa;"><td>कुल प्राप्त रकम (Gross Payable)</td><td style="text-align: right;">रु. ${settlementVoucher.grossSettlement.toLocaleString()}</td></tr>
+            <tr style="color: #c00;"><td>कट्टा: सञ्चय कोष सापटी कर्जा बाँकी</td><td style="text-align: right;">- रु. ${settlementVoucher.staffLoanDeduction.toLocaleString()}</td></tr>
+            <tr style="font-weight: bold; background: #e8f5e9; font-size: 13px;"><td>कर्मचारीलाई भुक्तानी हुने खुद रकम (Net Final Settlement)</td><td style="text-align: right;">रु. ${settlementVoucher.netPayableToEmployee.toLocaleString()}</td></tr>
+          </tbody>
+        </table>
+        <div class="signatures">
+          <div><div class="sig-line"></div><b>${selectedStaff.employeeName}</b><br><small>अवकाश प्राप्त कर्मचारी</small></div>
+          <div><div class="sig-line"></div><b>लेखापाल / प्रशासन प्रमुख</b><br><small>${coopSettings.nameNepali}</small></div>
+          <div><div class="sig-line"></div><b>व्यवस्थापक / अध्यक्ष</b><br><small>${coopSettings.nameNepali}</small></div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 400);
+  };
+
+  const handleExecuteSettlement = () => {
+    if (!settlementVoucher || !selectedStaff) return;
+    addTransaction({
+      type: 'WITHDRAWAL',
+      amount: settlementVoucher.netPayableToEmployee,
+      description: `कर्मचारी अवकाश भुक्तानी - ${selectedStaff.employeeName} (${selectedStaff.employeeNo}) [Voucher: ${settlementVoucher.voucherNo}]`,
+      referenceNo: settlementVoucher.voucherNo,
+    });
+    setIsSettled(true);
+    alert(
+      `कर्मचारी ${selectedStaff.employeeName} को अवकाश भुक्तानी (रु. ${settlementVoucher.netPayableToEmployee.toLocaleString()}) सफल भयो र लेखा बहिखातामा प्रविष्टि गरियो!`
+    );
   };
 
   const handleCopyVoucher = () => {
@@ -256,7 +335,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
             }`}
           >
             <DollarSign className="size-4" />
-            <span>{t('२. सञ्चय कोष सापटी (PF Loan)', '2. Staff PF Loan')}</span>
+            <span>{t('२. सञ्चय कोष सापटी', '2. Staff PF Loan')}</span>
           </button>
 
           <button
@@ -268,7 +347,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
             }`}
           >
             <ShieldCheck className="size-4" />
-            <span>{t('३. कोष पृथकीकरण अडिट (Segregation)', '3. Fund Ring-fencing Audit')}</span>
+            <span>{t('३. कोष पृथकीकरण अडिट', '3. Fund Ring-fencing Audit')}</span>
           </button>
 
           <button
@@ -305,7 +384,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
               <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-wrap items-center gap-4">
                 <div className="grow">
                   <label className="text-xs text-slate-500 block mb-1">
-                    {t('मासिक आधारभूत तलब (Basic Monthly Salary NPR)', 'Monthly Basic Pay (NPR)')}
+                    {t('मासिक आधारभूत तलब', 'Monthly Basic Pay (NPR)')}
                   </label>
                   <input
                     type="number"
@@ -399,7 +478,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
 
                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                    {t('बाँकी सापटी सीमा (Available Limit)', 'Available Headroom')}
+                    {t('बाँकी सापटी सीमा', 'Available Headroom')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1">
                     {fmtCurrency(pfLoanEligibility.availableLoanLimit, true)}
@@ -441,7 +520,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                     >
                       {requestedLoanAmount <= pfLoanEligibility.availableLoanLimit
                         ? t('सापटी स्वीकृत हुन सक्ने (Within 90% Limit)', 'Eligible within 90% limit')
-                        : t('सीमा नाघेको (Exceeds available ceiling)', 'Exceeds available ceiling')}
+                        : t('सीमा नाघेको', 'Exceeds available ceiling')}
                     </span>
                   </div>
                 </div>
@@ -469,7 +548,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                   <h3 className="text-sm font-bold">
                     {ringfenceAudit.isFullyProtected
                       ? t('कर्मचारी कोष शतप्रतिशत सुरक्षित तथा अलग लगानीमा बाँधिएको', '100% Ring-Fenced and Legally Segregated')
-                      : t('कोष अपुग / जोखिम (Segregation Deficit Detected)', 'Ring-Fencing Deficit Alert')}
+                      : t('कोष अपुग / जोखिम', 'Ring-Fencing Deficit Alert')}
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-300">
                     {t(
@@ -484,7 +563,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {t('कर्मचारी दायित्व (Total Liability)', 'Total Staff Liability')}
+                    {t('कर्मचारी दायित्व', 'Total Staff Liability')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-slate-900 dark:text-white mt-1">
                     {fmtCurrency(ringfenceAudit.totalStaffLiability, true)}
@@ -496,7 +575,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
 
                 <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
-                    {t('अलग मुद्दती/बैंक मौज्दात (Earmarked Assets)', 'Segregated Bank Assets')}
+                    {t('अलग मुद्दती/बैंक मौज्दात', 'Segregated Bank Assets')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
                     {fmtCurrency(ringFencedBankAssets, true)}
@@ -506,7 +585,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
 
                 <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
-                    {t('बचत / अपुग (Surplus / Deficit)', 'Surplus / Deficit')}
+                    {t('बचत / अपुग', 'Surplus / Deficit')}
                   </p>
                   <p
                     className={`text-lg font-mono font-extrabold mt-1 ${
@@ -554,6 +633,20 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                     <Printer className="size-3.5" />
                     <span>{t('प्रिन्ट भौचर', 'Print Voucher')}</span>
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={handleExecuteSettlement}
+                    disabled={isSettled}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs ${
+                      isSettled
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
+                  >
+                    <CheckCircle2 className="size-3.5" />
+                    <span>{isSettled ? t('फछ्र्यौट सम्पन्न', 'Settled') : t('फछ्र्यौट निकासा गर्नुहोस्', 'Execute Discharge')}</span>
+                  </button>
                 </div>
               </div>
 
@@ -562,10 +655,10 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                 {/* Letterhead */}
                 <div className="text-center space-y-1 pb-4 border-b border-dashed border-slate-300 dark:border-slate-700">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                    उनको बचत तथा ऋण सहकारी संस्था लि.
+                    {coopSettings.nameNepali}
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    गढवा गाउँपालिका वडा नं. ५, दाङ | दर्ता नं. १२३/०६८/०६९
+                    {coopSettings.addressNepali} | {t('दर्ता नं.', 'Reg No.')} {coopSettings.regNo}
                   </p>
                   <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 pt-2 uppercase">
                     कर्मचारी सञ्चय कोष, उपदान तथा संचित बिदा फछ्र्यौट पत्र (Discharge Voucher)
@@ -581,7 +674,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                     <thead className="bg-slate-50 dark:bg-slate-900 font-semibold text-slate-600 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                       <tr>
                         <th className="px-4 py-2.5">{t('दाबी / हिसाब विवरण', 'Particulars')}</th>
-                        <th className="px-4 py-2.5 text-right">{t('प्राप्त हुने रकम (Payable NPR)', 'Amount (NPR)')}</th>
+                        <th className="px-4 py-2.5 text-right">{t('प्राप्त हुने रकम', 'Amount (NPR)')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
@@ -595,7 +688,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                       </tr>
                       <tr>
                         <td className="px-4 py-2.5 font-sans">
-                          {t('२. नेपाल श्रम ऐन २०७४ अनुसार संचित उपदान (Gratuity)', 'Accrued Statutory Gratuity')}
+                          {t('२. नेपाल श्रम ऐन २०७४ अनुसार संचित उपदान', 'Accrued Statutory Gratuity')}
                         </td>
                         <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">
                           {fmtCurrency(settlementVoucher.gratuityPayable, false)}
@@ -603,7 +696,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                       </tr>
                       <tr>
                         <td className="px-4 py-2.5 font-sans">
-                          {t('३. संचित बिदा बापतको रकम (Unutilized Leave Encashment: ', 'Leave Encashment: ')}
+                          {t('३. संचित बिदा बापतको रकम (Unutilized Leave Encashment:', 'Leave Encashment: ')}
                           {fmtDigits(selectedStaff.accumulatedLeaveDays)} {t('दिन)', 'days)')}
                         </td>
                         <td className="px-4 py-2.5 text-right font-bold text-slate-900 dark:text-white">
@@ -611,14 +704,14 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                         </td>
                       </tr>
                       <tr className="bg-slate-50 dark:bg-slate-900/60 font-bold">
-                        <td className="px-4 py-2.5 font-sans">{t('कुल प्राप्त रकम (Gross Payable):', 'Gross Payable:')}</td>
+                        <td className="px-4 py-2.5 font-sans">{t('कुल प्राप्त रकम:', 'Gross Payable:')}</td>
                         <td className="px-4 py-2.5 text-right text-emerald-600 dark:text-emerald-400">
                           {fmtCurrency(settlementVoucher.grossSettlement, false)}
                         </td>
                       </tr>
                       <tr className="text-rose-600 dark:text-rose-400">
                         <td className="px-4 py-2.5 font-sans">
-                          {t('कट्टा: सञ्चय कोष सापटी कर्जा बाँकी (Staff PF Loan Balance)', 'Less: Outstanding Staff PF Loan')}
+                          {t('कट्टा: सञ्चय कोष सापटी कर्जा बाँकी', 'Less: Outstanding Staff PF Loan')}
                         </td>
                         <td className="px-4 py-2.5 text-right font-bold">
                           - {fmtCurrency(settlementVoucher.staffLoanDeduction, false)}
@@ -626,7 +719,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                       </tr>
                       <tr className="bg-emerald-50 dark:bg-emerald-950/40 text-sm font-extrabold border-t-2 border-emerald-300 dark:border-emerald-700">
                         <td className="px-4 py-3 font-sans text-emerald-900 dark:text-emerald-200">
-                          {t('कर्मचारीलाई भुक्तानी हुने खुद रकम (Net Final Settlement):', 'Net Payable to Employee:')}
+                          {t('कर्मचारीलाई भुक्तानी हुने खुद रकम:', 'Net Payable to Employee:')}
                         </td>
                         <td className="px-4 py-3 text-right text-emerald-700 dark:text-emerald-300">
                           {fmtCurrency(settlementVoucher.netPayableToEmployee, true)}
@@ -685,7 +778,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                   className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs cursor-pointer"
                 >
                   <Download className="size-4" />
-                  <span>{t('CSV डाउनलोड (Export CSV)', 'Export CSV')}</span>
+                  <span>{t('CSV डाउनलोड', 'Export CSV')}</span>
                 </button>
               </div>
 
@@ -702,7 +795,7 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
                         <th className="px-3 py-2.5 text-right">{t('कर्मचारी PF (१०%)', 'Employee PF')}</th>
                         <th className="px-3 py-2.5 text-right">{t('संस्था PF (१०%)', 'Employer PF')}</th>
                         <th className="px-3 py-2.5 text-right">{t('कुल सञ्चय कोष', 'Total PF')}</th>
-                        <th className="px-3 py-2.5 text-right">{t('उपदान (Gratuity)', 'Gratuity')}</th>
+                        <th className="px-3 py-2.5 text-right">{t('उपदान', 'Gratuity')}</th>
                         <th className="px-3 py-2.5 text-right">{t('सापटी बाँकी', 'PF Loan')}</th>
                       </tr>
                     </thead>

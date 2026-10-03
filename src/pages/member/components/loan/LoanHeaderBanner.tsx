@@ -2,6 +2,7 @@ import React from 'react';
 import { ShieldCheck, Calendar, PlusCircle, CheckCircle2, Sparkles } from 'lucide-react';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { Loan } from '../../../../types';
+import { LOAN_SCHEMES } from '../../../../types/loan';
 
 interface LoanHeaderBannerProps {
   onOpenApplyModal: () => void;
@@ -15,7 +16,10 @@ export const LoanHeaderBanner: React.FC<LoanHeaderBannerProps> = ({
   const { t } = useLanguageStore();
 
   const loanNo = activeLoan?.loanNo || 'LN-2025-0429';
-  const loanType = activeLoan?.loanType || 'Small Business Enterprise & Dairy';
+  const matchedScheme = activeLoan?.loanType ? LOAN_SCHEMES.find((s) => s.type === activeLoan.loanType) : undefined;
+  const localizedLoanType = matchedScheme
+    ? t(matchedScheme.labelNe, matchedScheme.labelEn)
+    : activeLoan?.loanType || t('साना व्यवसाय उद्यम तथा दुग्ध कर्जा', 'Small Business Enterprise & Dairy');
   const nextDue = activeLoan?.nextDueDate || 'Chaitra 15, 2081';
 
   return (
@@ -35,7 +39,7 @@ export const LoanHeaderBanner: React.FC<LoanHeaderBannerProps> = ({
           {t('कर्जा तथा पुनर्भुक्तानी पोर्टफोलियो', 'Loan & Repayment Portfolio')}
         </h1>
         <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-          {loanType} • Unako SACCOS Core CBS Credit Ledger
+          {localizedLoanType} • {t('उनको साकोस केन्द्रीय सीबीएस ऋण खाता', 'Unako SACCOS Core CBS Credit Ledger')}
         </p>
       </div>
 

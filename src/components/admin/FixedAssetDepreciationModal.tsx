@@ -325,13 +325,13 @@ export const FixedAssetDepreciationModal: React.FC<FixedAssetDepreciationModalPr
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold">
                   <tr>
-                    <th className="py-3 px-3">{t('ह्रासकट्टी वर्ग (Pool)', 'Pool Category')}</th>
+                    <th className="py-3 px-3">{t('ह्रासकट्टी वर्ग', 'Pool Category')}</th>
                     <th className="py-3 px-2 text-center">{t('दर %', 'Rate')}</th>
                     <th className="py-3 px-3 text-right">{t('प्रारम्भिक WDV', 'Opening WDV')}</th>
                     <th className="py-3 px-3 text-right">{t('श्रावण-पौष (१००%)', 'Shrawan-Poush')}</th>
                     <th className="py-3 px-3 text-right">{t('माघ-चैत्र (६६.७%)', 'Magh-Chaitra')}</th>
                     <th className="py-3 px-3 text-right">{t('वैशाख-असार (३३.३%)', 'Baisakh-Ashadh')}</th>
-                    <th className="py-3 px-3 text-right">{t('ह्रास आधार (Base)', 'Dep Base')}</th>
+                    <th className="py-3 px-3 text-right">{t('ह्रास आधार', 'Dep Base')}</th>
                     <th className="py-3 px-3 text-right text-rose-600">{t('ह्रासकट्टी खर्च', 'Depreciation')}</th>
                     <th className="py-3 px-3 text-right text-purple-600">{t('आगामी वर्ष सर्ने', 'Deferred')}</th>
                     <th className="py-3 px-4 text-right text-emerald-600 font-black">{t('अन्तिम WDV', 'Closing WDV')}</th>
@@ -390,7 +390,7 @@ export const FixedAssetDepreciationModal: React.FC<FixedAssetDepreciationModalPr
                 </tbody>
                 <tfoot className="bg-slate-100 dark:bg-slate-800 font-bold border-t-2 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white">
                   <tr>
-                    <td className="py-3 px-3">{t('कुल जम्मा (Total Summary)', 'Total Summary')}</td>
+                    <td className="py-3 px-3">{t('कुल जम्मा', 'Total Summary')}</td>
                     <td className="py-3 px-2 text-center">-</td>
                     <td className="py-3 px-3 text-right">{summary.totalOpeningWdv.toLocaleString('en-IN')}</td>
                     <td colSpan={3} className="py-3 px-3 text-center text-amber-600">
@@ -428,7 +428,7 @@ export const FixedAssetDepreciationModal: React.FC<FixedAssetDepreciationModalPr
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै वर्ग (All Pools)', 'All Pools')}</option>
+                <option value="ALL">{t('सबै वर्ग', 'All Pools')}</option>
                 {Object.entries(POOL_METADATA).map(([k, v]) => (
                   <option key={k} value={k}>{v.nameNp}</option>
                 ))}
@@ -439,7 +439,7 @@ export const FixedAssetDepreciationModal: React.FC<FixedAssetDepreciationModalPr
                 onChange={(e) => setBranchFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै शाखा (All Branches)', 'All Branches')}</option>
+                <option value="ALL">{t('सबै शाखा', 'All Branches')}</option>
                 <option value="गढवा मुख्य शाखा">गढवा मुख्य शाखा</option>
                 <option value="लमही सेवा केन्द्र">लमही सेवा केन्द्र</option>
                 <option value="भालुवाङ सेवा केन्द्र">भालुवाङ सेवा केन्द्र</option>
@@ -647,7 +647,7 @@ export const FixedAssetDepreciationModal: React.FC<FixedAssetDepreciationModalPr
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-[10px] text-slate-400 block mb-1">{t('ह्रासकट्टी वर्ग (Pool)', 'Pool Category')}</label>
+                    <label className="text-[10px] text-slate-400 block mb-1">{t('ह्रासकट्टी वर्ग', 'Pool Category')}</label>
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value as AssetPoolCategory)}
@@ -697,7 +697,7 @@ export const FixedAssetDepreciationModal: React.FC<FixedAssetDepreciationModalPr
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-400 block mb-1">{t('खरिद समय स्ल्याब (Addition Timing)', 'Timing Slab')}</label>
+                  <label className="text-[10px] text-slate-400 block mb-1">{t('खरिद समय स्ल्याब', 'Timing Slab')}</label>
                   <select
                     value={newTiming}
                     onChange={(e) => setNewTiming(e.target.value as AdditionTiming)}

@@ -374,7 +374,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-bold text-red-600 dark:text-red-400 tracking-wider uppercase">
-                  {t('नेपाल सरकार आन्तरिक राजस्व विभाग (Inland Revenue Department)', 'Government of Nepal Inland Revenue Department')}
+                  {t('नेपाल सरकार आन्तरिक राजस्व विभाग', 'Government of Nepal Inland Revenue Department')}
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-300/40">
                   {t('आयकर ऐन २०५८ दफा ८७, ८८, ८९ अनुरूप', 'Compliant with Income Tax Act 2058')}
@@ -400,7 +400,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-5 bg-slate-50 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800">
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-              {t('कुल करयोग्य भुक्तानी (Gross)', 'Total Gross Payment')}
+              {t('कुल करयोग्य भुक्तानी', 'Total Gross Payment')}
             </span>
             <span className="text-lg font-black text-slate-900 dark:text-white mt-0.5 block font-mono">
               {fmtCurrency(totalGrossWithheld)}
@@ -410,7 +410,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-red-200 dark:border-red-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider block">
-              {t('कुल कट्टी कर (Total TDS)', 'Total TDS Withheld')}
+              {t('कुल कट्टी कर', 'Total TDS Withheld')}
             </span>
             <span className="text-lg font-black text-red-600 dark:text-red-400 mt-0.5 block font-mono">
               {fmtCurrency(totalTdsWithheld)}
@@ -420,7 +420,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
-              {t('दाखिला भएको कर (Deposited)', 'Deposited to Treasury')}
+              {t('दाखिला भएको कर', 'Deposited to Treasury')}
             </span>
             <span className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block font-mono">
               {fmtCurrency(totalDeposited)}
@@ -432,7 +432,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-amber-200 dark:border-amber-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block">
-              {t('दाखिला बाँकी कर (Pending)', 'Pending Deposit')}
+              {t('दाखिला बाँकी कर', 'Pending Deposit')}
             </span>
             <span className="text-lg font-black text-amber-600 dark:text-amber-400 mt-0.5 block font-mono">
               {fmtCurrency(totalPending)}
@@ -454,7 +454,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
             }`}
           >
             <FileText className="size-4" />
-            <span>{t('e-TDS अभिलेख तथा अनुसूची (Register)', 'e-TDS Register & Schedule')}</span>
+            <span>{t('e-TDS अभिलेख तथा अनुसूची', 'e-TDS Register & Schedule')}</span>
           </button>
 
           <button
@@ -466,7 +466,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
             }`}
           >
             <Download className="size-4" />
-            <span>{t('IRD अपलोड फाइल जेनेरेटर (Portal Exporter)', 'IRD Portal File Exporter')}</span>
+            <span>{t('IRD अपलोड फाइल जेनेरेटर', 'IRD Portal File Exporter')}</span>
           </button>
 
           <button
@@ -478,7 +478,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
             }`}
           >
             <Coins className="size-4" />
-            <span>{t('राजस्व दाखिला भौचर मिलान (Treasury Vouchers)', 'Treasury Deposit Vouchers')}</span>
+            <span>{t('राजस्व दाखिला भौचर मिलान', 'Treasury Deposit Vouchers')}</span>
           </button>
 
           <button
@@ -490,7 +490,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
             }`}
           >
             <ShieldCheck className="size-4" />
-            <span>{t('कर कट्टी प्रमाणपत्र फाराम नं. ८८ (TDS Certificate)', 'TDS Deduction Certificate Form 88')}</span>
+            <span>{t('कर कट्टी प्रमाणपत्र फाराम नं. ८८', 'TDS Deduction Certificate Form 88')}</span>
           </button>
         </div>
 
@@ -516,7 +516,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                   <div>
                     <h4 className="font-bold text-sm">
                       {filingCompliance.isFullyDeposited
-                        ? t('महिनाको कर कट्टी दाखिला शतप्रतिशत सम्पन्न (Fully Complied)', 'Monthly TDS fully deposited into Nepal Treasury')
+                        ? t('महिनाको कर कट्टी दाखिला शतप्रतिशत सम्पन्न', 'Monthly TDS fully deposited into Nepal Treasury')
                         : t('कर कट्टी रकम समयमै दाखिला गर्नुपर्ने कानूनी सूचना', 'Statutory TDS Deposit & Filing Notice')}
                     </h4>
                     <p className="text-xs opacity-90 mt-0.5">
@@ -543,11 +543,11 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                 <form onSubmit={handleAddNewRecord} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-4 animate-in fade-in">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Plus className="size-4 text-red-600" />
-                    <span>{t('नयाँ कर कट्टी दाखिला प्रविष्टि (New TDS Deduction Entry)', 'New TDS Deduction Entry')}</span>
+                    <span>{t('नयाँ कर कट्टी दाखिला प्रविष्टि', 'New TDS Deduction Entry')}</span>
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('कानूनी दफा (Section)', 'TDS Section')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('कानूनी दफा', 'TDS Section')}</label>
                       <select
                         value={newSection}
                         onChange={(e) => {
@@ -583,7 +583,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('स्थायी लेखा नं. (PAN No)', 'PAN No')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('स्थायी लेखा नं.', 'PAN No')}</label>
                       <input
                         type="text"
                         placeholder="9-digit PAN e.g. 601234567"
@@ -617,7 +617,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('कुल भुक्तानी रकम (Gross NPR)', 'Gross Amount NPR')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('कुल भुक्तानी रकम', 'Gross Amount NPR')}</label>
                       <input
                         type="number"
                         min="1"
@@ -669,7 +669,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                     onChange={(e) => setSelectedMonthBS(e.target.value)}
                     className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-bold"
                   >
-                    <option value="ALL">{t('सबै महिना (All Months)', 'All Months')}</option>
+                    <option value="ALL">{t('सबै महिना', 'All Months')}</option>
                     <option value="श्रावण">श्रावण (Shrawan)</option>
                     <option value="भाद्र">भाद्र (Bhadra)</option>
                     <option value="आश्विन">आश्विन (Ashwin)</option>
@@ -689,7 +689,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                     onChange={(e) => setSectionFilter(e.target.value as 'ALL' | TdsSectionCode)}
                     className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-bold"
                   >
-                    <option value="ALL">{t('सबै कानूनी दफाहरू (All Sections)', 'All Sections')}</option>
+                    <option value="ALL">{t('सबै कानूनी दफाहरू', 'All Sections')}</option>
                     <option value="SEC_87">दफा ८७ - पारिश्रमिक (Payroll)</option>
                     <option value="SEC_88_INTEREST">दफा ८८(१) - ब्याज (Interest)</option>
                     <option value="SEC_88_DIVIDEND">दफा ८८(२) - लाभांश (Dividend)</option>
@@ -721,10 +721,10 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                         <th className="py-3 px-3.5">{t('कानूनी दफा', 'Section')}</th>
                         <th className="py-3 px-3.5">{t('भुक्तानी पाउने व्यक्ति / संस्था', 'Deductee Name')}</th>
                         <th className="py-3 px-3.5">{t('प्यान नं. (PAN)', 'PAN')}</th>
-                        <th className="py-3 px-3.5 text-right">{t('कुल रकम (Gross)', 'Gross Amount')}</th>
+                        <th className="py-3 px-3.5 text-right">{t('कुल रकम', 'Gross Amount')}</th>
                         <th className="py-3 px-3.5 text-center">{t('कर दर', 'Rate')}</th>
                         <th className="py-3 px-3.5 text-right">{t('कट्टी कर (TDS)', 'TDS Amount')}</th>
-                        <th className="py-3 px-3.5 text-right">{t('खुद भुक्तानी (Net)', 'Net Paid')}</th>
+                        <th className="py-3 px-3.5 text-right">{t('खुद भुक्तानी', 'Net Paid')}</th>
                         <th className="py-3 px-3.5">{t('दाखिला भौचर', 'Voucher')}</th>
                         <th className="py-3 px-3.5 text-center">{t('स्थिति', 'Status')}</th>
                       </tr>
@@ -859,7 +859,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                 <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                      {t('IRD e-TDS टेक्स्ट फाइल पूर्वावलोकन (Live Text Preview)', 'IRD e-TDS Text Output Preview')}
+                      {t('IRD e-TDS टेक्स्ट फाइल पूर्वावलोकन', 'IRD e-TDS Text Output Preview')}
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono">
                       {filteredRecords.length} records ready
@@ -922,7 +922,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
                   <div>
-                    <label className="block text-slate-500 font-bold mb-1">{t('राजस्व शीर्षक (Revenue Head)', 'Revenue Head')}</label>
+                    <label className="block text-slate-500 font-bold mb-1">{t('राजस्व शीर्षक', 'Revenue Head')}</label>
                     <select
                       value={reconcileHead}
                       onChange={(e) => setReconcileHead(e.target.value as RevenueHeadCode)}
@@ -991,7 +991,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder={t('सदस्य नं. वा प्यान नम्बर प्रविष्ट गर्नुहोस् (e.g. 601234567 or M-102)...', 'Enter Member ID or PAN...')}
+                    placeholder={t('सदस्य नं. वा प्यान नम्बर प्रविष्ट गर्नुहोस्...', 'Enter Member ID or PAN...')}
                     value={certSearchQuery}
                     onChange={(e) => setCertSearchQuery(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-mono font-bold"
@@ -1003,7 +1003,7 @@ export const IrdETdsManagerModal: React.FC<IrdETdsManagerModalProps> = ({
                     className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer shrink-0"
                   >
                     <Printer className="size-4" />
-                    <span>{t('प्रमाणपत्र प्रिन्ट (Print Certificate)', 'Print Certificate')}</span>
+                    <span>{t('प्रमाणपत्र प्रिन्ट', 'Print Certificate')}</span>
                   </button>
                 )}
               </div>

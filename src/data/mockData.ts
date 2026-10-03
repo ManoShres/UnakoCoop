@@ -313,6 +313,7 @@ export const INITIAL_APPLICATIONS: LoanApplication[] = [
 export const INITIAL_TRANSACTIONS: Transaction[] = [
   {
     id: 't1',
+    memberId: 'm1',
     date: '2026-09-05',
     type: 'DEPOSIT',
     description: 'Monthly Recurring Savings Deposit',
@@ -322,6 +323,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
   },
   {
     id: 't2',
+    memberId: 'm1',
     date: '2026-09-02',
     type: 'LOAN_EMI',
     description: 'EMI Payment: LN-2025-0429 (Principal + Interest)',
@@ -331,6 +333,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
   },
   {
     id: 't3',
+    memberId: 'm1',
     date: '2026-08-15',
     type: 'DEPOSIT',
     description: 'Fixed Deposit Monthly Accrued Interest Credit',
@@ -340,6 +343,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
   },
   {
     id: 't4',
+    memberId: 'm1',
     date: '2026-07-28',
     type: 'DIVIDEND',
     description: 'Annual General Meeting Share Dividend Distribution (14.5%)',
@@ -349,6 +353,7 @@ export const INITIAL_TRANSACTIONS: Transaction[] = [
   },
   {
     id: 't5',
+    memberId: 'm1',
     date: '2026-07-10',
     type: 'WITHDRAWAL',
     description: 'Counter Cash Withdrawal for Emergency Agrochemical Purchase',

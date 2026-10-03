@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { CreditCard, ShieldCheck, Sparkles, ArrowRight, Clock, Award } from 'lucide-react';
 import { Loan } from '../../../../types';
+import { LOAN_SCHEMES } from '../../../../types/loan';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 
 interface MemberLoanHealthCardProps {
@@ -19,6 +20,11 @@ export function MemberLoanHealthCard({ loan, onOpenEmiModal }: MemberLoanHealthC
   const emiAmount = loan?.monthlyEmi || 8640;
   const loanNo = loan?.loanNo || 'LN-2099-0418';
 
+  const matchedScheme = loan?.loanType ? LOAN_SCHEMES.find((s) => s.type === loan.loanType) : undefined;
+  const localizedLoanType = matchedScheme
+    ? t(matchedScheme.labelNe, matchedScheme.labelEn)
+    : loan?.loanType || t('कृषि तथा दुग्ध व्यवसाय कर्जा', 'Krishi & Dairy Entrepreneurship Loan');
+
   return (
     <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col justify-between h-full space-y-5">
       {/* Header */}
@@ -34,7 +40,7 @@ export function MemberLoanHealthCard({ loan, onOpenEmiModal }: MemberLoanHealthC
         </div>
 
         <h3 className="text-base font-bold text-slate-900 dark:text-white">
-          {loan?.loanType || t('कृषि तथा दुग्ध व्यवसाय कर्जा', 'Krishi & Dairy Entrepreneurship Loan')}
+          {localizedLoanType}
         </h3>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
           {t('चेनपुर दुग्ध संकलन केन्द्र, गढवा क्लस्टर', 'Chainpur Dairy Cooperative Cluster, Gadhwa')}
@@ -45,10 +51,10 @@ export function MemberLoanHealthCard({ loan, onOpenEmiModal }: MemberLoanHealthC
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs">
           <span className="font-medium text-slate-600 dark:text-slate-400">
-            {t('ऋण फर्छ्यौट प्रगति (Loan Repaid)', 'Repayment Progress')}
+            {t('ऋण फर्छ्यौट प्रगति', 'Repayment Progress')}
           </span>
-          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-            {percentCleared}% {t('चुक्ता भयो', 'Cleared')}
+          <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+            {fmtDigits(percentCleared)}% {t('चुक्ता भयो', 'Cleared')}
           </span>
         </div>
 
@@ -60,8 +66,8 @@ export function MemberLoanHealthCard({ loan, onOpenEmiModal }: MemberLoanHealthC
         </div>
 
         <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono pt-1">
-          <span>{t('स्वीकृत रकम:', 'Sanctioned:')} रु. {fmtCurrency(totalSanctioned, false)}</span>
-          <span>{t('बाँकी साँवा:', 'Balance:')} रु. {fmtCurrency(remaining, false)}</span>
+          <span>{t('स्वीकृत रकम:', 'Sanctioned:')} <strong className="tabular-nums text-slate-700 dark:text-slate-300">{fmtCurrency(totalSanctioned, false)}</strong></span>
+          <span>{t('बाँकी साँवा:', 'Balance:')} <strong className="tabular-nums text-slate-700 dark:text-slate-300">{fmtCurrency(remaining, false)}</strong></span>
         </div>
       </div>
 
@@ -70,7 +76,7 @@ export function MemberLoanHealthCard({ loan, onOpenEmiModal }: MemberLoanHealthC
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-300">
             <Clock className="size-4 text-amber-600" />
-            <span>{t('आसन्न किस्ता भुक्तानी (Next Due)', 'Next Installment Due')}</span>
+            <span>{t('आसन्न किस्ता भुक्तानी', 'Next Installment Due')}</span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-200/70 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300 font-bold">
             {t('किस्ता #२५/३६', '#25 of 36')}
@@ -79,18 +85,18 @@ export function MemberLoanHealthCard({ loan, onOpenEmiModal }: MemberLoanHealthC
 
         <div className="flex items-baseline justify-between">
           <div>
-            <div className="text-2xl font-black font-mono text-slate-900 dark:text-white">
-              रु. {fmtCurrency(emiAmount, false)}
+            <div className="text-2xl font-black font-mono text-slate-900 dark:text-white tabular-nums">
+              {fmtCurrency(emiAmount, false)}
             </div>
             <div className="text-[10px] text-slate-500 dark:text-slate-400">
-              {t('साँवा: रु. ७,१२० • ब्याज (७.०%): रु. १,५२०', 'Principal: NPR 7,120 • Interest: NPR 1,520')}
+              {t('साँवा: रु ७,१२० • ब्याज (७.०%): रु १,५२०', 'Principal: NPR 7,120 • Interest: NPR 1,520')}
             </div>
           </div>
 
           <button
             type="button"
             onClick={onOpenEmiModal}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm transition active:scale-95 cursor-pointer"
           >
             <CreditCard className="size-3.5" />
             <span>{t('किस्ता तिर्नुहोस्', 'Pay EMI')}</span>

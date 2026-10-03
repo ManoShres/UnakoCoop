@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { Loan, Member, LoanProvisionCategory } from '../../types';
 import {
   DISTRESS_REASONS,
@@ -46,6 +47,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
   onRescheduleSuccess,
 }) => {
   const { t, fmtCurrency, fmtDigits, fmtPercent } = useLanguageStore();
+  const { coopSettings, rescheduleLoan } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'ELIGIBILITY' | 'AMORTIZATION' | 'DEED' | 'REGISTER'>('ELIGIBILITY');
   const [selectedLoanId, setSelectedLoanId] = useState<string>(initialLoanId || loans[0]?.id || '');
@@ -211,7 +213,54 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    if (!deed) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>तमसुक - ${deed.deedNo}</title>
+        <style>
+          body { font-family: 'Mukti', 'Kalimati', 'Arial', sans-serif; padding: 30px; line-height: 1.6; color: #111; }
+          .header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 12px; margin-bottom: 20px; }
+          .inst-name { font-size: 20px; font-weight: bold; margin: 0; }
+          .inst-sub { font-size: 13px; margin: 2px 0; }
+          .title-box { display: inline-block; padding: 4px 14px; background: #eee; font-weight: bold; font-size: 14px; margin-top: 10px; border: 1px solid #ccc; }
+          .meta { font-size: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+          .deed-text { font-size: 13px; text-align: justify; white-space: pre-line; margin-bottom: 30px; }
+          .signatures { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center; margin-top: 40px; font-size: 12px; }
+          .sig-line { border-bottom: 1px dotted #555; height: 35px; margin-bottom: 5px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <p class="inst-name">${coopSettings.nameNepali}</p>
+          <p class="inst-sub">${coopSettings.addressNepali} | दर्ता नं. ${coopSettings.regNo} | पान नं. ${coopSettings.panNo}</p>
+          <div class="title-box">कर्जा पुनर्तालिकीकरण तथा पुनर्संरचना सम्झौता पत्र (तमसुक)</div>
+        </div>
+        <div class="meta">
+          <span>तमसुक नं: <b>${deed.deedNo}</b></span>
+          <span>मिति: <b>${deed.executionDateNepali}</b></span>
+        </div>
+        <div class="deed-text">${deed.bodyNepaliText}</div>
+        <div class="signatures">
+          <div><div class="sig-line"></div><b>${deed.borrowerName}</b><br><small>ऋणी सदस्य</small></div>
+          <div><div class="sig-line"></div><b>........................</b><br><small>जमानतदार / रोहबर</small></div>
+          <div><div class="sig-line"></div><b>${officerName}</b><br><small>ऋण उपसमिति / अधिकृत</small></div>
+          <div><div class="sig-line"></div><b>संस्थाको छाप / व्यवस्थापक</b><br><small>${coopSettings.nameNepali}</small></div>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+    }, 400);
   };
 
   const handleSaveAndExecute = () => {
@@ -232,6 +281,16 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
       restructuredDate: startDateBS,
       status: 'ACTIVE_PROBATION',
     };
+
+    // Wire to store: update loan and ledger
+    rescheduleLoan(selectedLoan.loanNo, {
+      newPrincipal: restructuredPrincipal,
+      newRate: customInterestRate,
+      extendedTenure: extendedTenureMonths,
+      revisedEmi,
+      downPayment: lumpSumDownPayment,
+      note: deed.deedNo,
+    });
 
     setRescheduledRecords((prev) => [newRecord, ...prev]);
     if (onRescheduleSuccess) {
@@ -393,8 +452,8 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                   <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold">
                       {eligibility.isEligible
-                        ? t('पुनर्तालिकीकरणका लागि योग्य (Eligible for Restructuring)', 'Eligible for Restructuring')
-                        : t('सर्त अपुग (Not Eligible - Conditions Unmet)', 'Conditions Unmet for Restructuring')}
+                        ? t('पुनर्तालिकीकरणका लागि योग्य', 'Eligible for Restructuring')
+                        : t('सर्त अपुग', 'Conditions Unmet for Restructuring')}
                     </h3>
                     <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-900 shadow-xs">
                       {t('असुली दर:', 'Paid Ratio:')} {fmtPercent(eligibility.interestPaymentRatio * 100)}
@@ -469,7 +528,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
 
                     {eligibility.shortfallAmount > 0 && (
                       <p className="text-[11px] text-rose-600 dark:text-rose-400 font-semibold">
-                        {t('अपुग रकम (Shortfall):', 'Shortfall:')} {fmtCurrency(eligibility.shortfallAmount, true)} {t('थप दाखिला गर्नुपर्नेछ।', 'more needed.')}
+                        {t('अपुग रकम:', 'Shortfall:')} {fmtCurrency(eligibility.shortfallAmount, true)} {t('थप दाखिला गर्नुपर्नेछ।', 'more needed.')}
                       </p>
                     )}
                   </div>
@@ -485,7 +544,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                   <div className="space-y-3">
                     <div>
                       <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">
-                        {t('विपद् वर्ग (Distress Category)', 'Distress Category')}
+                        {t('विपद् वर्ग', 'Distress Category')}
                       </label>
                       <select
                         value={distressReason}
@@ -515,7 +574,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
 
                     <div>
                       <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">
-                        {t('व्यवसाय पुनरुत्थान कार्ययोजना (Business Revival Plan)', 'Business Revival & Income Plan')}
+                        {t('व्यवसाय पुनरुत्थान कार्ययोजना', 'Business Revival & Income Plan')}
                       </label>
                       <textarea
                         rows={2}
@@ -556,7 +615,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center justify-between">
                   <span className="flex items-center gap-2">
                     <Calculator className="size-4 text-amber-500" />
-                    {t('पुनर्तालिकीकरण सर्तहरू (Restructuring Terms)', 'Restructuring Terms')}
+                    {t('पुनर्तालिकीकरण सर्तहरू', 'Restructuring Terms')}
                   </span>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300">
                     घट्दो साँवा विधि (Reducing Balance EMI)
@@ -566,7 +625,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
                     <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">
-                      {t('एकमूष्ठ साँवा भुक्तानी (Down-payment)', 'Lump-sum Principal Paid')}
+                      {t('एकमूष्ठ साँवा भुक्तानी', 'Lump-sum Principal Paid')}
                     </label>
                     <input
                       type="number"
@@ -632,10 +691,10 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                       className="w-full text-xs bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                     >
                       <option value="PAY_INTEREST_MONTHLY">
-                        {t('मासिक रूपमा ब्याज मात्र चुक्ता गर्ने (Pay Interest Monthly)', 'Pay Interest Monthly')}
+                        {t('मासिक रूपमा ब्याज मात्र चुक्ता गर्ने', 'Pay Interest Monthly')}
                       </option>
                       <option value="CAPITALIZE_TO_PRINCIPAL">
-                        {t('साँवामा पुँजीकरण गर्ने (Capitalize into Principal)', 'Capitalize into Principal')}
+                        {t('साँवामा पुँजीकरण गर्ने', 'Capitalize into Principal')}
                       </option>
                     </select>
                   </div>
@@ -659,7 +718,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                    {t('संशोधित नयाँ किस्ता (Revised EMI)', 'Revised EMI')}
+                    {t('संशोधित नयाँ किस्ता', 'Revised EMI')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1">
                     {fmtCurrency(revisedEmi, true)}
@@ -671,7 +730,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {t('नयाँ साँवा आधार (Principal)', 'Principal Base')}
+                    {t('नयाँ साँवा आधार', 'Principal Base')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-slate-900 dark:text-white mt-1">
                     {fmtCurrency(restructuredPrincipal, true)}
@@ -683,7 +742,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {t('कुल ब्याज दायित्व (Total Interest)', 'Total Interest')}
+                    {t('कुल ब्याज दायित्व', 'Total Interest')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-slate-900 dark:text-white mt-1">
                     {fmtCurrency(totalInterestPayable, true)}
@@ -695,7 +754,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
 
                 <div className="p-4 rounded-2xl bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">
-                    {t('नोक्सानी जगेडा (Provision)', 'Statutory Provision')}
+                    {t('नोक्सानी जगेडा', 'Statutory Provision')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-purple-600 dark:text-purple-300 mt-1">
                     {fmtPercent(statutoryProvision.statutoryProvisionPercent)}
@@ -711,7 +770,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                 <div className="px-4 py-3 bg-slate-100/70 dark:bg-slate-950/70 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Calendar className="size-4 text-amber-500" />
-                    {t('संशोधित किस्ता भुक्तानी तालिका (Revised Amortization Schedule)', 'Revised Amortization Schedule')}
+                    {t('संशोधित किस्ता भुक्तानी तालिका', 'Revised Amortization Schedule')}
                   </span>
                   <span className="text-[10px] text-slate-400 font-mono">
                     {amortizationSchedule.length} {t('किस्ताहरू', 'installments')}
@@ -723,7 +782,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                     <thead className="bg-slate-50 dark:bg-slate-900 text-slate-500 font-semibold sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800">
                       <tr>
                         <th className="px-3 py-2">#</th>
-                        <th className="px-3 py-2">{t('भाखा मिति (Due Date)', 'Due Date')}</th>
+                        <th className="px-3 py-2">{t('भाखा मिति', 'Due Date')}</th>
                         <th className="px-3 py-2 text-right">{t('सुरुवाती साँवा', 'Opening Balance')}</th>
                         <th className="px-3 py-2 text-right">{t('साँवा किस्ता', 'Principal Part')}</th>
                         <th className="px-3 py-2 text-right">{t('ब्याज किस्ता', 'Interest Part')}</th>
@@ -838,10 +897,10 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                 {/* Letterhead */}
                 <div className="text-center space-y-1 pb-4 border-b border-dashed border-slate-300 dark:border-slate-700">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                    उनको बचत तथा ऋण सहकारी संस्था लि.
+                    {coopSettings.nameNepali}
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश | दर्ता नं. १२३/०६८/०६९
+                    {coopSettings.addressNepali} | {t('दर्ता नं.', 'Reg No.')} {coopSettings.regNo}
                   </p>
                   <div className="pt-2">
                     <span className="inline-block px-3 py-1 text-xs font-bold rounded-lg bg-amber-100 text-amber-900 dark:bg-amber-950/80 dark:text-amber-200 border border-amber-300 dark:border-amber-800">
@@ -892,7 +951,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                     <p className="font-semibold text-slate-700 dark:text-slate-300">
                       संस्थाको छाप / व्यवस्थापक
                       <br />
-                      <span className="text-[10px] text-slate-500">उनको साकोस</span>
+                      <span className="text-[10px] text-slate-500">{coopSettings.nameNepali}</span>
                     </p>
                   </div>
                 </div>
@@ -954,7 +1013,7 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
                   className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white shadow-xs cursor-pointer"
                 >
                   <Download className="size-4" />
-                  <span>{t('CSV डाउनलोड (Export CSV)', 'Export CSV')}</span>
+                  <span>{t('CSV डाउनलोड', 'Export CSV')}</span>
                 </button>
               </div>
 

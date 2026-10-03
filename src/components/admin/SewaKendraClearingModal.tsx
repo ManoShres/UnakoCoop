@@ -318,7 +318,7 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                   {/* Receipts Box */}
                   <div className="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900/60 bg-emerald-50/40 dark:bg-emerald-950/20 text-xs space-y-2">
                     <div className="font-bold text-emerald-900 dark:text-emerald-300 flex items-center justify-between">
-                      <span>{t('दैनिक संकलन तथा आम्दानी (Receipts)', 'Receipts')}</span>
+                      <span>{t('दैनिक संकलन तथा आम्दानी', 'Receipts')}</span>
                       <span className="font-mono">
                         {fmtCurrency(
                           selectedRecord.receipts.savingsDeposit +
@@ -331,23 +331,23 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                     </div>
                     <div className="divide-y divide-emerald-200/50 dark:divide-emerald-900/40 text-[11px] text-slate-600 dark:text-slate-300">
                       <div className="flex justify-between py-1">
-                        <span>{t('सदस्य बचत जम्मा (Savings Deposit):', 'Savings Deposit:')}</span>
+                        <span>{t('सदस्य बचत जम्मा:', 'Savings Deposit:')}</span>
                         <span className="font-mono font-bold">{fmtCurrency(selectedRecord.receipts.savingsDeposit)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('कर्जा साँवा/ब्याज असुली (Loan Recovery):', 'Loan Recovery:')}</span>
+                        <span>{t('कर्जा साँवा/ब्याज असुली:', 'Loan Recovery:')}</span>
                         <span className="font-mono font-bold">{fmtCurrency(selectedRecord.receipts.loanRepayment)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('सेयर तथा सदस्यता शुल्क (Share & Fees):', 'Share & Fees:')}</span>
+                        <span>{t('सेयर तथा सदस्यता शुल्क:', 'Share & Fees:')}</span>
                         <span className="font-mono">{fmtCurrency(selectedRecord.receipts.shareAndFees)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('रेमिट्यान्स संकलन कोष (Remittance Inflow):', 'Remittance:')}</span>
+                        <span>{t('रेमिट्यान्स संकलन कोष:', 'Remittance:')}</span>
                         <span className="font-mono">{fmtCurrency(selectedRecord.receipts.remittanceReceived)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('अन्य विविध आम्दानी (Other Receipts):', 'Other:')}</span>
+                        <span>{t('अन्य विविध आम्दानी:', 'Other:')}</span>
                         <span className="font-mono">{fmtCurrency(selectedRecord.receipts.otherReceipts)}</span>
                       </div>
                     </div>
@@ -356,7 +356,7 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                   {/* Disbursements Box */}
                   <div className="p-4 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/40 dark:bg-rose-950/20 text-xs space-y-2">
                     <div className="font-bold text-rose-900 dark:text-rose-300 flex items-center justify-between">
-                      <span>{t('दैनिक भुक्तानी तथा खर्च (Disbursements)', 'Disbursements')}</span>
+                      <span>{t('दैनिक भुक्तानी तथा खर्च', 'Disbursements')}</span>
                       <span className="font-mono">
                         {fmtCurrency(
                           selectedRecord.disbursements.savingsWithdrawal +
@@ -368,19 +368,19 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                     </div>
                     <div className="divide-y divide-rose-200/50 dark:divide-rose-900/40 text-[11px] text-slate-600 dark:text-slate-300">
                       <div className="flex justify-between py-1">
-                        <span>{t('बचत फिर्ता भुक्तानी (Savings Withdrawal):', 'Savings Withdrawal:')}</span>
+                        <span>{t('बचत फिर्ता भुक्तानी:', 'Savings Withdrawal:')}</span>
                         <span className="font-mono font-bold">{fmtCurrency(selectedRecord.disbursements.savingsWithdrawal)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('कर्जा प्रवाह (Loan Disbursement):', 'Loan Disbursement:')}</span>
+                        <span>{t('कर्जा प्रवाह:', 'Loan Disbursement:')}</span>
                         <span className="font-mono font-bold">{fmtCurrency(selectedRecord.disbursements.loanDisbursement)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('रेमिट्यान्स सेवाग्राही भुक्तानी (Remittance Payout):', 'Remittance Payout:')}</span>
+                        <span>{t('रेमिट्यान्स सेवाग्राही भुक्तानी:', 'Remittance Payout:')}</span>
                         <span className="font-mono">{fmtCurrency(selectedRecord.disbursements.remittancePayout)}</span>
                       </div>
                       <div className="flex justify-between py-1">
-                        <span>{t('कार्यालय सञ्चालन विविध खर्च (Petty Expenses):', 'Petty Expenses:')}</span>
+                        <span>{t('कार्यालय सञ्चालन विविध खर्च:', 'Petty Expenses:')}</span>
                         <span className="font-mono">{fmtCurrency(selectedRecord.disbursements.pettyExpenses)}</span>
                       </div>
                     </div>
@@ -392,7 +392,7 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                   <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
                     <span className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                       <Coins className="size-4 text-amber-500" />
-                      <span>{t('भौतिक नगद दरबन्दी गन्ती (Physical Cash Count)', 'Denominations')}</span>
+                      <span>{t('भौतिक नगद दरबन्दी गन्ती', 'Denominations')}</span>
                     </span>
                     <span className="font-mono font-bold text-blue-600 text-sm">
                       {fmtCurrency(selectedRecord.physicalCashCount)}
@@ -444,11 +444,11 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                       <span className="font-mono font-bold">{fmtCurrency(selectedRecord.calculatedClosingBalance)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-500">{t('भौतिक नगद गन्ती (Physical Count):', 'Physical Cash Count:')}</span>
+                      <span className="text-slate-500">{t('भौतिक नगद गन्ती:', 'Physical Cash Count:')}</span>
                       <span className="font-mono font-bold">{fmtCurrency(selectedRecord.physicalCashCount)}</span>
                     </div>
                     <div className="flex justify-between pt-1 border-t border-slate-200 dark:border-slate-800 items-center">
-                      <span className="font-bold text-slate-700 dark:text-slate-300">{t('नगद फरक (Discrepancy):', 'Discrepancy:')}</span>
+                      <span className="font-bold text-slate-700 dark:text-slate-300">{t('नगद फरक:', 'Discrepancy:')}</span>
                       <span
                         className={`font-mono font-black ${
                           selectedRecord.discrepancyAmount === 0
@@ -522,10 +522,10 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                   <table className="w-full text-xs text-left">
                     <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
                       <tr>
-                        <th className="p-3">{t('कारोबार शीर्षक (Account Head)', 'Account Head')}</th>
-                        <th className="p-3">{t('शाखा/कार्यालय (Branch)', 'Branch')}</th>
-                        <th className="p-3 text-right">{t('डेबिट (Debit NPR)', 'Debit')}</th>
-                        <th className="p-3 text-right">{t('क्रेडिट (Credit NPR)', 'Credit')}</th>
+                        <th className="p-3">{t('कारोबार शीर्षक', 'Account Head')}</th>
+                        <th className="p-3">{t('शाखा/कार्यालय', 'Branch')}</th>
+                        <th className="p-3 text-right">{t('डेबिट', 'Debit')}</th>
+                        <th className="p-3 text-right">{t('क्रेडिट', 'Credit')}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -553,7 +553,7 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                     <tfoot className="bg-slate-100 dark:bg-slate-800 font-bold border-t border-slate-300 dark:border-slate-700">
                       <tr>
                         <td colSpan={2} className="p-3 text-slate-900 dark:text-white">
-                          {t('कुल जम्मा (Total Balancing Amount)', 'Total')}
+                          {t('कुल जम्मा', 'Total')}
                         </td>
                         <td className="p-3 text-right font-mono font-black text-emerald-600">
                           {fmtCurrency(currentVoucher.transferAmount)}
@@ -586,19 +586,19 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                     <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                       {selectedRecord.inchargeName}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('सेवा केन्द्र इन्चार्ज (Branch Incharge)', 'Branch Incharge')}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('सेवा केन्द्र इन्चार्ज', 'Branch Incharge')}</div>
                   </div>
                   <div>
                     <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                       {t('सीता कुमारी चौधरी', 'Sita Kumari Chaudhary')}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('केन्द्रीय क्यासियर (Head Cashier)', 'Head Cashier')}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('केन्द्रीय क्यासियर', 'Head Cashier')}</div>
                   </div>
                   <div>
                     <div className="border-b border-slate-300 dark:border-slate-700 pb-1 mb-1 font-bold">
                       {t('अर्जुन प्रसाद शर्मा', 'Arjun Prasad Sharma')}
                     </div>
-                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('व्यवस्थापक (General Manager)', 'General Manager')}</div>
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">{t('व्यवस्थापक', 'General Manager')}</div>
                   </div>
                 </div>
 
@@ -623,7 +623,7 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                 <table className="w-full text-xs text-left">
                   <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
                     <tr>
-                      <th className="p-3">{t('सेवा केन्द्र (Branch)', 'Branch')}</th>
+                      <th className="p-3">{t('सेवा केन्द्र', 'Branch')}</th>
                       <th className="p-3 text-right">{t('सुरु मौज्दात', 'Opening')}</th>
                       <th className="p-3 text-right">{t('दैनिक सङ्कलन', 'Receipts')}</th>
                       <th className="p-3 text-right">{t('दैनिक भुक्तानी', 'Disbursements')}</th>
@@ -752,16 +752,16 @@ export const SewaKendraClearingModal: React.FC<SewaKendraClearingModalProps> = (
                     )}
                   </li>
                   <li>
-                    <strong>{t('अन्तर-शाखा क्लियरिङ हिसाब (Inter-Branch Clearing):', 'Inter-Branch Clearing:')}</strong>{' '}
+                    <strong>{t('अन्तर-शाखा क्लियरिङ हिसाब:', 'Inter-Branch Clearing:')}</strong>{' '}
                     {t(
                       'सेवा केन्द्रबाट केन्द्रीय कार्यालय वा एक सेवा केन्द्रबाट अर्कोमा रकम रकमान्तर गर्दा अन्तर-शाखा क्लियरिङ खातामार्फत मात्र गर्नुपर्नेछ।',
                       'Fund transfers between branches and Central Vault must route through Inter-Branch Clearing ledger.'
                     )}
                   </li>
                   <li>
-                    <strong>{t('ढुकुटी सुरक्षा सीमा (Vault Holding Limit):', 'Vault Ceiling Limit:')}</strong>{' '}
+                    <strong>{t('ढुकुटी सुरक्षा सीमा:', 'Vault Ceiling Limit:')}</strong>{' '}
                     {t(
-                      'सेवा केन्द्रमा तोकिएको अधिकतम् नगद मौज्दात सीमा (Holding Ceiling) भन्दा बढी भएको रकम अनिवार्य केन्द्रीय ढुकुटी वा नजिकको बैंक खातामा सोही दिन दाखिला गर्नुपर्नेछ।',
+                      'सेवा केन्द्रमा तोकिएको अधिकतम् नगद मौज्दात सीमा भन्दा बढी भएको रकम अनिवार्य केन्द्रीय ढुकुटी वा नजिकको बैंक खातामा सोही दिन दाखिला गर्नुपर्नेछ।',
                       'Cash exceeding branch insurance ceiling must be dispatched to the Central Vault on the same day.'
                     )}
                   </li>

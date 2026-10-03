@@ -32,7 +32,7 @@ export const EmployeeStatsStrip: React.FC<EmployeeStatsStripProps> = ({
           {fmtCount(totalEmployees)}
         </div>
         <div className="text-[10px] text-slate-400 mt-0.5">
-          {t('क्षेत्र सहजकर्ता: ', 'Field officers: ')}
+          {t('क्षेत्र सहजकर्ता:', 'Field officers: ')}
           {fmtCount(fieldOfficerCount)}
         </div>
       </div>

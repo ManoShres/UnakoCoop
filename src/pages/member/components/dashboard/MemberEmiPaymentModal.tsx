@@ -100,8 +100,8 @@ export function MemberEmiPaymentModal({
             <div className="text-[11px] font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">
               {t('भुक्तानी हुने किस्ता रकम', 'EMI Installment Amount')}
             </div>
-            <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
-              रु. {fmtCurrency(emiAmount, false)}
+            <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1 tabular-nums">
+              {fmtCurrency(emiAmount, false)}
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-mono">
               {loanNo} • {t('किस्ता #२५/३६', 'Installment #25/36')}
@@ -110,20 +110,20 @@ export function MemberEmiPaymentModal({
 
           <div className="space-y-2 text-xs">
             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-              <span className="text-slate-500">{t('कट्टा हुने खाता (Source):', 'Source Account:')}</span>
+              <span className="text-slate-500">{t('कट्टा हुने खाता:', 'Source Account:')}</span>
               <span className="font-bold text-slate-800 dark:text-slate-200">
                 {t('नियमित बचत खाता (०१)', 'Regular Savings (01)')}
               </span>
             </div>
             <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
               <span className="text-slate-500 font-sans">{t('खातामा उपलब्ध मौज्दात:', 'Available Balance:')}</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                रु. {fmtCurrency(availableSavings, false)}
+              <span className="font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                {fmtCurrency(availableSavings, false)}
               </span>
             </div>
             <div className="flex justify-between py-1">
-              <span className="text-slate-500">{t('फर्छ्यौट शुल्क (Fee):', 'Settlement Fee:')}</span>
-              <span className="font-bold text-emerald-600">रु. ०.०० (Free)</span>
+              <span className="text-slate-500">{t('फर्छ्यौट सेवा शुल्क:', 'Settlement Fee:')}</span>
+              <span className="font-bold text-emerald-600">{t('निःशुल्क', 'Free (NPR 0)')}</span>
             </div>
           </div>
 

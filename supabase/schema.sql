@@ -519,7 +519,6 @@ create index if not exists generated_reports_category_idx on public.generated_re
 -- 6a. Auth link column FIRST: the helper functions below reference
 --     members.auth_user_id, and SQL function bodies are validated at creation
 --     time - so on databases where the members table predates this schema,
---     the column must exist before is_staff()/current_member_id() are defined.
 --     (Idempotent: one auth user per member via the partial unique index.)
 alter table public.members
   add column if not exists auth_user_id uuid references auth.users (id) on delete set null;
@@ -527,9 +526,17 @@ create unique index if not exists members_auth_user_id_uq
   on public.members (auth_user_id) where auth_user_id is not null;
 create index if not exists members_auth_user_id_idx on public.members (auth_user_id);
 
+alter table public.employees
+  add column if not exists auth_user_id uuid references auth.users (id) on delete set null;
+create unique index if not exists employees_auth_user_id_uq
+  on public.employees (auth_user_id) where auth_user_id is not null;
+create index if not exists employees_auth_user_id_idx on public.employees (auth_user_id);
+
+-- ---------------------------------------------------------------------------
+-- RLS HELPER FUNCTIONS
 --    • anon (public website)  → read-only access to directories & rate cards
---    • authenticated (staff)  → read/write on all operational tables
---    Tighten later by matching auth.uid() against members.auth_user_id.
+--    • authenticated (staff)  → read/write on operational tables ONLY IF active employee
+--    • authenticated (member) → read/write strictly scoped to own member rows
 -- ---------------------------------------------------------------------------
 create or replace function public.is_staff()
 returns boolean
@@ -538,12 +545,26 @@ stable
 security definer
 set search_path = public
 as $$
-  -- Staff = signed in via Supabase Auth AND not linked to a members row.
-  -- (security definer so the members lookup never recurses into RLS itself)
+  -- Staff = signed in via Supabase Auth AND strictly linked to an ACTIVE employee row.
+  -- Eliminates the S1 vulnerability where arbitrary authenticated users gained staff access.
   select coalesce(auth.role(), 'anon') = 'authenticated'
-     and not exists (
-       select 1 from public.members m where m.auth_user_id = auth.uid()
+     and exists (
+       select 1 from public.employees e
+       where e.auth_user_id = auth.uid()
+         and e.status = 'ACTIVE'
      );
+$$;
+
+-- Returns the access_role (SUPER_ADMIN, BRANCH_MANAGER, TELLER, etc.) of current staff.
+create or replace function public.current_staff_role()
+returns text
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select e.access_role from public.employees e
+  where e.auth_user_id = auth.uid() and e.status = 'ACTIVE';
 $$;
 
 -- members.id of the signed-in portal member (null for staff / guests).
@@ -557,28 +578,36 @@ as $$
   select m.id from public.members m where m.auth_user_id = auth.uid();
 $$;
 
--- Auto-link: when a Supabase Auth user is created with an email matching a
--- members row, the login is bound to that member automatically. Staff emails
--- live in employees (not members), so they never get linked here.
-create or replace function public.handle_member_auth_link()
+-- Auto-link: when an auth user is created, link to employees if staff email matches,
+-- or members if member email matches.
+create or replace function public.handle_auth_user_link()
 returns trigger
 language plpgsql
 security definer
 set search_path = public
 as $$
 begin
+  -- 1. Check and link to employees
+  update public.employees
+     set auth_user_id = new.id
+   where auth_user_id is null
+     and lower(email) = lower(coalesce(new.email, ''));
+
+  -- 2. Check and link to members
   update public.members
      set auth_user_id = new.id
    where auth_user_id is null
      and lower(email) = lower(coalesce(new.email, ''));
+
   return new;
 end;
 $$;
 
 drop trigger if exists trg_auth_user_member_link on auth.users;
-create trigger trg_auth_user_member_link
+drop trigger if exists trg_auth_user_link on auth.users;
+create trigger trg_auth_user_link
   after insert on auth.users
-  for each row execute function public.handle_member_auth_link();
+  for each row execute function public.handle_auth_user_link();
 
 -- Column guard: a signed-in member may edit only the contact fields of their
 -- own row; financial / governance columns are frozen unless staff writes.

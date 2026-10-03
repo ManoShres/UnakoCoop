@@ -492,7 +492,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                                   : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                               }`}
                             >
-                              {t('सम्पन्न (Pass)', 'Pass')}
+                              {t('सम्पन्न', 'Pass')}
                             </button>
                             <button
                               type="button"
@@ -503,7 +503,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                                   : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                               }`}
                             >
-                              {t('आंशिक (Partial)', 'Partial')}
+                              {t('आंशिक', 'Partial')}
                             </button>
                             <button
                               type="button"
@@ -514,7 +514,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                                   : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300'
                               }`}
                             >
-                              {t('त्रुटि (Fail)', 'Fail')}
+                              {t('त्रुटि', 'Fail')}
                             </button>
                           </div>
 
@@ -537,7 +537,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
                         <div>
                           <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                            {t('स्थलगत देखिएको यथार्थ (Findings):', 'Field Findings:')}
+                            {t('स्थलगत देखिएको यथार्थ:', 'Field Findings:')}
                           </label>
                           <input
                             type="text"
@@ -549,7 +549,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                         </div>
                         <div>
                           <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                            {t('समितिको सुझाव (Recommendation):', 'Committee Recommendation:')}
+                            {t('समितिको सुझाव:', 'Committee Recommendation:')}
                           </label>
                           <input
                             type="text"
@@ -615,14 +615,14 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                 {/* Pillar Breakdown Table */}
                 <div className="space-y-2">
                   <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
-                    {t('स्तम्भगत प्राप्ताङ्क तथा मूल्यांकन (Pillar Breakdown)', 'Pillar Score Evaluation')}
+                    {t('स्तम्भगत प्राप्ताङ्क तथा मूल्यांकन', 'Pillar Score Evaluation')}
                   </h4>
                   <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
                     <table className="w-full text-xs text-left">
                       <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold">
                         <tr>
-                          <th className="p-2.5">{t('निरीक्षण क्षेत्र (Pillar)', 'Pillar')}</th>
-                          <th className="p-2.5 text-center">{t('भार (Weight)', 'Weight')}</th>
+                          <th className="p-2.5">{t('निरीक्षण क्षेत्र', 'Pillar')}</th>
+                          <th className="p-2.5 text-center">{t('भार', 'Weight')}</th>
                           <th className="p-2.5 text-center">{t('पूर्णाङ्क', 'Max')}</th>
                           <th className="p-2.5 text-center">{t('प्राप्ताङ्क', 'Score')}</th>
                           <th className="p-2.5 text-center">{t('अनुपालन दर', 'Compliance %')}</th>
@@ -655,7 +655,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                       </tbody>
                       <tfoot className="bg-slate-100 dark:bg-slate-800 font-bold border-t border-slate-300 dark:border-slate-700">
                         <tr>
-                          <td className="p-2.5">{t('समग्र कुल प्राप्ताङ्क (Total Score)', 'Aggregate Score')}</td>
+                          <td className="p-2.5">{t('समग्र कुल प्राप्ताङ्क', 'Aggregate Score')}</td>
                           <td className="p-2.5 text-center font-mono">100%</td>
                           <td className="p-2.5 text-center font-mono">{auditScore.maxTotalScore}</td>
                           <td className="p-2.5 text-center font-bold text-blue-600 font-mono">{auditScore.totalScoreAwarded}</td>
@@ -670,7 +670,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                 <div className="p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40 space-y-2">
                   <div className="font-bold text-xs text-blue-900 dark:text-blue-300 flex items-center gap-1.5">
                     <FileCheck className="size-4 text-blue-600" />
-                    <span>{t('समितिको कार्यकारी निष्कर्ष (Executive Audit Summary):', 'Executive Summary:')}</span>
+                    <span>{t('समितिको कार्यकारी निष्कर्ष:', 'Executive Summary:')}</span>
                   </div>
                   <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                     {currentReport.executiveSummaryNepali}
@@ -680,7 +680,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                 {/* Signatories Section */}
                 <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-800">
                   <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    {t('लेखा सुपरीवेक्षण समिति पदाधिकारीहरू (Supervisory Committee Signatures):', 'Signatures:')}
+                    {t('लेखा सुपरीवेक्षण समिति पदाधिकारीहरू:', 'Signatures:')}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-center space-y-2">
@@ -693,7 +693,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                         onChange={(e) => setConvenerName(e.target.value)}
                         className="text-xs font-bold text-center w-full bg-transparent border-b border-slate-300 dark:border-slate-700 focus:outline-none"
                       />
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('संयोजक (Convener)', 'Convener')}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('संयोजक', 'Convener')}</div>
                     </div>
 
                     <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-center space-y-2">
@@ -706,7 +706,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                         onChange={(e) => setMember1Name(e.target.value)}
                         className="text-xs font-bold text-center w-full bg-transparent border-b border-slate-300 dark:border-slate-700 focus:outline-none"
                       />
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('सदस्य (Member)', 'Member')}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('सदस्य', 'Member')}</div>
                     </div>
 
                     <div className="p-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-center space-y-2">
@@ -719,7 +719,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                         onChange={(e) => setMember2Name(e.target.value)}
                         className="text-xs font-bold text-center w-full bg-transparent border-b border-slate-300 dark:border-slate-700 focus:outline-none"
                       />
-                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('सदस्य (Member)', 'Member')}</div>
+                      <div className="text-[10px] text-slate-400 font-bold uppercase">{t('सदस्य', 'Member')}</div>
                     </div>
                   </div>
                 </div>
@@ -744,7 +744,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {t('सुधारात्मक कार्ययोजना सूची (Corrective Action Plan Tracker)', 'Action Plan Tracker')}
+                    {t('सुधारात्मक कार्ययोजना सूची', 'Action Plan Tracker')}
                   </h4>
                   <p className="text-xs text-slate-500">
                     {t(
@@ -799,9 +799,9 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
                         onChange={(e) => setNewActionAssignedTo(e.target.value as any)}
                         className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800"
                       >
-                        <option value="LOAN_OFFICER">{t('कर्जा अधिकृत (Loan Officer)', 'Loan Officer')}</option>
-                        <option value="MANAGER">{t('व्यवस्थापक (Manager)', 'Manager')}</option>
-                        <option value="ACCOUNTANT">{t('लेखापाल (Accountant)', 'Accountant')}</option>
+                        <option value="LOAN_OFFICER">{t('कर्जा अधिकृत', 'Loan Officer')}</option>
+                        <option value="MANAGER">{t('व्यवस्थापक', 'Manager')}</option>
+                        <option value="ACCOUNTANT">{t('लेखापाल', 'Accountant')}</option>
                         <option value="BOARD">{t('सञ्चालक समिति (BOD)', 'Board of Directors')}</option>
                       </select>
                     </div>
@@ -821,7 +821,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
 
                   <div>
                     <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">
-                      {t('कैफियत विवरण (Findings)', 'Finding')}
+                      {t('कैफियत विवरण', 'Finding')}
                     </label>
                     <input
                       type="text"
@@ -835,7 +835,7 @@ export const SupervisoryAuditModal: React.FC<SupervisoryAuditModalProps> = ({
 
                   <div>
                     <label className="block text-slate-600 dark:text-slate-400 font-bold mb-1">
-                      {t('गर्नुपर्ने सुधारात्मक कार्य (Action Required)', 'Action Required')}
+                      {t('गर्नुपर्ने सुधारात्मक कार्य', 'Action Required')}
                     </label>
                     <input
                       type="text"

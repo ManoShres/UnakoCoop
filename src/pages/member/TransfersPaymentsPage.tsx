@@ -24,9 +24,7 @@ type TransferTab = 'transfer' | 'wallet' | 'beneficiaries' | 'history';
 export function TransfersPaymentsPage() {
   const { t, fmtCurrency } = useLanguageStore();
   const currentMember = useAuthStore(s => s.currentMember);
-  const savings = useCoopStore(s => s.savings);
-  const adjustSavingsBalance = useCoopStore(s => s.adjustSavingsBalance);
-  const addTransaction = useCoopStore(s => s.addTransaction);
+  const { savings, members, adjustSavingsBalance } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<TransferTab>('transfer');
   const [memberId, setMemberId] = useState('UKO-2072-04419');
@@ -74,12 +72,37 @@ export function TransfersPaymentsPage() {
     const numericAmount = parseInt(amount || '0', 10);
     if (numericAmount <= 0) return;
 
+    // 1. Debit sender's account
+    const senderNarration = `Transfer to ${verifiedMember?.name || memberId} - ${purpose || 'Inter-member transfer'}`;
     adjustSavingsBalance(
       regularSavings.accountNo,
       numericAmount,
       'WITHDRAWAL',
-      `Transfer to ${verifiedMember?.name || memberId}`
+      senderNarration
     );
+
+    // 2. Look up and credit recipient's savings account (two-sided transaction)
+    const recipientMember = members.find(
+      (m) =>
+        m.id === memberId ||
+        m.memberNo.toLowerCase() === memberId.toLowerCase() ||
+        m.name.toLowerCase() === (verifiedMember?.name || '').toLowerCase()
+    );
+
+    const recipientSavings = recipientMember
+      ? savings.find((s) => s.memberId === recipientMember.id && s.accountType === 'Regular Savings') ||
+        savings.find((s) => s.memberId === recipientMember.id)
+      : null;
+
+    if (recipientSavings) {
+      const recipientNarration = `Transfer from ${currentMember?.name || 'Ram Bahadur Shrestha'} (${regularSavings.accountNo}) - ${purpose || 'Inter-member transfer'}`;
+      adjustSavingsBalance(
+        recipientSavings.accountNo,
+        numericAmount,
+        'DEPOSIT',
+        recipientNarration
+      );
+    }
 
     const newRef = `CBS-TRF-${Date.now().toString().slice(-5)}`;
     const newRecord: PaymentRecord = {
@@ -96,16 +119,7 @@ export function TransfersPaymentsPage() {
       ref: newRef,
     };
 
-    setCustomRecords(prev => [newRecord, ...prev]);
-
-    addTransaction({
-      memberId: effectiveMemberId,
-      type: 'WITHDRAWAL',
-      amount: numericAmount,
-      description: `Transfer to ${verifiedMember?.name || memberId} - ${purpose || 'Inter-member transfer'}`,
-      referenceNo: newRef,
-    });
-
+    setCustomRecords((prev) => [newRecord, ...prev]);
     setReviewModal(false);
     setReceiptModal(newRecord);
   };
@@ -133,16 +147,7 @@ export function TransfersPaymentsPage() {
       ref: newRef,
     };
 
-    setCustomRecords(prev => [newRecord, ...prev]);
-
-    addTransaction({
-      memberId: effectiveMemberId,
-      type: 'DEPOSIT',
-      amount: loadAmount,
-      description: `Digital Deposit via ${gateway.toUpperCase()}`,
-      referenceNo: newRef,
-    });
-
+    setCustomRecords((prev) => [newRecord, ...prev]);
     setReceiptModal(newRecord);
   };
 

@@ -12,5 +12,5 @@ export interface SavingsAccount {
   interestRate: number; // percentage, e.g. 8.5
   openedDate: string;
   maturityDate?: string;
-  status: 'ACTIVE' | 'DORMANT' | 'MATURED';
+  status: 'ACTIVE' | 'DORMANT' | 'MATURED' | 'CLOSED';
 }

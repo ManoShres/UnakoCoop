@@ -145,7 +145,7 @@ export function MemberVerificationTrackTab({
                   <div className="flex-1">
                     <p className="font-bold text-slate-900 dark:text-white">{t('शेयर पुँजी बाँडफाँड', 'Share Capital Allocation')}</p>
                     <p className="text-[11px] text-slate-400">
-                      {t('जम्मा पुँजी', 'Pledged')}: रु. {fmtCurrency(trackedResult.shareCapital, true)}
+                      {t('जम्मा पुँजी', 'Pledged')}: <strong className="tabular-nums font-semibold text-slate-700 dark:text-slate-300">{fmtCurrency(trackedResult.shareCapital, true)}</strong>
                     </p>
                   </div>
                 </div>

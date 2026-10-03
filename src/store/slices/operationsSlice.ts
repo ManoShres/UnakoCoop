@@ -56,12 +56,42 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
       ...txData,
       id: 'tx-' + Date.now(),
       date: new Date().toISOString().split('T')[0],
-      status: 'COMPLETED',
+      status: txData.status || 'COMPLETED',
     };
 
     set((state) => ({
       transactions: [newTx, ...state.transactions],
     }));
+  },
+
+  confirmPendingDeposit: (transactionId) => {
+    set((state) => {
+      const tx = state.transactions.find((t) => t.id === transactionId);
+      if (!tx || tx.status !== 'PENDING' || tx.type !== 'DEPOSIT') return state;
+
+      const memberAcc = state.savings.find((s) => s.memberId === tx.memberId) || state.savings[0];
+      const accNo = memberAcc ? memberAcc.accountNo : '004-10294-88-01';
+
+      const updatedTxns = state.transactions.map((t) =>
+        t.id === transactionId ? { ...t, status: 'COMPLETED' as const } : t
+      );
+
+      const updatedSavings = state.savings.map((s) =>
+        s.accountNo === accNo ? { ...s, balance: s.balance + tx.amount } : s
+      );
+
+      const updatedMembers = tx.memberId
+        ? state.members.map((m) =>
+            m.id === tx.memberId ? { ...m, totalSavings: (m.totalSavings || 0) + tx.amount } : m
+          )
+        : state.members;
+
+      return {
+        transactions: updatedTxns,
+        savings: updatedSavings,
+        members: updatedMembers,
+      };
+    });
   },
 
   toggleGatewayRail: (gatewayId, status) => {

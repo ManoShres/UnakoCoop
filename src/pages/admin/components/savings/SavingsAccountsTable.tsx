@@ -73,7 +73,7 @@ export function SavingsAccountsTable({
                   <td className="py-3.5 px-4">
                     <span className="inline-flex items-center gap-1 font-bold text-emerald-600">
                       <Percent className="size-3" />
-                      {fmtPercent(s.interestRate)} p.a.
+                      {fmtPercent(s.interestRate)} {t('वार्षिक', 'p.a.')}
                     </span>
                   </td>
                   <td className="py-3.5 px-4">

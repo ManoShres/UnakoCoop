@@ -2,7 +2,7 @@
  * Member and User Identity Domain Types
  */
 
-export type VerificationStatus = 'VERIFIED' | 'PENDING' | 'ACTION_REQUIRED' | 'REJECTED';
+export type VerificationStatus = 'VERIFIED' | 'PENDING' | 'ACTION_REQUIRED' | 'REJECTED' | 'INACTIVE';
 
 export type UserRole = 'MEMBER' | 'ADMIN' | 'GUEST';
 

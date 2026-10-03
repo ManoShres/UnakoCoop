@@ -229,7 +229,7 @@ export function ShareCertificateModal({
                 <span>{t('थप खरिद गर्ने कित्ता संख्या *', 'Additional Share Units (Kitta) *')}</span>
               </label>
               <span className="text-[11px] text-slate-400">
-                {t('अंकित मूल्य: ', 'Par Value: ')}<span className="font-mono font-bold text-slate-700 dark:text-slate-300">{fmtCurrency(parValue, true)}</span>
+                {t('अंकित मूल्य:', 'Par Value: ')}<span className="font-mono font-bold text-slate-700 dark:text-slate-300">{fmtCurrency(parValue, true)}</span>
               </span>
             </div>
 
@@ -266,7 +266,7 @@ export function ShareCertificateModal({
           <div className="p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/20 dark:to-teal-950/20 border border-emerald-200 dark:border-emerald-900/40">
             <div className="flex items-center justify-between text-xs">
               <span className="text-emerald-800 dark:text-emerald-300 font-bold">
-                {t('कुल जम्मा भुक्तानी रकम (Total Amount Payable):', 'Total Amount Payable:')}
+                {t('कुल जम्मा भुक्तानी रकम:', 'Total Amount Payable:')}
               </span>
               <span className="text-xl font-black font-mono text-emerald-700 dark:text-emerald-400">
                 {fmtCurrency(totalAmount, true)}

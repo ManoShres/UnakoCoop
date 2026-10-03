@@ -168,7 +168,7 @@ export const BulkDividendDistributionModal: React.FC<BulkDividendDistributionMod
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60">
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('लाभांश दर % (Dividend Rate)', 'Dividend Rate %')}
+                {t('लाभांश दर %', 'Dividend Rate %')}
               </label>
               <div className="relative">
                 <input
@@ -190,7 +190,7 @@ export const BulkDividendDistributionModal: React.FC<BulkDividendDistributionMod
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('आर्थिक वर्ष (Fiscal Year)', 'Fiscal Year')}
+                {t('आर्थिक वर्ष', 'Fiscal Year')}
               </label>
               <select
                 value={fiscalYear}
@@ -206,7 +206,7 @@ export const BulkDividendDistributionModal: React.FC<BulkDividendDistributionMod
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('५% आयकर कट्टी (Statutory TDS)', '5% Statutory TDS')}
+                {t('५% आयकर कट्टी', '5% Statutory TDS')}
               </label>
               <button
                 type="button"
@@ -228,7 +228,7 @@ export const BulkDividendDistributionModal: React.FC<BulkDividendDistributionMod
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('भुक्तानी गन्तव्य (Destination)', 'Payout Destination')}
+                {t('भुक्तानी गन्तव्य', 'Payout Destination')}
               </label>
               <select
                 value={destination}
@@ -236,8 +236,8 @@ export const BulkDividendDistributionModal: React.FC<BulkDividendDistributionMod
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-blue-600 dark:text-blue-400 focus:ring-2 focus:ring-blue-500 outline-none"
                 disabled={isConfirming}
               >
-                <option value="SAVINGS">{t('सिधै सदस्य बचत खाता (Passbook)', 'Direct Member Savings Account')}</option>
-                <option value="ACCRUED">{t('सदस्य बक्यौता लगत (Accrued Ledger)', 'Accrue to Member Ledger')}</option>
+                <option value="SAVINGS">{t('सिधै सदस्य बचत खाता', 'Direct Member Savings Account')}</option>
+                <option value="ACCRUED">{t('सदस्य बक्यौता लगत', 'Accrue to Member Ledger')}</option>
               </select>
               <span className="text-[10px] text-slate-400 block mt-0.5">
                 {destination === 'SAVINGS'
@@ -257,7 +257,7 @@ export const BulkDividendDistributionModal: React.FC<BulkDividendDistributionMod
                 {fmtCount(calculation.summary.memberCount)}
               </span>
               <span className="text-[10px] text-slate-400">
-                {t('कुल पुँजी: ', 'Total Capital: ')}
+                {t('कुल पुँजी:', 'Total Capital: ')}
                 {fmtCurrency(calculation.summary.totalShareCapital, true)}
               </span>
             </div>

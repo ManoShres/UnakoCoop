@@ -76,7 +76,7 @@ export function SavingsRatesModal({
         <div className="p-6 overflow-y-auto space-y-4 flex-1">
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 font-medium">
-              {t('सक्रिय बचत योजनाहरू (Active Savings Schemes)', 'Active Savings Schemes')}
+              {t('सक्रिय बचत योजनाहरू', 'Active Savings Schemes')}
             </span>
             <button
               type="button"
@@ -95,7 +95,7 @@ export function SavingsRatesModal({
               className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/40 space-y-3 animate-fade-in"
             >
               <div className="text-xs font-bold text-emerald-900 dark:text-emerald-300">
-                {t('नयाँ बचत योजना सिर्जना फारम (New Savings Scheme)', 'Create New Savings Scheme')}
+                {t('नयाँ बचत योजना सिर्जना फारम', 'Create New Savings Scheme')}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -113,7 +113,7 @@ export function SavingsRatesModal({
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    {t('ब्याजदर (% p.a.) *', 'Annual Rate (% p.a.) *')}
+                    {t('वार्षिक ब्याजदर (%) *', 'Annual Rate (% p.a.) *')}
                   </label>
                   <input
                     type="number"
@@ -137,10 +137,10 @@ export function SavingsRatesModal({
                     onChange={(e) => setNewSchemeCompounding(e.target.value as 'Daily' | 'Monthly' | 'Quarterly' | 'Half-Yearly')}
                     className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
                   >
-                    <option value="Daily">{t('दैनिक (Daily)', 'Daily')}</option>
-                    <option value="Monthly">{t('मासिक (Monthly)', 'Monthly')}</option>
-                    <option value="Quarterly">{t('त्रैमासिक (Quarterly)', 'Quarterly')}</option>
-                    <option value="Half-Yearly">{t('अर्धवार्षिक (Half-Yearly)', 'Half-Yearly')}</option>
+                    <option value="Daily">{t('दैनिक', 'Daily')}</option>
+                    <option value="Monthly">{t('मासिक', 'Monthly')}</option>
+                    <option value="Quarterly">{t('त्रैमासिक', 'Quarterly')}</option>
+                    <option value="Half-Yearly">{t('अर्धवार्षिक', 'Half-Yearly')}</option>
                   </select>
                 </div>
                 <div>
@@ -194,7 +194,7 @@ export function SavingsRatesModal({
                     <div className="text-[11px] text-slate-400">{r.desc}</div>
                     <div className="text-[10px] text-slate-500 flex items-center gap-3 font-mono">
                       <span>
-                        {t('न्यूनतम मौज्दात:', 'Min Bal:')} रु. {fmtCurrency(r.minBalance, true)}
+                        {t('न्यूनतम मौज्दात:', 'Min Bal:')} <strong className="tabular-nums font-semibold">{fmtCurrency(r.minBalance, true)}</strong>
                       </span>
                       <span>•</span>
                       <span>{t('कर कट्टा (TDS): ५%', 'TDS: 5%')}</span>
@@ -217,7 +217,7 @@ export function SavingsRatesModal({
                       }}
                       className="w-20 px-2 py-1 text-right font-mono font-bold text-xs rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900"
                     />
-                    <span className="text-xs font-bold text-slate-500">% p.a.</span>
+                    <span className="text-xs font-bold text-slate-500">{t('% वार्षिक', '% p.a.')}</span>
                   </div>
                 </div>
               );

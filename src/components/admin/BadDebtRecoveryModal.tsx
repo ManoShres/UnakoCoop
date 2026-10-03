@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { Loan, Member, LoanProvisionCategory } from '../../types';
 import {
   LegalNoticeType,
@@ -41,6 +42,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
   initialLoanId,
 }) => {
   const { t, fmtCurrency, fmtDigits, fmtPercent } = useLanguageStore();
+  const { coopSettings, recordLoanRepayment } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'NOTICE' | 'CIB' | 'WRITE_OFF' | 'WATERFALL'>('NOTICE');
   const [selectedLoanId, setSelectedLoanId] = useState<string>(initialLoanId || loans[0]?.id || '');
@@ -138,9 +140,9 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">उनको बचत तथा ऋण सहकारी संस्था लि.</p>
-          <p class="inst-sub">गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश</p>
-          <p class="inst-sub">दर्ता नं: २८३/०६५/०६६ | पान नं: ३०२९५८४८१</p>
+          <p class="inst-name">${coopSettings.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
+          <p class="inst-sub">${coopSettings.addressNepali || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश'}</p>
+          <p class="inst-sub">दर्ता नं: ${coopSettings.regNo || '२८३/०६५/०६६'} | पान नं: ${coopSettings.panNo || '३०२९५८४८१'}</p>
         </div>
         <div class="meta">
           <span>सूचना नं: ${noticeData.noticeNo}</span>
@@ -170,7 +172,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
 
         <div class="footer">
           <p>कर्जा असुली उपसमिति तथा व्यवस्थापन पक्ष</p>
-          <p>उनको बचत तथा ऋण सहकारी संस्था लि.</p>
+          <p>${coopSettings.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
         </div>
       </body>
       </html>
@@ -203,6 +205,11 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
       writeOffNotes
     );
     setGeneratedVoucher(voucher);
+
+    // Wire to store: write off loan balance to zero out bad debt in ledger & member balance
+    if (selectedLoan.remainingBalance > 0) {
+      recordLoanRepayment(selectedLoan.loanNo, selectedLoan.remainingBalance);
+    }
   };
 
   return (
@@ -311,7 +318,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
             }`}
           >
             <Scale className="size-4" />
-            <span>{t('खराब कर्जा अपलेखन (Write-Off)', 'Statutory Bad Debt Write-Off')}</span>
+            <span>{t('खराब कर्जा अपलेखन', 'Statutory Bad Debt Write-Off')}</span>
           </button>
 
           <button
@@ -355,7 +362,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all"
                   >
                     {copiedNotice ? <CheckCircle2 className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
-                    <span>{copiedNotice ? t('कपी भयो!', 'Copied!') : t('प्रतिलिपि (Copy)', 'Copy Text')}</span>
+                    <span>{copiedNotice ? t('कपी भयो!', 'Copied!') : t('प्रतिलिपि', 'Copy Text')}</span>
                   </button>
                   <button
                     type="button"
@@ -363,7 +370,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                     className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-xs"
                   >
                     <Printer className="size-3.5" />
-                    <span>{t('सूचना छाप्नुहोस् (Print Notice)', 'Print Notice')}</span>
+                    <span>{t('सूचना छाप्नुहोस्', 'Print Notice')}</span>
                   </button>
                 </div>
               </div>
@@ -497,11 +504,11 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                 <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
                 <div className="text-xs text-amber-800 dark:text-amber-200 space-y-1">
                   <p className="font-bold">
-                    {t('सहकारी विभागको मापदण्ड अनुसार अपलेखन शर्तहरू (Write-Off Criteria):', 'Statutory Write-Off Rules:')}
+                    {t('सहकारी विभागको मापदण्ड अनुसार अपलेखन शर्तहरू:', 'Statutory Write-Off Rules:')}
                   </p>
                   <p>
                     {t(
-                      '१. कर्जा शतप्रतिशत (१००%) नोक्सानी जगेडा कोषमा बाँधिएको हुनुपर्ने। २. सञ्चालक समितिको स्पष्ट निर्णय र आगामी साधारण सभाबाट अनुमोदन गराउनुपर्ने। ३. अपलेखन गरे तापनि कालोसूची र असुली अधिकार बाह्य खाता (Memorandum Account) मा अक्षुण्ण रहन्छ।',
+                      '१. कर्जा शतप्रतिशत (१००%) नोक्सानी जगेडा कोषमा बाँधिएको हुनुपर्ने। २. सञ्चालक समितिको स्पष्ट निर्णय र आगामी साधारण सभाबाट अनुमोदन गराउनुपर्ने। ३. अपलेखन गरे तापनि कालोसूची र असुली अधिकार बाह्य खाता मा अक्षुण्ण रहन्छ।',
                       '1. Must be 100% provisioned in loan loss reserve. 2. Requires Board of Directors resolution and AGM ratification. 3. Legal claim remains active in memorandum register.'
                     )}
                   </p>
@@ -512,7 +519,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('सञ्चालक समिति निर्णय नं. (Resolution No):', 'Board Resolution No:')}
+                    {t('सञ्चालक समिति निर्णय नं.:', 'Board Resolution No:')}
                   </label>
                   <input
                     type="text"
@@ -524,7 +531,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('सञ्चालक समिति निर्णय मिति (Date BS):', 'Board Decision Date:')}
+                    {t('सञ्चालक समिति निर्णय मिति:', 'Board Decision Date:')}
                   </label>
                   <input
                     type="text"
@@ -553,7 +560,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition-all shadow-md"
                   >
                     <Scale className="size-4" />
-                    <span>{t('अपलेखन भौचर तयार गर्नुहोस् (Generate Write-off Voucher)', 'Generate Write-off Voucher')}</span>
+                    <span>{t('अपलेखन भौचर तयार गर्नुहोस्', 'Generate Write-off Voucher')}</span>
                   </button>
                 </div>
               </div>
@@ -565,7 +572,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="size-5 text-emerald-500" />
                       <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
-                        {t('अपलेखन लेखा भौचर तथा बाह्य खाता दर्ता सम्पन्न (Voucher Generated)', 'Write-Off Voucher Executed')}
+                        {t('अपलेखन लेखा भौचर तथा बाह्य खाता दर्ता सम्पन्न', 'Write-Off Voucher Executed')}
                       </h4>
                     </div>
                     <span className="font-mono text-xs font-bold text-emerald-700 dark:text-emerald-300">
@@ -578,7 +585,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Debit Account (नामे)</span>
                       <p className="font-bold text-slate-900 dark:text-white mt-1">{generatedVoucher.debitAccount}</p>
                       <p className="font-mono font-bold text-rose-600 dark:text-rose-400 mt-1">
-                        रु. {fmtCurrency(generatedVoucher.totalWriteOffAmount, true)}
+                        {fmtCurrency(generatedVoucher.totalWriteOffAmount, true)}
                       </p>
                     </div>
 
@@ -586,19 +593,19 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                       <span className="text-[10px] font-bold text-slate-400 uppercase">Credit Account (जम्मा)</span>
                       <p className="font-bold text-slate-900 dark:text-white mt-1">{generatedVoucher.creditAccount}</p>
                       <p className="font-mono font-bold text-emerald-600 dark:text-emerald-400 mt-1">
-                        रु. {fmtCurrency(generatedVoucher.totalWriteOffAmount, true)}
+                        {fmtCurrency(generatedVoucher.totalWriteOffAmount, true)}
                       </p>
                     </div>
                   </div>
 
                   <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                      <span className="text-slate-400">{t('बाह्य अभिलेख खाता (Memorandum Register):', 'Memorandum A/C:')} </span>
+                      <span className="text-slate-400">{t('बाह्य अभिलेख खाता:', 'Memorandum A/C:')} </span>
                       <b className="font-mono text-slate-900 dark:text-white">{generatedVoucher.memorandumRegisterNo}</b>
                     </div>
                     <div className="inline-flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">
                       <CheckCircle2 className="size-3.5" />
-                      <span>{t('कानूनी असुली अधिकार अक्षुण्ण रहेको (Recovery Rights Preserved)', 'Legal Claim Preserved')}</span>
+                      <span>{t('कानूनी असुली अधिकार अक्षुण्ण रहेको', 'Legal Claim Preserved')}</span>
                     </div>
                   </div>
                 </div>
@@ -612,7 +619,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('धितो लिलाम बिक्रीबाट प्राप्त कूल रकम (Gross Proceeds NPR):', 'Gross Auction Proceeds (NPR):')}
+                    {t('धितो लिलाम बिक्रीबाट प्राप्त कूल रकम:', 'Gross Auction Proceeds (NPR):')}
                   </label>
                   <input
                     type="number"
@@ -626,7 +633,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('लिलाम तथा कानूनी खर्च (Auction & Legal Cost NPR):', 'Legal & Auction Expenses (NPR):')}
+                    {t('लिलाम तथा कानूनी खर्च:', 'Legal & Auction Expenses (NPR):')}
                   </label>
                   <input
                     type="number"
@@ -642,7 +649,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
               {/* Waterfall Hierarchy Table */}
               <div className="space-y-2">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                  {t('दफा ८४ अनुसार असुली बाँडफाँडको वैधानिक प्राथमिकता (Statutory Priority Waterfall)', 'Statutory Waterfall Priority')}
+                  {t('दफा ८४ अनुसार असुली बाँडफाँडको वैधानिक प्राथमिकता', 'Statutory Waterfall Priority')}
                 </h4>
 
                 <div className="space-y-2 text-xs">
@@ -695,8 +702,8 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     {settlementResult.isFullySettled
-                      ? t('ऋणीलाई फिर्ता भुक्तानी हुने बचत रकम (Surplus Refund)', 'Surplus Refund to Member')
-                      : t('ऋणी तथा जमानीकर्ताबाट थप असुली बाँकी रकम (Deficit)', 'Remaining Unrecovered Deficit')}
+                      ? t('ऋणीलाई फिर्ता भुक्तानी हुने बचत रकम', 'Surplus Refund to Member')
+                      : t('ऋणी तथा जमानीकर्ताबाट थप असुली बाँकी रकम', 'Remaining Unrecovered Deficit')}
                   </span>
                   <div
                     className={`text-2xl font-black ${
@@ -737,7 +744,7 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
             onClick={onClose}
             className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:hover:bg-white text-white dark:text-slate-900 text-xs font-bold transition-all shadow-xs"
           >
-            {t('बन्द गर्नुहोस् (Close)', 'Close')}
+            {t('बन्द गर्नुहोस्', 'Close')}
           </button>
         </div>
       </div>

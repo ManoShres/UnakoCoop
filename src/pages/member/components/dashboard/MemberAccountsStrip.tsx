@@ -106,8 +106,8 @@ export function MemberAccountsStrip({ summary, shareKitta }: MemberAccountsStrip
                   {acct.type}
                 </div>
 
-                <div className="text-2xl font-black font-mono tracking-tight text-slate-900 dark:text-white mt-3">
-                  रु. {fmtCurrency(acct.amount, false)}
+                <div className="text-2xl font-black font-mono tracking-tight text-slate-900 dark:text-white mt-3 tabular-nums">
+                  {fmtCurrency(acct.amount, false)}
                 </div>
               </div>
 

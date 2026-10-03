@@ -407,7 +407,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
                     onChange={(e) => setCategoryFilter(e.target.value)}
                     className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                   >
-                    <option value="ALL">{t('सबै विषय क्षेत्र (All Categories)', 'All Categories')}</option>
+                    <option value="ALL">{t('सबै विषय क्षेत्र', 'All Categories')}</option>
                     {Object.entries(CATEGORY_LABELS).map(([catKey, label]) => (
                       <option key={catKey} value={catKey}>
                         {label.ne}
@@ -554,7 +554,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('आर्थिक वर्ष (Fiscal Year)', 'Fiscal Year')}
+                      {t('आर्थिक वर्ष', 'Fiscal Year')}
                     </label>
                     <input
                       type="text"
@@ -566,7 +566,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
 
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('वार्षिक खुद बचत (Net Surplus/Profit)', 'Annual Net Surplus')} (रु)
+                      {t('वार्षिक खुद बचत', 'Annual Net Surplus')} (रु)
                     </label>
                     <input
                       type="number"
@@ -578,7 +578,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
 
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('शिक्षा कोष विनियोजन दर (Statutory Rate)', 'Statutory Rate')}
+                      {t('शिक्षा कोष विनियोजन दर', 'Statutory Rate')}
                     </label>
                     <select
                       value={allocationRate}
@@ -595,7 +595,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs pt-2">
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('अघिल्लो वर्षबाट बाँकी मौज्दात (Opening Balance)', 'Opening Fund Balance')} (रु)
+                      {t('अघिल्लो वर्षबाट बाँकी मौज्दात', 'Opening Fund Balance')} (रु)
                     </label>
                     <input
                       type="number"
@@ -607,7 +607,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
 
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('केन्द्रीय/जिल्ला सहकारी संघमा दाखिला (Union Remittance)', 'Union Remittance')} (रु)
+                      {t('केन्द्रीय/जिल्ला सहकारी संघमा दाखिला', 'Union Remittance')} (रु)
                     </label>
                     <input
                       type="number"
@@ -619,7 +619,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
 
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('सरकारी/दातृ अनुदान थप (Grants / Subsidy)', 'Grants / Subsidies')} (रु)
+                      {t('सरकारी/दातृ अनुदान थप', 'Grants / Subsidies')} (रु)
                     </label>
                     <input
                       type="number"
@@ -635,7 +635,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
               <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                 <div className="p-4 bg-slate-50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-700">
                   <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                    {t('सहकारी शिक्षा तथा तालिम कोष खर्च तथा उपयोग विवरण (Section 68 Statement)', 'Fund Statement')}
+                    {t('सहकारी शिक्षा तथा तालिम कोष खर्च तथा उपयोग विवरण', 'Fund Statement')}
                   </h4>
                 </div>
 
@@ -679,7 +679,7 @@ export const CoopEducationTrainingModal: React.FC<CoopEducationTrainingModalProp
               <div className="bg-slate-50 dark:bg-slate-800/80 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2">
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <CheckCircle2 className="size-4 text-emerald-500" />
-                  {t('वैधानिक अनुपालन समीक्षा (Regulatory Compliance Notes)', 'Statutory Compliance Notes')}
+                  {t('वैधानिक अनुपालन समीक्षा', 'Statutory Compliance Notes')}
                 </span>
                 <ul className="space-y-1 text-xs text-slate-600 dark:text-slate-400">
                   {fundSummary.complianceNotes.map((note, idx) => (

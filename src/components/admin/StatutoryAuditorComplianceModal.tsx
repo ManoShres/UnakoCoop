@@ -213,7 +213,7 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
 
           <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
             <span className="text-[11px] font-bold text-slate-500 block mb-0.5">
-              {t('लेखापरीक्षण राय (Opinion)', 'Audit Opinion')}
+              {t('लेखापरीक्षण राय', 'Audit Opinion')}
             </span>
             <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 truncate">
               {OPINION_LABELS[summary.auditOpinion]?.ne.split('(')[0] || summary.auditOpinion}
@@ -295,7 +295,7 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
             }`}
           >
             <Award className="size-4" />
-            <span>{t('औपचारिक नियुक्ति पत्र (Appointment Letter)', 'Appointment Letter')}</span>
+            <span>{t('औपचारिक नियुक्ति पत्र', 'Appointment Letter')}</span>
           </button>
         </div>
 
@@ -323,10 +323,10 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
                     onChange={(e) => setCheckpointStatusFilter(e.target.value as any)}
                     className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                   >
-                    <option value="ALL">{t('सबै परीक्षण बुँदाहरू (All Points)', 'All Points')}</option>
-                    <option value="COMPLIANT">{t('अनुकूल / दुरुस्त (Compliant)', 'Compliant')}</option>
-                    <option value="MINOR_OBSERVATION">{t('सामान्य कैफियत (Minor Observation)', 'Minor Observation')}</option>
-                    <option value="MAJOR_DEFICIENCY">{t('गम्भीर त्रुटि (Major Deficiency)', 'Major Deficiency')}</option>
+                    <option value="ALL">{t('सबै परीक्षण बुँदाहरू', 'All Points')}</option>
+                    <option value="COMPLIANT">{t('अनुकूल / दुरुस्त', 'Compliant')}</option>
+                    <option value="MINOR_OBSERVATION">{t('सामान्य कैफियत', 'Minor Observation')}</option>
+                    <option value="MAJOR_DEFICIENCY">{t('गम्भीर त्रुटि', 'Major Deficiency')}</option>
                   </select>
                 </div>
               </div>
@@ -390,7 +390,7 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
                 <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 space-y-2">
                   <div className="flex items-center gap-2 text-rose-800 dark:text-rose-300 font-bold text-xs">
                     <BadgeAlert className="size-4 text-rose-500" />
-                    <span>{t('दफा ८७ वैधानिक अयोग्यता चेतावनी (Statutory Disqualification)', 'Disqualification Alert')}</span>
+                    <span>{t('दफा ८७ वैधानिक अयोग्यता चेतावनी', 'Disqualification Alert')}</span>
                   </div>
                   <ul className="text-xs text-rose-700 dark:text-rose-400 space-y-1 pl-4 list-disc">
                     {eligibility.errors.map((err, idx) => (
@@ -404,7 +404,7 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
                 <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 space-y-1">
                   <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-xs">
                     <AlertTriangle className="size-4 text-amber-500" />
-                    <span>{t('रोटेसन पूर्व-सूचना (Tenure Warning)', 'Tenure Warning')}</span>
+                    <span>{t('रोटेसन पूर्व-सूचना', 'Tenure Warning')}</span>
                   </div>
                   <p className="text-xs text-amber-700 dark:text-amber-400">
                     {eligibility.warnings[0]}
@@ -448,7 +448,7 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
 
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('ICAN प्रमाणपत्र नं (COP Registration)', 'ICAN COP Registration No')} *
+                      {t('ICAN प्रमाणपत्र नं', 'ICAN COP Registration No')} *
                     </label>
                     <input
                       type="text"
@@ -460,7 +460,7 @@ export const StatutoryAuditorComplianceModal: React.FC<StatutoryAuditorComplianc
 
                   <div>
                     <label className="block text-slate-500 font-semibold mb-1">
-                      {t('लेखापरीक्षक वर्गीकरण (Category)', 'Auditor Category')}
+                      {t('लेखापरीक्षक वर्गीकरण', 'Auditor Category')}
                     </label>
                     <select
                       value={auditor.category}

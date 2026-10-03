@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import {
   CooperativeEntityProfile,
   INITIAL_ANCHOR_COOP,
@@ -40,6 +41,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
   onClose,
 }) => {
   const { t, fmtCurrency, fmtPercent, fmtDigits } = useLanguageStore();
+  const { coopSettings } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'DDA_SWAP' | 'CONSOLIDATED_BS' | 'REGULATORY_STEPS' | 'RESOLUTION_VOUCHER'>('DDA_SWAP');
   const [anchor] = useState<CooperativeEntityProfile>(INITIAL_ANCHOR_COOP);
@@ -126,7 +128,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-black text-slate-900 dark:text-white">
-                {t('संस्था एकीकरण (Merger), डीडीए मूल्याङ्कन तथा संयुक्त वासलात', 'Cooperative Merger, DDA Valuation & Consolidated Balance Sheet')}
+                {t('संस्था एकीकरण, डीडीए मूल्याङ्कन तथा संयुक्त वासलात', 'Cooperative Merger, DDA Valuation & Consolidated Balance Sheet')}
               </h2>
             </div>
           </div>
@@ -166,7 +168,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
             }`}
           >
             <Building2 className="size-4" />
-            <span>{t('एकीकृत प्रारम्भिक वासलात (Consolidated)', 'Consolidated Balance Sheet')}</span>
+            <span>{t('एकीकृत प्रारम्भिक वासलात', 'Consolidated Balance Sheet')}</span>
           </button>
 
           <button
@@ -209,7 +211,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <span className="text-[11px] font-bold uppercase tracking-wider text-violet-200">
-                      {t('स्वतन्त्र डीडीए मूल्याङ्कन निष्कर्ष (DDA Swap Ratio Determination)', 'DDA Swap Determination')}
+                      {t('स्वतन्त्र डीडीए मूल्याङ्कन निष्कर्ष', 'DDA Swap Determination')}
                     </span>
                     <h3 className="text-xl sm:text-2xl font-black mt-0.5">
                       सेयर स्वाप अनुपात: १ : {swapAnalysis.nominalSwapRatio}
@@ -235,7 +237,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200">
                     <Sliders className="size-4 text-violet-500" />
-                    <span>{t('कर्जा नोक्सानी तथा सम्पत्ति पुनर्मूल्याङ्कन डिस्काउन्ट (Asset Haircut)', 'Asset Quality Haircut')}</span>
+                    <span>{t('कर्जा नोक्सानी तथा सम्पत्ति पुनर्मूल्याङ्कन डिस्काउन्ट', 'Asset Quality Haircut')}</span>
                   </div>
                   <p className="text-[11px] text-slate-500">
                     गाभिने संस्थाका खराब कर्जा वा धितो जोखिमका आधारमा खुद सम्पत्तिमा कटौती दर: <strong>{haircutPercent}%</strong>
@@ -371,7 +373,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
               {/* Action Toolbar */}
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
-                  {t('एकीकरण पश्चातको प्रारम्भिक एकीकृत वासलात (Consolidated Balance Sheet)', 'Consolidated Balance Sheet')}
+                  {t('एकीकरण पश्चातको प्रारम्भिक एकीकृत वासलात', 'Consolidated Balance Sheet')}
                 </h3>
                 <button
                   type="button"
@@ -388,7 +390,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-400">
                     <tr>
-                      <th className="p-3 font-semibold">{t('वासलात शीर्षक (Balance Sheet Head)', 'Balance Sheet Head')}</th>
+                      <th className="p-3 font-semibold">{t('वासलात शीर्षक', 'Balance Sheet Head')}</th>
                       <th className="p-3 font-semibold text-right">{anchor.nameNepali}</th>
                       <th className="p-3 font-semibold text-right">{target.nameNepali}</th>
                       <th className="p-3 font-semibold text-right text-violet-600 dark:text-violet-400 font-bold">
@@ -537,13 +539,13 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
 
                 <div className="space-y-3 leading-relaxed text-slate-700 dark:text-slate-300">
                   <p>
-                    आज मिति <strong>२०८१/०६/०५</strong> गते <strong>उनको बचत तथा ऋण सहकारी संस्था लि.</strong> (दर्ता नं. १४८/०६४/०६५, गढवा-५, दाङ) र <strong>राप्ती ग्रामीण महिला बचत तथा ऋण सहकारी संस्था लि.</strong> (दर्ता नं. २१५/०६८/०६९, गढवा-२, दाङ) का सञ्चालक समिति तथा विशेष साधारण सभाको निर्णयानुसार दुवै संस्था एकापसमा गाभिने (एकीकरण हुने) अन्तिम सम्झौता गरिएको छ।
+                    आज मिति <strong>२०८१/०६/०५</strong> गते <strong>{coopSettings.nameNepali}</strong> (दर्ता नं. {coopSettings.regNo}, {coopSettings.addressNepali}) र <strong>राप्ती ग्रामीण महिला बचत तथा ऋण सहकारी संस्था लि.</strong> (दर्ता नं. २१५/०६८/०६९, गढवा-२, दाङ) का सञ्चालक समिति तथा विशेष साधारण सभाको निर्णयानुसार दुवै संस्था एकापसमा गाभिने (एकीकरण हुने) अन्तिम सम्झौता गरिएको छ।
                   </p>
 
                   <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-1">
                     <strong className="block text-slate-900 dark:text-white">मुख्य एकीकरण सम्झौता सर्तहरू:</strong>
                     <ul className="list-disc list-inside space-y-0.5 text-[11px]">
-                      <li>एकीकृत संस्थाको नाम: <strong>उनको बचत तथा ऋण सहकारी संस्था लि.</strong> रहनेछ।</li>
+                      <li>एकीकृत संस्थाको नाम: <strong>{coopSettings.nameNepali}</strong> रहनेछ।</li>
                       <li>सेयर स्वाप अनुपात: <strong>१ : {swapAnalysis.nominalSwapRatio}</strong> का दरले सेयर समायोजन हुनेछ।</li>
                       <li>गाभिने संस्थाका सम्पूर्ण सदस्य, बचत तथा कर्जा दायित्व एकीकृत संस्थाले यथावत दायित्व ग्रहण गर्नेछ।</li>
                       <li>कार्यक्षेत्र: गढवा गाउँपालिका सम्पूर्ण वडामा सेवा केन्द्र विस्तार गरिनेछ।</li>
@@ -554,7 +556,7 @@ export const CoopMergerConsolidationModal: React.FC<CoopMergerConsolidationModal
                 <div className="grid grid-cols-2 gap-8 pt-8 text-center text-[11px] text-slate-500">
                   <div className="border-t border-slate-300 dark:border-slate-700 pt-1">
                     अध्यक्ष / व्यवस्थापक<br />
-                    <strong>उनको बचत तथा ऋण सहकारी संस्था लि.</strong>
+                    <strong>{coopSettings.nameNepali}</strong>
                   </div>
                   <div className="border-t border-slate-300 dark:border-slate-700 pt-1">
                     अध्यक्ष / व्यवस्थापक<br />

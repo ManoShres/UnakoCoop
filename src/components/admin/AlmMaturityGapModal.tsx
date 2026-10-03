@@ -126,7 +126,7 @@ export const AlmMaturityGapModal: React.FC<AlmMaturityGapModalProps> = ({
             }`}
           >
             <Layers className="size-4" />
-            <span>{t('६-अवधि परिपक्वता अन्तर (Maturity Gaps)', '6-Bucket Maturity Matrix')}</span>
+            <span>{t('६-अवधि परिपक्वता अन्तर', '6-Bucket Maturity Matrix')}</span>
           </button>
 
           <button
@@ -139,7 +139,7 @@ export const AlmMaturityGapModal: React.FC<AlmMaturityGapModalProps> = ({
             }`}
           >
             <Percent className="size-4" />
-            <span>{t('ब्याजदर संवेदनशीलता (NII Shocks)', 'Interest Rate Shocks')}</span>
+            <span>{t('ब्याजदर संवेदनशीलता', 'Interest Rate Shocks')}</span>
           </button>
 
           <button
@@ -152,7 +152,7 @@ export const AlmMaturityGapModal: React.FC<AlmMaturityGapModalProps> = ({
             }`}
           >
             <Activity className="size-4" />
-            <span>{t('तरलता तनाव परीक्षण (Stress Runoff)', 'Liquidity Stress Tests')}</span>
+            <span>{t('तरलता तनाव परीक्षण', 'Liquidity Stress Tests')}</span>
           </button>
 
           <button
@@ -237,8 +237,8 @@ export const AlmMaturityGapModal: React.FC<AlmMaturityGapModalProps> = ({
                       <th className="p-3 font-semibold">{t('समय परिपक्वता अवधि', 'Time Horizon')}</th>
                       <th className="p-3 font-semibold text-right">{t('सम्पत्ति (RSA)', 'Assets (RSA)')}</th>
                       <th className="p-3 font-semibold text-right">{t('दायित्व (RSL)', 'Liabilities (RSL)')}</th>
-                      <th className="p-3 font-semibold text-right">{t('अवधि अन्तर (Periodic Gap)', 'Periodic Gap')}</th>
-                      <th className="p-3 font-semibold text-right">{t('संचयी अन्तर (Cumulative Gap)', 'Cumulative Gap')}</th>
+                      <th className="p-3 font-semibold text-right">{t('अवधि अन्तर', 'Periodic Gap')}</th>
+                      <th className="p-3 font-semibold text-right">{t('संचयी अन्तर', 'Cumulative Gap')}</th>
                       <th className="p-3 font-semibold text-center">{t('सम्पत्ति अनुपात %', 'Gap %')}</th>
                       <th className="p-3 font-semibold text-right">{t('स्थिति', 'Status')}</th>
                     </tr>
@@ -348,7 +348,7 @@ export const AlmMaturityGapModal: React.FC<AlmMaturityGapModalProps> = ({
             <div className="space-y-6">
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                 <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-                  {t('तरलता संकट दबाब परीक्षण (Liquidity Runoff Stress Scenarios)', 'Liquidity Runoff Stress Tests')}
+                  {t('तरलता संकट दबाब परीक्षण', 'Liquidity Runoff Stress Tests')}
                 </h4>
                 <p className="text-xs text-slate-500 mt-0.5">
                   आकस्मिक बचत फिर्ता माग हुँदा संस्थाको प्राथमिक तरलता (नगद + बैंक मौज्दात) र दोस्रो तहको तरलताले कति दिन धान्न सक्छ?

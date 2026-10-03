@@ -148,7 +148,7 @@ export const EkycNationalIdVerificationModal: React.FC<EkycNationalIdVerificatio
               <div className="flex items-center gap-2">
                 <h2 className="text-lg font-black text-slate-900 dark:text-white">
                   {t(
-                    'राष्ट्रिय परिचयपत्र तथा विद्युतीय ग्राहक पहिचान (e-KYC) प्रणाली',
+                    'राष्ट्रिय परिचयपत्र तथा विद्युतीय ग्राहक पहिचान प्रणाली',
                     'DoNIDCR National ID & Electronic KYC Regulatory Console'
                   )}
                 </h2>
@@ -158,7 +158,7 @@ export const EkycNationalIdVerificationModal: React.FC<EkycNationalIdVerificatio
               </div>
               <p className="text-xs text-slate-500">
                 {t(
-                  'गृह मन्त्रालय (DoNIDCR) १०-अंकको NID प्रमाणीकरण, बायोमेट्रिक औंठाछाप, र FIU-Nepal कालोसूची स्क्रिनिङ',
+                  'गृह मन्त्रालय १०-अंकको NID प्रमाणीकरण, बायोमेट्रिक औंठाछाप, र FIU-Nepal कालोसूची स्क्रिनिङ',
                   'Live DoNIDCR 10-digit NID verification, biometric liveness validation, and FIU/PEP regulatory screening'
                 )}
               </p>
@@ -304,7 +304,7 @@ export const EkycNationalIdVerificationModal: React.FC<EkycNationalIdVerificatio
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै NID अवस्था (All Status)', 'All NID Statuses')}</option>
+                <option value="ALL">{t('सबै NID अवस्था', 'All NID Statuses')}</option>
                 {Object.entries(NID_STATUS_CONFIG).map(([k, v]) => (
                   <option key={k} value={k}>{v.np}</option>
                 ))}
@@ -315,7 +315,7 @@ export const EkycNationalIdVerificationModal: React.FC<EkycNationalIdVerificatio
                 onChange={(e) => setPepFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै PEP वर्ग (All PEP)', 'All PEP')}</option>
+                <option value="ALL">{t('सबै PEP वर्ग', 'All PEP')}</option>
                 {Object.entries(PEP_LABELS).map(([k, v]) => (
                   <option key={k} value={k}>{v.np}</option>
                 ))}
@@ -326,7 +326,7 @@ export const EkycNationalIdVerificationModal: React.FC<EkycNationalIdVerificatio
                 onChange={(e) => setRiskFilter(e.target.value)}
                 className="px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
               >
-                <option value="ALL">{t('सबै जोखिम वर्ग (All Risk)', 'All Risk')}</option>
+                <option value="ALL">{t('सबै जोखिम वर्ग', 'All Risk')}</option>
                 {Object.entries(RISK_CONFIG).map(([k, v]) => (
                   <option key={k} value={k}>{v.np}</option>
                 ))}

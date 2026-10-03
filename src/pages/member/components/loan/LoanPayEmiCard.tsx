@@ -87,7 +87,7 @@ export const LoanPayEmiCard: React.FC<LoanPayEmiCardProps> = ({
         <div className="flex items-center gap-2.5 p-3 rounded-xl bg-surface-dark-card/60 mb-4 text-xs text-white/80 border border-white/10">
           <Clock className="w-4 h-4 text-brand-accent-lime shrink-0" />
           <span>
-            {t('म्याद: ', 'Due on ')}
+            {t('म्याद:', 'Due on ')}
             <strong className="text-white">{nextDueDate}</strong> • {t('समयमै भुक्तानी गर्नुहोस्', 'Pay on time for subsidy')}
           </span>
         </div>

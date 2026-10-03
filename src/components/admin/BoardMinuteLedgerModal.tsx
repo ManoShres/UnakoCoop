@@ -194,7 +194,7 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
               </div>
               <h3 className="text-base sm:text-lg font-bold text-white">
                 {t(
-                  'सञ्चालक तथा उपसमिति निर्णय पुस्तिका (Minute Book) एवं भत्ता लेजर',
+                  'सञ्चालक तथा उपसमिति निर्णय पुस्तिका एवं भत्ता लेजर',
                   'Board of Directors Minute Book & Meeting Allowance Ledger'
                 )}
               </h3>
@@ -233,7 +233,7 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
             }`}
           >
             <span className="block text-[10px] uppercase font-semibold">
-              {t('गणपूरक संख्या (Quorum)', 'Statutory Quorum')}
+              {t('गणपूरक संख्या', 'Statutory Quorum')}
             </span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <strong className="text-base font-mono font-black">
@@ -245,8 +245,8 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
             </div>
             <span className="text-[10px] block">
               {currentMeeting.isQuorumMet
-                ? t('गणपूरक संख्या पूरा (Valid)', 'Quorum Met')
-                : t('गणपूरक संख्या अपुग (Invalid)', 'Quorum Failed')}
+                ? t('गणपूरक संख्या पूरा', 'Quorum Met')
+                : t('गणपूरक संख्या अपुग', 'Quorum Failed')}
             </span>
           </div>
 
@@ -384,7 +384,7 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
                           className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-teal-950 hover:bg-teal-900 text-teal-300 border border-teal-800/80 font-bold text-[11px] transition cursor-pointer"
                         >
                           <Printer className="size-3.5" />
-                          <span>{t('निर्णयको प्रतिलिपि (Extract)', 'Certified Extract')}</span>
+                          <span>{t('निर्णयको प्रतिलिपि', 'Certified Extract')}</span>
                         </button>
                       </div>
                     </div>
@@ -392,14 +392,14 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
                     <div className="space-y-2 text-slate-300">
                       <div>
                         <strong className="text-slate-400 block text-[11px]">
-                          {t('छलफलको सारांश (Discussion Summary):', 'Discussion Summary:')}
+                          {t('छलफलको सारांश:', 'Discussion Summary:')}
                         </strong>
                         <p className="mt-0.5 leading-relaxed">{agenda.discussionSummary}</p>
                       </div>
 
                       <div className="p-3 rounded-lg bg-teal-950/30 border border-teal-900/40 text-teal-100">
                         <strong className="text-teal-400 block text-[11px] font-bold">
-                          {t('पारित निर्णय (Approved Resolution):', 'Approved Resolution:')}
+                          {t('पारित निर्णय:', 'Approved Resolution:')}
                         </strong>
                         <p className="mt-1 font-medium leading-relaxed">{agenda.resolution}</p>
                       </div>
@@ -429,7 +429,7 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
                     <tr>
                       <th className="p-2.5 w-8 text-center">#</th>
                       <th className="p-2.5">{t('सञ्चालक / पदाधिकारी', 'Board Member')}</th>
-                      <th className="p-2.5">{t('पद (Role)', 'Designation')}</th>
+                      <th className="p-2.5">{t('पद', 'Designation')}</th>
                       <th className="p-2.5 text-center">{t('उपस्थिति स्थिति', 'Attendance')}</th>
                       <th className="p-2.5">{t('स्वार्थ बाझिने कैफियत', 'Conflict of Interest')}</th>
                     </tr>
@@ -457,10 +457,10 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
                               }`}
                             >
                               {status === 'PRESENT'
-                                ? t('उपस्थित (Present)', 'Present')
+                                ? t('उपस्थित', 'Present')
                                 : status === 'ON_LEAVE'
-                                ? t('विदा (Leave)', 'Leave')
-                                : t('अनुपस्थित (Absent)', 'Absent')}
+                                ? t('विदा', 'Leave')
+                                : t('अनुपस्थित', 'Absent')}
                             </span>
                           </td>
                           <td className="p-2.5 text-slate-300">
@@ -505,9 +505,9 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
                       <th className="p-2.5 w-8 text-center">#</th>
                       <th className="p-2.5">{t('सञ्चालकको नाम', 'Director Name')}</th>
                       <th className="p-2.5">{t('पद', 'Role')}</th>
-                      <th className="p-2.5 text-right">{t('कुल भत्ता (Gross)', 'Gross Allowance')}</th>
+                      <th className="p-2.5 text-right">{t('कुल भत्ता', 'Gross Allowance')}</th>
                       <th className="p-2.5 text-right">{t('१५% TDS कट्टी', '15% TDS')}</th>
-                      <th className="p-2.5 text-right">{t('खुद भुक्तानी (Net)', 'Net Payable')}</th>
+                      <th className="p-2.5 text-right">{t('खुद भुक्तानी', 'Net Payable')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-800/60">
@@ -536,7 +536,7 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
                     })}
                     <tr className="bg-slate-900/80 font-bold border-t border-slate-700">
                       <td colSpan={3} className="p-2.5 text-right text-white">
-                        {t('जम्मा (Total Allowance):', 'Total Allowance:')}
+                        {t('जम्मा:', 'Total Allowance:')}
                       </td>
                       <td className="p-2.5 text-right font-mono text-slate-200">
                         {fmtCurrency(currentMeeting.totalGrossAllowance, true)}

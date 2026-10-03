@@ -33,6 +33,10 @@ const getInitialLanguage = (): Language => {
 };
 
 const initialLang = getInitialLanguage();
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = initialLang;
+  document.documentElement.setAttribute('data-lang', initialLang);
+}
 
 export const useLanguageStore = create<LanguageState>((set, get) => ({
   lang: initialLang,
@@ -43,6 +47,10 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
     } catch {
       // ignore
     }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = lang;
+      document.documentElement.setAttribute('data-lang', lang);
+    }
     set({ lang, isNepali: lang === 'ne' });
   },
   toggleLang: () => {
@@ -51,6 +59,10 @@ export const useLanguageStore = create<LanguageState>((set, get) => ({
       localStorage.setItem('unako_lang', next);
     } catch {
       // ignore
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = next;
+      document.documentElement.setAttribute('data-lang', next);
     }
     set({ lang: next, isNepali: next === 'ne' });
   },

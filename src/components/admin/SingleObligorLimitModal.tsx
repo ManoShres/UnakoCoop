@@ -113,7 +113,7 @@ export const SingleObligorLimitModal: React.FC<SingleObligorLimitModalProps> = (
         <div className="bg-slate-950 px-5 py-3 border-b border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">
-              {t('प्राथमिक पूँजी कोष (Core Capital)', 'Primary Core Capital')}
+              {t('प्राथमिक पूँजी कोष', 'Primary Core Capital')}
             </span>
             <strong className="text-white text-base block mt-0.5 font-mono">
               {fmtCurrency(baseline.coreCapital, true)}
@@ -125,7 +125,7 @@ export const SingleObligorLimitModal: React.FC<SingleObligorLimitModalProps> = (
 
           <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">
-              {t('विनाधितो १०% सीमा (Unsecured Cap)', 'Unsecured 10% Cap')}
+              {t('विनाधितो १०% सीमा', 'Unsecured 10% Cap')}
             </span>
             <strong className="text-amber-400 text-base block mt-0.5 font-mono">
               {fmtCurrency(baseline.unsecuredSolLimit, true)}
@@ -137,7 +137,7 @@ export const SingleObligorLimitModal: React.FC<SingleObligorLimitModalProps> = (
 
           <div className="bg-slate-900 p-2.5 rounded-xl border border-slate-800">
             <span className="text-slate-400 block text-[10px] uppercase font-semibold">
-              {t('धितोयुक्त १५% सीमा (Secured Cap)', 'Secured 15% Cap')}
+              {t('धितोयुक्त १५% सीमा', 'Secured 15% Cap')}
             </span>
             <strong className="text-emerald-400 text-base block mt-0.5 font-mono">
               {fmtCurrency(baseline.securedSolLimit, true)}
@@ -227,7 +227,7 @@ export const SingleObligorLimitModal: React.FC<SingleObligorLimitModalProps> = (
               }`}
             >
               <Sliders className="size-4" />
-              <span>{t('नयाँ कर्जा प्रवाह पूर्व-जाँच (Pre-Check)', 'New Loan Pre-Check')}</span>
+              <span>{t('नयाँ कर्जा प्रवाह पूर्व-जाँच', 'New Loan Pre-Check')}</span>
             </button>
           </div>
 
@@ -432,7 +432,7 @@ export const SingleObligorLimitModal: React.FC<SingleObligorLimitModalProps> = (
               <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
                 <h4 className="font-bold text-white text-sm flex items-center gap-2">
                   <Sliders className="size-4 text-amber-400" />
-                  <span>{t('नयाँ कर्जा प्रवाह पूर्व-जाँच सिमुलेटर (SOL Pre-Check)', 'New Loan Pre-Check Simulator')}</span>
+                  <span>{t('नयाँ कर्जा प्रवाह पूर्व-जाँच सिमुलेटर', 'New Loan Pre-Check Simulator')}</span>
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -498,8 +498,8 @@ export const SingleObligorLimitModal: React.FC<SingleObligorLimitModalProps> = (
                       )}
                       <strong className="text-white text-sm">
                         {preCheckResult.isCompliant
-                          ? t('कर्जा प्रवाह कानूनसम्मत (SOL Compliant - Approved)', 'SOL Compliant - Permitted to Disburse')
-                          : t('कर्जा प्रवाह अस्वीकृत! दफा ५१ सीमा उल्लंघन (SOL Breached - Rejected)', 'SOL Breached - Rejection Mandatory')}
+                          ? t('कर्जा प्रवाह कानूनसम्मत', 'SOL Compliant - Permitted to Disburse')
+                          : t('कर्जा प्रवाह अस्वीकृत! दफा ५१ सीमा उल्लंघन', 'SOL Breached - Rejection Mandatory')}
                       </strong>
                     </div>
 

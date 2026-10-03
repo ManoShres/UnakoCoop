@@ -144,7 +144,7 @@ export const LoanProvisioningPage: React.FC = () => {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-              {t('कर्जा नोक्सानी व्यवस्थापन (Loan Loss Provisioning)', 'Loan Loss Provisioning Register')}
+              {t('कर्जा नोक्सानी व्यवस्थापन', 'Loan Loss Provisioning Register')}
             </h1>
             <p className="text-xs text-slate-500 mt-1 max-w-2xl">
               {t(
@@ -185,7 +185,7 @@ export const LoanProvisioningPage: React.FC = () => {
               title={t('सहुलियतपूर्ण कर्जा तथा सरकारी ब्याज अनुदान व्यवस्थापन', 'Concessional Loan & Interest Subsidy Gateway')}
             >
               <Percent className="size-4" />
-              <span>{t('ब्याज अनुदान (Subsidy)', 'Interest Subsidy')}</span>
+              <span>{t('ब्याज अनुदान', 'Interest Subsidy')}</span>
             </button>
 
             <button
@@ -317,7 +317,7 @@ export const LoanProvisioningPage: React.FC = () => {
           <table className="w-full text-left text-xs">
             <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider">
               <tr>
-                <th className="px-4 py-3 rounded-l-lg">{t('कर्जा वर्ग (Category)', 'Category')}</th>
+                <th className="px-4 py-3 rounded-l-lg">{t('कर्जा वर्ग', 'Category')}</th>
                 <th className="px-4 py-3">{t('भाखा नाघेको अवधि', 'Overdue Days')}</th>
                 <th className="px-4 py-3">{t('कर्जा संख्या', 'Loan Count')}</th>
                 <th className="px-4 py-3">{t('कुल बाँकी साँवा रकम', 'Outstanding Balance')}</th>
@@ -369,7 +369,7 @@ export const LoanProvisioningPage: React.FC = () => {
                             : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300'
                         }`}
                       >
-                        {summary.isNpl ? t('निष्क्रिय (NPL)', 'NPL') : t('सक्रिय (Performing)', 'Performing')}
+                        {summary.isNpl ? t('निष्क्रिय (NPL)', 'NPL') : t('सक्रिय', 'Performing')}
                       </span>
                     </td>
                   </tr>
@@ -452,8 +452,8 @@ export const LoanProvisioningPage: React.FC = () => {
                 <th className="px-4 py-3 rounded-l-lg">{t('कर्जा नं. / प्रकार', 'Loan No & Type')}</th>
                 <th className="px-4 py-3">{t('ऋणी सदस्य', 'Borrower Member')}</th>
                 <th className="px-4 py-3">{t('बाँकी साँवा', 'Balance')}</th>
-                <th className="px-4 py-3">{t('भाखा नाघेको दिन (Days)', 'Overdue Days')}</th>
-                <th className="px-4 py-3">{t('वर्ग (Category)', 'Category')}</th>
+                <th className="px-4 py-3">{t('भाखा नाघेको दिन', 'Overdue Days')}</th>
+                <th className="px-4 py-3">{t('वर्ग', 'Category')}</th>
                 <th className="px-4 py-3 text-right">{t('नोक्सानी जगेडा', 'Provision (NPR)')}</th>
                 <th className="px-4 py-3 text-center rounded-r-lg">{t('कानूनी कार्य', 'Legal Action')}</th>
               </tr>

@@ -271,10 +271,10 @@ export const MultiBranchVaultMonitor: React.FC = () => {
             <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 text-slate-400">
               <tr>
                 <th className="p-4 font-semibold">{t('सेवा केन्द्र', 'Service Center')}</th>
-                <th className="p-4 font-semibold">{t('तिजोरी प्रमुख (Custodian)', 'Vault Custodian')}</th>
+                <th className="p-4 font-semibold">{t('तिजोरी प्रमुख', 'Vault Custodian')}</th>
                 <th className="p-4 font-semibold text-right">{t('हालको मौज्दात', 'Current Vault Cash')}</th>
                 <th className="p-4 font-semibold text-right">{t('न्यूनतम सीमा', 'Min Reserve')}</th>
-                <th className="p-4 font-semibold text-right">{t('बीमा सीमा (Ceiling)', 'Holding Ceiling')}</th>
+                <th className="p-4 font-semibold text-right">{t('बीमा सीमा', 'Holding Ceiling')}</th>
                 <th className="p-4 font-semibold text-center">{t('अवस्था', 'Health Status')}</th>
                 <th className="p-4 font-semibold text-center">{t('कार्य', 'Action')}</th>
               </tr>
@@ -322,7 +322,7 @@ export const MultiBranchVaultMonitor: React.FC = () => {
                     <td className="p-4 text-center">
                       {b.status === 'NORMAL' ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400">
-                          <CheckCircle2 className="size-3" /> {t('सामान्य (Safe)', 'Normal')}
+                          <CheckCircle2 className="size-3" /> {t('सामान्य', 'Normal')}
                         </span>
                       ) : b.status === 'SURPLUS_WARNING' ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 animate-pulse">
@@ -353,7 +353,7 @@ export const MultiBranchVaultMonitor: React.FC = () => {
                       >
                         {b.status === 'SURPLUS_WARNING'
                           ? t('बैंक/केन्द्र पठाउनुहोस्', 'Remit to HQ')
-                          : t('नगद आपूर्ति (Replenish)', 'Replenish')}
+                          : t('नगद आपूर्ति', 'Replenish')}
                       </button>
                     </td>
                   </tr>
@@ -465,7 +465,7 @@ export const MultiBranchVaultMonitor: React.FC = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('स्रोत सेवा केन्द्र (From)', 'Source Location')}
+                    {t('स्रोत सेवा केन्द्र', 'Source Location')}
                   </label>
                   <select
                     value={transitFrom}
@@ -482,7 +482,7 @@ export const MultiBranchVaultMonitor: React.FC = () => {
 
                 <div>
                   <label className="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">
-                    {t('गन्तव्य केन्द्र (To)', 'Destination Location')}
+                    {t('गन्तव्य केन्द्र', 'Destination Location')}
                   </label>
                   <select
                     value={transitTo}

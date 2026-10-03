@@ -32,6 +32,7 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
   member,
 }) => {
   const { t, fmtCurrency, fmtDigits } = useLanguageStore();
+  const perAnnum = (rate: string) => `${fmtDigits(rate)}% ${t('वार्षिक', 'p.a.')}`;
   const { coopSettings } = useCoopStore();
   const [showSmartCard, setShowSmartCard] = useState(false);
 
@@ -61,7 +62,7 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
             </div>
             <div>
               <h3 id="member-dossier-title" className="font-bold text-sm">
-                {t('सदस्य खाता तथा पहिचान विवरण (KYC Dossier)', 'Member Account & KYC Dossier Profile')}
+                {t('सदस्य खाता तथा पहिचान विवरण', 'Member Account & KYC Dossier Profile')}
               </h3>
               <p className="text-[11px] text-slate-400 font-mono">
                 {member.name} [{member.memberNo}]
@@ -145,7 +146,7 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
             {/* Document Title Banner */}
             <div className="text-center py-1 bg-slate-100 rounded-lg border border-slate-300">
               <h2 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider">
-                {t('सदस्य व्यक्तिगत, पारिवारिक तथा खाता अभिलेख विवरण (KYC Dossier)', 'Official Member Account, Lineage & KYC Record Dossier')}
+                {t('सदस्य व्यक्तिगत, पारिवारिक तथा खाता अभिलेख विवरण', 'Official Member Account, Lineage & KYC Record Dossier')}
               </h2>
             </div>
 
@@ -227,13 +228,13 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
                   <span>{t('बसोबास तथा ठेगाना विवरण', 'Address & Residence Information')}</span>
                 </h4>
                 <div>
-                  <span className="text-slate-500 text-[11px] block">{t('स्थायी ठेगाना (Permanent Address):', 'Permanent Address:')}</span>
+                  <span className="text-slate-500 text-[11px] block">{t('स्थायी ठेगाना:', 'Permanent Address:')}</span>
                   <p className="font-semibold text-slate-900">
                     {member.addressNepali || member.address || 'गढवा गाउँपालिका वडा नं. ५, चैनपुर, देउखुरी, दाङ'}
                   </p>
                 </div>
                 <div>
-                  <span className="text-slate-500 text-[11px] block">{t('हालको बसोबास (Current/Temporary Address):', 'Temporary Address:')}</span>
+                  <span className="text-slate-500 text-[11px] block">{t('हालको बसोबास:', 'Temporary Address:')}</span>
                   <p className="font-medium text-slate-800">
                     {member.tempAddress || 'स्थायी ठेगाना अनुसार नै (Same as Permanent)'}
                   </p>
@@ -273,7 +274,7 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
               <div className="p-4 rounded-xl border border-slate-300 bg-slate-50/60 space-y-2">
                 <h4 className="font-bold text-slate-900 text-xs border-b border-slate-200 pb-1.5 flex items-center gap-1.5">
                   <BadgeCheck className="size-3.5 text-emerald-700" />
-                  <span>{t('हकवाला / इच्छाएको व्यक्ति (Nominee)', 'Nominee Declaration')}</span>
+                  <span>{t('हकवाला / इच्छाएको व्यक्ति', 'Nominee Declaration')}</span>
                 </h4>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -281,7 +282,7 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
                     <p className="font-bold text-slate-900">{member.nominee?.name || 'सुनिता कुमारी चौधरी'}</p>
                   </div>
                   <div>
-                    <span className="text-slate-500 text-[11px] block">{t('नाता (Relation):', 'Relation:')}</span>
+                    <span className="text-slate-500 text-[11px] block">{t('नाता:', 'Relation:')}</span>
                     <p className="font-semibold text-slate-900">{member.nominee?.relation || 'श्रीमती (Spouse)'}</p>
                   </div>
                   <div>
@@ -339,20 +340,20 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
                       <td className="py-2 px-3 font-semibold text-slate-900">
                         {t('नियमित साधारण बचत', 'Regular Savings')}
                       </td>
-                      <td className="py-2 px-3 font-mono text-slate-600">004-10294-88-01</td>
-                      <td className="py-2 px-3 font-bold text-emerald-700">8.0% p.a.</td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
-                        रु. {fmtCurrency(member.totalSavings || 184500, false)}
+                      <td className="py-2 px-3 font-mono text-slate-600">{fmtDigits('004-10294-88-01')}</td>
+                      <td className="py-2 px-3 font-bold text-emerald-700">{perAnnum('8.0')}</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 tabular-nums">
+                        {fmtCurrency(member.totalSavings || 184500, false)}
                       </td>
                     </tr>
                     <tr>
                       <td className="py-2 px-3 font-semibold text-slate-900">
                         {t('अनिवार्य मासिक बचत', 'Compulsory Monthly')}
                       </td>
-                      <td className="py-2 px-3 font-mono text-slate-600">004-10294-88-02</td>
-                      <td className="py-2 px-3 font-bold text-emerald-700">8.5% p.a.</td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
-                        रु. {fmtCurrency(68000, false)}
+                      <td className="py-2 px-3 font-mono text-slate-600">{fmtDigits('004-10294-88-02')}</td>
+                      <td className="py-2 px-3 font-bold text-emerald-700">{perAnnum('8.5')}</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 tabular-nums">
+                        {fmtCurrency(68000, false)}
                       </td>
                     </tr>
                     <tr>
@@ -362,19 +363,19 @@ export const MemberAccountProfilePrintModal: React.FC<MemberAccountProfilePrintM
                       <td className="py-2 px-3 font-mono text-slate-600">
                         {fmtDigits(member.shareKitta || 500)} {t('कित्ता', 'Units')}
                       </td>
-                      <td className="py-2 px-3 font-bold text-amber-700">14.2% Div</td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
-                        रु. {fmtCurrency(member.shareCapital || 50000, false)}
+                      <td className="py-2 px-3 font-bold text-amber-700">{fmtDigits('14.2')}% {t('लाभांश', 'Div')}</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900 tabular-nums">
+                        {fmtCurrency(member.shareCapital || 50000, false)}
                       </td>
                     </tr>
                     <tr>
                       <td className="py-2 px-3 font-semibold text-slate-900">
                         {t('सक्रिय ऋण दायित्व', 'Active Loan Liabilities')}
                       </td>
-                      <td className="py-2 px-3 font-mono text-slate-600">LN-2025-0429</td>
-                      <td className="py-2 px-3 font-bold text-rose-700">9.5% p.a.</td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-rose-700">
-                        रु. {fmtCurrency(member.activeLoanBalance || 320000, false)}
+                      <td className="py-2 px-3 font-mono text-slate-600">LN-{fmtDigits('2025-0429')}</td>
+                      <td className="py-2 px-3 font-bold text-rose-700">{perAnnum('9.5')}</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-rose-700 tabular-nums">
+                        {fmtCurrency(member.activeLoanBalance || 320000, false)}
                       </td>
                     </tr>
                   </tbody>

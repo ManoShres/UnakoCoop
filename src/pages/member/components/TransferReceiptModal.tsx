@@ -1,6 +1,7 @@
 import React from 'react';
 import { CheckCircle2, Printer, X } from 'lucide-react';
 import { useLanguageStore } from '../../../store/useLanguageStore';
+import { useCoopStore } from '../../../store/useCoopStore';
 import { PaymentRecord } from './TransferTypes';
 import { printElement } from '../../../utils/printHelper';
 
@@ -11,6 +12,7 @@ interface TransferReceiptModalProps {
 
 export const TransferReceiptModal: React.FC<TransferReceiptModalProps> = ({ record, onClose }) => {
   const { t } = useLanguageStore();
+  const coopSettings = useCoopStore((s) => s.coopSettings);
 
   if (!record) return null;
 
@@ -37,9 +39,13 @@ export const TransferReceiptModal: React.FC<TransferReceiptModalProps> = ({ reco
           <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center mb-2 shadow-xs">
             <CheckCircle2 className="w-7 h-7" />
           </div>
-          <h3 className="font-headline text-lg font-bold text-slate-900">उनको बचत तथा ऋण सहकारी संस्था लि.</h3>
+          <h3 className="font-headline text-lg font-bold text-slate-900">
+            {coopSettings?.nameNepali || coopSettings?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}
+          </h3>
           <p className="font-label-sm text-xs text-slate-600 font-bold">Unako SACCOS · Central CBS Transaction Advice</p>
-          <p className="text-[10px] text-slate-500 mt-0.5">चाबहिल, काठमाडौं • दर्ता नं: ३८४/०६८/०६९</p>
+          <p className="text-[10px] text-slate-500 mt-0.5">
+            {coopSettings?.addressNepali || coopSettings?.address || 'गढवा-५, दाङ'} • दर्ता नं: {coopSettings?.regNo || '१२९०/०६७/०६८'}
+          </p>
           <div className="font-display-stat text-2xl font-black text-emerald-700 mt-2 font-headline">
             {record.isCredit ? '+' : '-'}NPR {record.amount}
           </div>

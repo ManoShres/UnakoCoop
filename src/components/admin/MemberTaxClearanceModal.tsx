@@ -332,7 +332,7 @@ export const MemberTaxClearanceModal: React.FC<MemberTaxClearanceModalProps> = (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-xs">
           <div className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
             <span className="text-[11px] font-bold text-slate-500 block mb-0.5">
-              {t('कुल आर्जित आम्दानी (Gross)', 'Total Gross Earnings')}
+              {t('कुल आर्जित आम्दानी', 'Total Gross Earnings')}
             </span>
             <div className="text-base font-black text-slate-900 dark:text-white">
               {fmtCurrency(calc.totalGrossIncome, true)}
@@ -444,7 +444,7 @@ export const MemberTaxClearanceModal: React.FC<MemberTaxClearanceModalProps> = (
                       <th className="py-3 px-4 text-right">{t('आर्जित ब्याज / लाभांश', 'Gross Earnings')}</th>
                       <th className="py-3 px-4 text-center">{t('कर दर', 'Tax Rate')}</th>
                       <th className="py-3 px-4 text-right">{t('कट्टी कर (TDS)', 'TDS Withheld')}</th>
-                      <th className="py-3 px-4 text-right">{t('खुद भुक्तानी (Net)', 'Net Paid')}</th>
+                      <th className="py-3 px-4 text-right">{t('खुद भुक्तानी', 'Net Paid')}</th>
                       <th className="py-3 px-4">{t('e-TDS भौचर नं', 'Voucher')}</th>
                     </tr>
                   </thead>

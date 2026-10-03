@@ -72,27 +72,98 @@ export const createLoanSlice: StateCreator<CoopState, [], [], LoanSlice> = (set)
   },
 
   recordLoanRepayment: (loanNo, amount, note) => {
-    set((state) => ({
-      loans: state.loans.map((l) =>
+    set((state) => {
+      const targetLoan = state.loans.find((l) => l.loanNo === loanNo);
+      const memberId = targetLoan?.memberId;
+
+      const updatedLoans = state.loans.map((l) =>
         l.loanNo === loanNo
           ? {
               ...l,
               remainingBalance: Math.max(0, l.remainingBalance - amount),
             }
           : l
-      ),
-      transactions: [
-        {
-          id: 'tx-' + Date.now(),
-          date: new Date().toISOString().split('T')[0],
-          type: 'LOAN_EMI',
-          description: 'Loan EMI Payment - ' + loanNo + (note ? ' (' + note + ')' : ''),
-          amount,
-          referenceNo: 'EMI-MANUAL-' + Math.floor(10000 + Math.random() * 90000),
-          status: 'COMPLETED',
-        },
-        ...state.transactions,
-      ],
-    }));
+      );
+
+      const updatedMembers = memberId
+        ? state.members.map((m) =>
+            m.id === memberId
+              ? {
+                  ...m,
+                  activeLoanBalance: Math.max(0, (m.activeLoanBalance || 0) - amount),
+                }
+              : m
+          )
+        : state.members;
+
+      const newTx = {
+        id: 'tx-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        memberId,
+        date: new Date().toISOString().split('T')[0],
+        type: 'LOAN_EMI' as const,
+        description: 'Loan EMI Payment - ' + loanNo + (note ? ' (' + note + ')' : ''),
+        amount,
+        referenceNo: 'EMI-MANUAL-' + Math.floor(10000 + Math.random() * 90000),
+        status: 'COMPLETED' as const,
+      };
+
+      return {
+        loans: updatedLoans,
+        members: updatedMembers,
+        transactions: [newTx, ...state.transactions],
+      };
+    });
+  },
+
+  rescheduleLoan: (loanNo, updates) => {
+    set((state) => {
+      const targetLoan = state.loans.find((l) => l.loanNo === loanNo);
+      const memberId = targetLoan?.memberId;
+
+      const updatedLoans = state.loans.map((l) =>
+        l.loanNo === loanNo
+          ? {
+              ...l,
+              remainingBalance: updates.newPrincipal,
+              interestRate: updates.newRate,
+              monthlyEmi: updates.revisedEmi,
+              tenureMonths: (l.tenureMonths || 12) + updates.extendedTenure,
+              status: 'ACTIVE' as const,
+            }
+          : l
+      );
+
+      const updatedMembers = memberId
+        ? state.members.map((m) =>
+            m.id === memberId
+              ? {
+                  ...m,
+                  activeLoanBalance: Math.max(0, updates.newPrincipal),
+                }
+              : m
+          )
+        : state.members;
+
+      const newTx = {
+        id: 'tx-resched-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+        memberId,
+        date: new Date().toISOString().split('T')[0],
+        type: 'LOAN_EMI' as const,
+        description:
+          'Loan Restructured - ' +
+          loanNo +
+          (updates.note ? ' (' + updates.note + ')' : '') +
+          (updates.downPayment ? ' [Down Payment: NPR ' + updates.downPayment + ']' : ''),
+        amount: updates.downPayment || 0,
+        referenceNo: 'RESCHED-' + Math.floor(10000 + Math.random() * 90000),
+        status: 'COMPLETED' as const,
+      };
+
+      return {
+        loans: updatedLoans,
+        members: updatedMembers,
+        transactions: [newTx, ...state.transactions],
+      };
+    });
   },
 });

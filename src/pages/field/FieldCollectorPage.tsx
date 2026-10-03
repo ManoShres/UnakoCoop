@@ -448,7 +448,7 @@ export function FieldCollectorPage() {
         <div className="max-w-2xl mx-auto mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
           <div className="flex items-center gap-1.5 text-slate-400">
             <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-            <span>{t('संकलन क्षेत्र (Ward):', 'Ward:')}</span>
+            <span>{t('संकलन क्षेत्र:', 'Ward:')}</span>
             <select
               value={selectedWardNumber}
               onChange={(e) => setSelectedWardNumber(Number(e.target.value))}
@@ -522,7 +522,7 @@ export function FieldCollectorPage() {
             {/* Step 1: Rapid Member Search */}
             <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-3">
               <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider">
-                {t('१. सदस्य छनोट गर्नुहोस् (Search Member)', '1. Select Member')}
+                {t('१. सदस्य छनोट गर्नुहोस्', '1. Select Member')}
               </label>
 
               {!selectedMember ? (
@@ -602,7 +602,7 @@ export function FieldCollectorPage() {
             <div className="bg-slate-900 rounded-2xl p-4 border border-slate-800 space-y-4">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                  {t('२. रकम प्रविष्टि (Collection Breakdown)', '2. Collection Breakdown')}
+                  {t('२. रकम प्रविष्टि', '2. Collection Breakdown')}
                 </label>
                 <span className="text-[11px] text-slate-400">
                   {t('फास्ट चिप्स प्रयोग गर्नुहोस्', 'Use quick chips')}
@@ -719,7 +719,7 @@ export function FieldCollectorPage() {
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
                   <span className="block text-[11px] text-slate-400">
-                    {t('गोदाम रसिद शुल्क (WHR Fee)', 'WHR Storage Fee')}
+                    {t('गोदाम रसिद शुल्क', 'WHR Storage Fee')}
                   </span>
                   <div className="flex items-center gap-1 mt-1">
                     <span className="text-slate-500">रु.</span>
@@ -737,7 +737,7 @@ export function FieldCollectorPage() {
 
                 <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800/80">
                   <span className="block text-[11px] text-slate-400">
-                    {t('सेयर किस्ता (Share)', 'Share Installment')}
+                    {t('सेयर किस्ता', 'Share Installment')}
                   </span>
                   <div className="flex items-center gap-1 mt-1">
                     <span className="text-slate-500">रु.</span>
@@ -793,7 +793,7 @@ export function FieldCollectorPage() {
               <div className="pt-4 border-t border-slate-800 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-bold text-slate-300">
-                    {t('कुल संकलन रकम (Total):', 'Total Collection Amount:')}
+                    {t('कुल संकलन रकम:', 'Total Collection Amount:')}
                   </span>
                   <span className="text-2xl font-black text-amber-300 tabular-nums">
                     रु. {currentTotalAmount.toLocaleString('ne-NP')}
@@ -922,7 +922,7 @@ export function FieldCollectorPage() {
               <div className="flex items-center justify-between pb-3 border-b border-slate-800">
                 <div>
                   <h3 className="text-sm font-bold text-white">
-                    {t('दैनिक नगद थैली मिलान (Bag Cash Denomination)', 'Cash Denomination Tally')}
+                    {t('दैनिक नगद थैली मिलान', 'Cash Denomination Tally')}
                   </h3>
                   <span className="text-xs text-slate-400">
                     {t('शाखा काउन्टरमा नगद बुझाउन अघि नोट गन्ती गर्नुहोस्', 'Tally physical notes before counter handover')}
@@ -994,7 +994,7 @@ export function FieldCollectorPage() {
                   </span>
                 </div>
                 <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-sm">
-                  <span className="font-bold text-slate-300">{t('फरक (Discrepancy):', 'Difference:')}</span>
+                  <span className="font-bold text-slate-300">{t('फरक:', 'Difference:')}</span>
                   <span
                     className={`font-black tabular-nums ${
                       handoverReport.status === 'BALANCED'

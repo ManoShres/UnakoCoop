@@ -339,8 +339,12 @@ export const MOCK_PATRONAGE_METRICS: MemberPatronageMetric[] = [
  * Retrieves patronage metric for a specific member ID
  */
 export function getMemberPatronageMetric(memberId: string): MemberPatronageMetric {
-  const existing = MOCK_PATRONAGE_METRICS.find((m) => m.memberId === memberId);
-  if (existing) return existing;
+  const existing = MOCK_PATRONAGE_METRICS.find(
+    (m) => m.memberId === memberId || (memberId === 'm1' && m.memberId === 'mem-1')
+  );
+  if (existing) {
+    return existing.memberId === memberId ? existing : { ...existing, memberId };
+  }
 
   // Fallback default for any member in the cooperative
   return {

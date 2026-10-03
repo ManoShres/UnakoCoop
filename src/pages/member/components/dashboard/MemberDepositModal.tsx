@@ -10,18 +10,21 @@ interface MemberDepositModalProps {
   onSuccess: (amount: number, gateway: string) => void;
 }
 
+import { useAuthStore } from '../../../../store/useAuthStore';
+
 export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: MemberDepositModalProps) {
   const { t, fmtCurrency } = useLanguageStore();
-  const { adjustSavingsBalance } = useCoopStore();
+  const { currentMember } = useAuthStore();
+  const { addTransaction } = useCoopStore();
   const [selectedGateway, setSelectedGateway] = useState<'nepalqr' | 'esewa' | 'khalti' | 'connectips' | 'counter'>('nepalqr');
   const [amount, setAmount] = useState<number>(5000);
   const [submitting, setSubmitting] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
 
   const gateways = [
-    { id: 'nepalqr', name: 'NepalPay / Fonepay QR', fee: t('शून्य शुल्क (Instant)', 'Zero Fee / Instant'), icon: QrCode, color: 'text-indigo-500' },
-    { id: 'esewa', name: 'eSewa Mobile Wallet', fee: t('शून्य शुल्क (Free)', 'Zero Fee'), icon: Smartphone, color: 'text-emerald-500' },
-    { id: 'khalti', name: 'Khalti Digital Wallet', fee: t('शून्य शुल्क (Free)', 'Zero Fee'), icon: Smartphone, color: 'text-purple-500' },
+    { id: 'nepalqr', name: 'NepalPay / Fonepay QR', fee: t('शून्य शुल्क', 'Zero Fee / Instant'), icon: QrCode, color: 'text-indigo-500' },
+    { id: 'esewa', name: 'eSewa Mobile Wallet', fee: t('शून्य शुल्क', 'Zero Fee'), icon: Smartphone, color: 'text-emerald-500' },
+    { id: 'khalti', name: 'Khalti Digital Wallet', fee: t('शून्य शुल्क', 'Zero Fee'), icon: Smartphone, color: 'text-purple-500' },
     { id: 'connectips', name: 'NCHL / ConnectIPS', fee: t('रु. २-८ प्रति कारोबार', 'NPR 2-8 fee'), icon: Landmark, color: 'text-blue-500' },
     { id: 'counter', name: 'Service Counter Slip', fee: t('काउन्टर नगद दाखिला', 'Counter Cash Deposit'), icon: Landmark, color: 'text-amber-500' },
   ];
@@ -37,12 +40,14 @@ export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: Mem
 
     setSubmitting(true);
     setTimeout(() => {
-      adjustSavingsBalance(
-        primaryAccountNo,
+      addTransaction({
+        memberId: currentMember?.id,
+        type: 'DEPOSIT',
         amount,
-        'DEPOSIT',
-        `Digital Deposit via ${selectedGateway.toUpperCase()}`
-      );
+        description: `Digital Deposit via ${selectedGateway.toUpperCase()} (Pending Verification)`,
+        referenceNo: `DEP-${Date.now()}`,
+        status: 'PENDING',
+      });
       setSubmitting(false);
       onSuccess(amount, selectedGateway.toUpperCase());
       onClose();
@@ -78,7 +83,7 @@ export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: Mem
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              {t('भुक्तानी माध्यम छनौट गर्नुहोस् (Select Gateway)', 'Select Payment Gateway')}
+              {t('भुक्तानी माध्यम छनौट गर्नुहोस्', 'Select Payment Gateway')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {gateways.map((gw) => {
@@ -145,7 +150,7 @@ export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: Mem
             </div>
             <div className="flex justify-between text-slate-500">
               <span>{t('सेवा शुल्क:', 'Service Fee:')}</span>
-              <span className="font-bold text-emerald-600">रु. ०.०० (Free)</span>
+              <span className="font-bold text-emerald-600">{t('निःशुल्क (रु. ०)', 'Free (NPR 0)')}</span>
             </div>
           </div>
 
@@ -177,12 +182,14 @@ export function MemberDepositModal({ onClose, primaryAccountNo, onSuccess }: Mem
         amount={amount}
         remarks="Online Savings Deposit"
         onPaymentSuccess={(ref, paidAmount) => {
-          adjustSavingsBalance(
-            primaryAccountNo,
-            paidAmount,
-            'DEPOSIT',
-            `Digital Deposit via NepalPay QR (${ref})`
-          );
+          addTransaction({
+            memberId: currentMember?.id,
+            type: 'DEPOSIT',
+            amount: paidAmount,
+            description: `Digital Deposit via NepalPay QR (Pending Verification) - ${ref}`,
+            referenceNo: ref,
+            status: 'PENDING',
+          });
           setShowQrModal(false);
           onSuccess(paidAmount, 'NEPALPAY_QR');
           onClose();

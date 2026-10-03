@@ -111,7 +111,7 @@ export const MotherGroupMeetingLedgerModal: React.FC<MotherGroupMeetingLedgerMod
               className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
             >
               <Printer className="size-4 text-slate-500" />
-              {t('प्रिन्ट (Print)', 'Print')}
+              {t('प्रिन्ट', 'Print')}
             </button>
             <button
               type="button"
@@ -285,7 +285,7 @@ export const MotherGroupMeetingLedgerModal: React.FC<MotherGroupMeetingLedgerMod
                         disabled={!row.isPaid}
                         className="text-[11px] py-1 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-medium disabled:opacity-50"
                       >
-                        <option value="CASH">{t('नगद (Cash)', 'Cash')}</option>
+                        <option value="CASH">{t('नगद', 'Cash')}</option>
                         <option value="QR_PAYMENT">{t('QR भुक्तानी', 'QR Pay')}</option>
                         <option value="SAVINGS_TRANSFER">{t('बचत रकमान्तर', 'Transfer')}</option>
                       </select>
@@ -304,7 +304,7 @@ export const MotherGroupMeetingLedgerModal: React.FC<MotherGroupMeetingLedgerMod
                 <tfoot className="bg-slate-100 dark:bg-slate-800/90 font-bold border-t border-slate-200 dark:border-slate-700">
                   <tr>
                     <td colSpan={3} className="px-3 py-3 text-right">
-                      {t('कुल जम्मा (Grand Total):', 'Grand Total:')}
+                      {t('कुल जम्मा:', 'Grand Total:')}
                     </td>
                     <td className="px-3 py-3 text-right font-mono text-purple-600 dark:text-purple-400">
                       {fmtCurrency(summary.totalMandatorySavings, true)}
@@ -328,7 +328,7 @@ export const MotherGroupMeetingLedgerModal: React.FC<MotherGroupMeetingLedgerMod
         {/* Footer */}
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
           <div className="text-xs text-slate-500">
-            {t('सहजकर्ता (Mobilizer)', 'Mobilizer')}: <span className="font-bold text-slate-700 dark:text-slate-300">{meeting.conductedByName || meeting.conductedBy}</span>
+            {t('सहजकर्ता', 'Mobilizer')}: <span className="font-bold text-slate-700 dark:text-slate-300">{meeting.conductedByName || meeting.conductedBy}</span>
           </div>
           <button
             type="button"

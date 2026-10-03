@@ -143,6 +143,35 @@
     color: #0f172a;
     letter-spacing: -0.015em;
   }
+
+  /* Optimized Devanagari typography when Nepali language is active */
+  :lang(ne),
+  [data-lang="ne"] {
+    letter-spacing: 0;
+  }
+
+  :lang(ne) h1,
+  :lang(ne) h2,
+  :lang(ne) h3,
+  :lang(ne) h4,
+  :lang(ne) h5,
+  :lang(ne) h6,
+  [data-lang="ne"] h1,
+  [data-lang="ne"] h2,
+  [data-lang="ne"] h3,
+  [data-lang="ne"] h4,
+  [data-lang="ne"] h5,
+  [data-lang="ne"] h6 {
+    font-family: 'Mukta', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: 0 !important;
+    line-height: 1.35;
+  }
+
+  /* Universal button tactile touch feedback */
+  button:active:not(:disabled),
+  [role="button"]:active:not(:disabled) {
+    transform: scale(0.98);
+  }
 }
 
 /* ========================================================

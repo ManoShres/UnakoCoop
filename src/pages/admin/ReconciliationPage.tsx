@@ -488,8 +488,8 @@ export function ReconciliationPage() {
                   onChange={(e) => setStSide(e.target.value as 'DEBIT' | 'CREDIT')}
                   className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs"
                 >
-                  <option value="CREDIT">{t('जम्मा (Credit)', 'Credit')}</option>
-                  <option value="DEBIT">{t('भुक्तानी (Debit)', 'Debit')}</option>
+                  <option value="CREDIT">{t('जम्मा', 'Credit')}</option>
+                  <option value="DEBIT">{t('भुक्तानी', 'Debit')}</option>
                 </select>
               </div>
             </div>

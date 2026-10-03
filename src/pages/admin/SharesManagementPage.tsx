@@ -270,7 +270,7 @@ export function SharesManagementPage() {
             {fmtCurrency(sharePool.parValue * sharePool.totalAllottedKitta, true)}
           </div>
           <div className="text-[11px] text-slate-400 mt-0.5">
-            {fmtCurrency(sharePool.totalAllottedKitta, true)} {t('कित्ता @ रु. ', 'Kitta @ NPR ')}
+            {fmtCurrency(sharePool.totalAllottedKitta, true)} {t('कित्ता @ रु.', 'Kitta @ NPR ')}
             {fmtCount(sharePool.parValue)}
           </div>
         </div>
@@ -281,7 +281,7 @@ export function SharesManagementPage() {
             <TrendingUp className="size-4 text-emerald-500" />
           </div>
           <div className="text-xl sm:text-2xl font-black font-mono text-emerald-600 mt-1">
-            {fmtPercent(sharePool.annualDividendPercent)} p.a.
+            {fmtPercent(sharePool.annualDividendPercent)} {t('वार्षिक', 'p.a.')}
           </div>
           <div className="text-[11px] text-emerald-600 mt-0.5">
             {t('साधारण सभा द्वारा स्वीकृत दर', 'AGM Board Approved Rate')}
@@ -354,11 +354,11 @@ export function SharesManagementPage() {
                 </div>
                 <div className="pt-2 mt-2 border-t border-slate-200 dark:border-slate-700 text-[11px] text-slate-500 space-y-0.5">
                   <div>
-                    {t('न्यूनतम: ', 'Min: ')}
+                    {t('न्यूनतम:', 'Min: ')}
                     {fmtCurrency(plan.min, true)}
                   </div>
                   <div>
-                    {t('फिर्ता जरिवाना: ', 'Penalty: ')}
+                    {t('फिर्ता जरिवाना:', 'Penalty: ')}
                     {plan.penalty}
                   </div>
                 </div>
@@ -574,7 +574,7 @@ export function SharesManagementPage() {
                           {fd.accountType}
                         </div>
                         <div className="text-[11px] text-emerald-600 font-mono font-bold">
-                          {fmtPercent(fd.interestRate)} p.a.
+                          {fmtPercent(fd.interestRate)} {t('वार्षिक', 'p.a.')}
                         </div>
                       </td>
 

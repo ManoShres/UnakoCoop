@@ -529,7 +529,7 @@ export const SystemTutorialModal: React.FC = () => {
                       <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 text-xs text-amber-900 dark:text-amber-200">
                         <CheckCircle2 className="size-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                         <div className="flex-1">
-                          <span className="font-bold">{t('महत्त्वपूर्ण जानकारी: ', 'Helpful Tip: ')}</span>
+                          <span className="font-bold">{t('महत्त्वपूर्ण जानकारी:', 'Helpful Tip: ')}</span>
                           {t(guide.tipsNp, guide.tipsEn)}
                         </div>
                       </div>

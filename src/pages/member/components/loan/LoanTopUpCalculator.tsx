@@ -36,7 +36,7 @@ export const LoanTopUpCalculator: React.FC<LoanTopUpCalculatorProps> = ({ onAppl
             </h3>
             <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-2 leading-relaxed">
               {t(
-                'उनको सहकारीसँगको १००% समयमै किस्ता तिरेको उत्कृष्ट ट्र्याक रेकर्डका आधारमा, तपाईं विना अतिरिक्त धितो ',
+                'उनको सहकारीसँगको १००% समयमै किस्ता तिरेको उत्कृष्ट ट्र्याक रेकर्डका आधारमा, तपाईं विना अतिरिक्त धितो',
                 'Based on your pristine 100% on-time track record with Unako SACCOS, you are pre-qualified for an instant Top-Up Agro loan of up to '
               )}
               <strong className="text-on-surface font-bold">NPR 1,50,000</strong>

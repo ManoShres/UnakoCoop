@@ -50,34 +50,37 @@ export function MemberDashboardPage() {
 
   // Compute live account balances from store
   const memberSavingsAccounts = savings.filter(
-    (s) => s.memberId === activeMember.id || s.accountNo.includes('004-10294')
+    (s) => s.memberId === activeMember.id
   );
 
   const regularSavingsAcct =
     memberSavingsAccounts.find((s) => s.accountType.includes('Regular') || s.accountType.includes('साधारण')) ||
-    savings[0];
+    memberSavingsAccounts[0];
 
-  const regularSavingsBalance = regularSavingsAcct?.balance || 184500;
-  const compulsorySavingsBalance = 68000;
-  const shareCapitalBalance = activeMember.shareCapital || 50000;
-  const fixedDepositsBalance = 40350;
+  const compulsorySavingsAcct = memberSavingsAccounts.find((s) => s.accountType.includes('Compulsory') || s.accountType.includes('मासिक'));
+  const fixedDepositsAcct = memberSavingsAccounts.find((s) => s.accountType.includes('Fixed') || s.accountType.includes('मुद्दती'));
+
+  const regularSavingsBalance = regularSavingsAcct?.balance ?? (activeMember.totalSavings || 0);
+  const compulsorySavingsBalance = compulsorySavingsAcct?.balance ?? (activeMember.id === 'm1' ? 68000 : 0);
+  const shareCapitalBalance = activeMember.shareCapital || 0;
+  const fixedDepositsBalance = fixedDepositsAcct?.balance ?? (activeMember.id === 'm1' ? 40350 : 0);
 
   const totalNetWorth =
     regularSavingsBalance + compulsorySavingsBalance + shareCapitalBalance + fixedDepositsBalance;
 
-  const primaryAccountNo = regularSavingsAcct?.accountNo || '004-10294-88-01';
+  const primaryAccountNo = regularSavingsAcct?.accountNo || (activeMember.id === 'm1' ? 'SAV-001-88219' : `SAV-${activeMember.id}-01`);
 
   // Active member loan
-  const activeLoan = loans.find(
-    (l) => l.memberId === activeMember.id || l.loanNo === 'LN-2099-0418' || l.status === 'ACTIVE'
-  ) || loans[0];
+  const activeLoan =
+    loans.find((l) => l.memberId === activeMember.id && l.status === 'ACTIVE') ||
+    loans.find((l) => l.memberId === activeMember.id);
 
   // Active notice
   const activeNotice = notices.find((n) => n.isActive) || notices[0];
 
-  // Filter transactions for this member or use cooperative ledger
+  // Filter transactions for this member
   const memberTransactions = transactions.filter(
-    (tx) => tx.memberId === activeMember.id || tx.memberId === 'mem-1' || !tx.memberId
+    (tx) => tx.memberId === activeMember.id || (activeMember.id === 'm1' && tx.memberId === 'mem-1')
   );
 
   const accountSummary: MemberDashboardAccountSummary = {
@@ -86,7 +89,7 @@ export function MemberDashboardPage() {
     shareCapital: shareCapitalBalance,
     fixedDeposits: fixedDepositsBalance,
     totalNetWorth,
-    activeLoanBalance: activeLoan?.remainingBalance || 118420,
+    activeLoanBalance: activeLoan?.remainingBalance ?? (activeMember.activeLoanBalance ?? 0),
     primaryAccountNo,
   };
 

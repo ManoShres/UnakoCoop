@@ -64,13 +64,13 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
           {/* LIVE MATH EQUATION WIDGET */}
           <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2">
             <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-              {t('मौज्दात हिसाब मिलान (Live Balance Equation)', 'Live Balance Reconciliation Equation')}
+              {t('मौज्दात हिसाब मिलान', 'Live Balance Reconciliation Equation')}
             </div>
             <div className="flex items-center justify-between gap-1 text-center font-mono">
               <div className="flex-1 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                 <div className="text-[10px] text-slate-400">{t('हालको मौज्दात', 'Initial')}</div>
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
-                  रु. {fmtCurrency(account.balance, true)}
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate tabular-nums">
+                  {fmtCurrency(account.balance, true)}
                 </div>
               </div>
 
@@ -81,11 +81,11 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
               <div className="flex-1 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                 <div className="text-[10px] text-slate-400">{t('समायोजन रकम', 'Adjust')}</div>
                 <div
-                  className={`text-xs font-bold truncate ${
+                  className={`text-xs font-bold truncate tabular-nums ${
                     adjustType === 'DEPOSIT' ? 'text-emerald-600' : 'text-rose-600'
                   }`}
                 >
-                  रु. {fmtCurrency(adjustAmount, true)}
+                  {fmtCurrency(adjustAmount, true)}
                 </div>
               </div>
 
@@ -100,11 +100,11 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
               >
                 <div className="text-[10px] text-slate-500">{t('अन्तिम मौज्दात', 'Result')}</div>
                 <div
-                  className={`text-xs font-black truncate ${
+                  className={`text-xs font-black truncate tabular-nums ${
                     isNegative ? 'text-rose-600' : 'text-emerald-700 dark:text-emerald-300'
                   }`}
                 >
-                  रु. {fmtCurrency(newBalance, true)}
+                  {fmtCurrency(newBalance, true)}
                 </div>
               </div>
             </div>
@@ -112,14 +112,14 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
             {isNegative && (
               <div className="text-[11px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1.5 pt-1">
                 <AlertCircle className="size-4 shrink-0" />
-                <span>{t('चेतावनी: खातामा मौज्दात ऋणात्मक (Negative) हुँदैछ!', 'Warning: Resulting balance will be negative!')}</span>
+                <span>{t('चेतावनी: खातामा मौज्दात ऋणात्मक हुँदैछ!', 'Warning: Resulting balance will be negative!')}</span>
               </div>
             )}
           </div>
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              {t('समायोजन दिशा (Action Type)', 'Action Type')}
+              {t('समायोजन दिशा', 'Action Type')}
             </label>
             <div className="grid grid-cols-2 gap-2">
               <button
@@ -132,7 +132,7 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
                 }`}
               >
                 <ArrowDownLeft className="size-4" />
-                <span>{t('जम्मा / क्रेडिट (Deposit)', 'Credit / Deposit')}</span>
+                <span>{t('जम्मा / क्रेडिट', 'Credit / Deposit')}</span>
               </button>
               <button
                 type="button"
@@ -144,7 +144,7 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
                 }`}
               >
                 <ArrowUpRight className="size-4" />
-                <span>{t('भुक्तानी / डेबिट (Withdrawal)', 'Debit / Withdrawal')}</span>
+                <span>{t('भुक्तानी / डेबिट', 'Debit / Withdrawal')}</span>
               </button>
             </div>
           </div>
@@ -167,7 +167,7 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
 
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                {t('भौचर नम्बर (JV No.) *', 'Journal Voucher No. *')}
+                {t('भौचर नम्बर *', 'Journal Voucher No. *')}
               </label>
               <input
                 type="text"
@@ -181,18 +181,18 @@ export function SavingsAdjustModal({ account, members, onClose, onSubmit }: Savi
 
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-              {t('समायोजनको कारण वर्ग (Reason Category) *', 'Reason Category *')}
+              {t('समायोजनको कारण वर्ग *', 'Reason Category *')}
             </label>
             <select
               value={adjustReasonCategory}
               onChange={(e) => setAdjustReasonCategory(e.target.value)}
               className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold"
             >
-              <option value="CASH_COUNTER_RECON">{t('काउन्टर नगद मिलान (Counter Cash Reconciliation)', 'Counter Cash Reconciliation')}</option>
-              <option value="DIVIDEND_CREDIT">{t('वार्षिक लाभांश समायोजन (Dividend Distribution)', 'Dividend Distribution')}</option>
-              <option value="LOAN_OFFSET">{t('ऋण किस्ता कट्टा (Loan Principal/Interest Offset)', 'Loan Repayment Offset')}</option>
-              <option value="ERROR_CORRECTION">{t('सीबीएस भुल सुधार प्रविष्टि (Ledger Error Correction)', 'Ledger Error Correction')}</option>
-              <option value="FEE_REVERSAL">{t('शुल्क फिर्ता / छुट (Fee Waiver/Reversal)', 'Fee Reversal')}</option>
+              <option value="CASH_COUNTER_RECON">{t('काउन्टर नगद मिलान', 'Counter Cash Reconciliation')}</option>
+              <option value="DIVIDEND_CREDIT">{t('वार्षिक लाभांश समायोजन', 'Dividend Distribution')}</option>
+              <option value="LOAN_OFFSET">{t('ऋण किस्ता कट्टा', 'Loan Repayment Offset')}</option>
+              <option value="ERROR_CORRECTION">{t('सीबीएस भुल सुधार प्रविष्टि', 'Ledger Error Correction')}</option>
+              <option value="FEE_REVERSAL">{t('शुल्क फिर्ता / छुट', 'Fee Reversal')}</option>
             </select>
           </div>
 

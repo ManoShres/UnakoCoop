@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Transaction } from '../../../../types';
 import { useLanguageStore } from '../../../../store/useLanguageStore';
+import { localizeTxDescription } from '../../../../utils/transactionLocalization';
 import { TransactionFilterType } from './MemberDashboardTypes';
 
 interface MemberActivityFeedProps {
@@ -21,7 +22,7 @@ interface MemberActivityFeedProps {
 }
 
 export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFeedProps) {
-  const { t, fmtCurrency, fmtDigits } = useLanguageStore();
+  const { lang, t, fmtCurrency, fmtDigits } = useLanguageStore();
   const [filter, setFilter] = useState<TransactionFilterType>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
@@ -56,7 +57,7 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
       <div className="p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span>{t('प्रमाणित कारोबार विवरण (Digital Passbook)', 'Verified Transaction Activity')}</span>
+            <span>{t('प्रमाणित कारोबार विवरण', 'Verified Transaction Activity')}</span>
             <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
               CBS Live
             </span>
@@ -91,16 +92,16 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
       {/* Filter Tabs */}
       <div className="px-5 pt-3 pb-2 border-b border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto text-xs font-semibold">
         {[
-          { id: 'all', label: t('सबै कारोबार (All)', 'All Activity') },
-          { id: 'deposits', label: t('जम्मा तथा आम्दानी (Deposits)', 'Deposits & Inflows') },
-          { id: 'debits', label: t('खर्च तथा निकासी (Debits)', 'Withdrawals & Debits') },
-          { id: 'loan_emi', label: t('ऋण किस्ता भुक्तानी (EMI)', 'Loan EMI Repayments') },
+          { id: 'all', label: t('सबै कारोबार', 'All Activity') },
+          { id: 'deposits', label: t('जम्मा तथा आम्दानी', 'Deposits & Inflows') },
+          { id: 'debits', label: t('खर्च तथा निकासी', 'Withdrawals & Debits') },
+          { id: 'loan_emi', label: t('ऋण किस्ता भुक्तानी', 'Loan EMI Repayments') },
         ].map((tab) => (
           <button
             key={tab.id}
             type="button"
             onClick={() => setFilter(tab.id as TransactionFilterType)}
-            className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors ${
+            className={`px-3 py-1.5 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
               filter === tab.id
                 ? 'bg-slate-900 text-white dark:bg-emerald-600 dark:text-white shadow-xs'
                 : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
@@ -149,7 +150,7 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
 
                   <div className="min-w-0">
                     <div className="font-bold text-slate-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                      {tx.description}
+                      {localizeTxDescription(tx.description, lang)}
                     </div>
                     <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2 mt-0.5 font-mono">
                       <span>{tx.date}</span>
@@ -161,7 +162,7 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
 
                 <div className="text-right shrink-0">
                   <div
-                    className={`font-mono font-bold text-sm ${
+                    className={`font-mono font-bold text-sm tabular-nums ${
                       isCredit
                         ? 'text-emerald-600 dark:text-emerald-400'
                         : isEmi
@@ -169,7 +170,7 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
                         : 'text-rose-600 dark:text-rose-400'
                     }`}
                   >
-                    {isCredit ? '+' : '−'} रु. {fmtCurrency(tx.amount, false)}
+                    {isCredit ? '+' : '−'} {fmtCurrency(tx.amount, false)}
                   </div>
                   <div className="text-[10px] text-slate-400 font-medium">
                     {tx.status || 'COMPLETED'}
@@ -207,7 +208,7 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="size-5 text-emerald-400" />
                 <h3 className="font-bold text-sm">
-                  {t('कारोबार भौचर विवरण (CBS Receipt)', 'Transaction Voucher Receipt')}
+                  {t('कारोबार भौचर विवरण', 'Transaction Voucher Receipt')}
                 </h3>
               </div>
               <button
@@ -223,8 +224,8 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
                 <div className="text-xs text-slate-500 uppercase tracking-wider font-semibold">
                   {t('कारोबार रकम', 'Transaction Amount')}
                 </div>
-                <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1">
-                  रु. {fmtCurrency(selectedTx.amount, false)}
+                <div className="text-3xl font-black font-mono text-slate-900 dark:text-white mt-1 tabular-nums">
+                  {fmtCurrency(selectedTx.amount, false)}
                 </div>
                 <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[10px] font-bold mt-1">
                   {t('सफलतापूर्वक सम्पन्न', 'SETTLED & CONFIRMED')}
@@ -233,9 +234,9 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
 
               <div className="space-y-2.5 text-xs">
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">{t('विवरण (Narration)', 'Narration')}</span>
+                  <span className="text-slate-500">{t('विवरण', 'Narration')}</span>
                   <span className="font-bold text-slate-800 dark:text-slate-200 text-right max-w-[220px]">
-                    {selectedTx.description}
+                    {localizeTxDescription(selectedTx.description, lang)}
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
@@ -245,11 +246,11 @@ export function MemberActivityFeed({ transactions, memberNo }: MemberActivityFee
                   </span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800 font-mono">
-                  <span className="text-slate-500 font-sans">{t('मिति (Date)', 'Date')}</span>
+                  <span className="text-slate-500 font-sans">{t('मिति', 'Date')}</span>
                   <span className="text-slate-800 dark:text-slate-200">{selectedTx.date}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-slate-100 dark:border-slate-800">
-                  <span className="text-slate-500">{t('प्रकार (Type)', 'Type')}</span>
+                  <span className="text-slate-500">{t('प्रकार', 'Type')}</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-200">{selectedTx.type}</span>
                 </div>
                 <div className="flex justify-between py-1 font-mono">

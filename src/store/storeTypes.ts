@@ -60,6 +60,17 @@ export interface LoanSlice {
   updateLoanScheme: (schemeId: string, updates: Partial<LoanScheme>) => void;
   addLoanScheme: (scheme: Omit<LoanScheme, 'id'>) => void;
   recordLoanRepayment: (loanNo: string, amount: number, note?: string) => void;
+  rescheduleLoan: (
+    loanNo: string,
+    updates: {
+      newPrincipal: number;
+      newRate: number;
+      extendedTenure: number;
+      revisedEmi: number;
+      downPayment?: number;
+      note?: string;
+    }
+  ) => void;
 }
 
 export interface SavingsSlice {
@@ -80,7 +91,8 @@ export interface OperationsSlice {
   fieldOfficers: FieldOfficer[];
   coopSettings: CoopSettings;
 
-  addTransaction: (tx: Omit<Transaction, 'id' | 'date' | 'status'>) => void;
+  addTransaction: (tx: Omit<Transaction, 'id' | 'date' | 'status'> & { status?: Transaction['status'] }) => void;
+  confirmPendingDeposit: (transactionId: string) => void;
   toggleGatewayRail: (gatewayId: string, status: GatewayRail['status']) => void;
   updateGatewayLimit: (gatewayId: string, dailyLimit: number) => void;
   updateSharePool: (updates: Partial<SharePool>) => void;

@@ -153,7 +153,7 @@ export const MemberDigitalSmartCardModal: React.FC<MemberDigitalSmartCardModalPr
             </div>
             <div>
               <div className="text-[10px] font-mono tracking-wider uppercase text-emerald-200 font-bold">
-                {t('डिजिटल सदस्य परिचयपत्र (CR-80 Smart Card)', 'Digital Member Smart ID Card')}
+                {t('डिजिटल सदस्य परिचयपत्र', 'Digital Member Smart ID Card')}
               </div>
               <h3 className="font-black text-sm text-white">
                 {member.name} [{member.memberNo}]
@@ -184,7 +184,7 @@ export const MemberDigitalSmartCardModal: React.FC<MemberDigitalSmartCardModalPr
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              {t('अगाडि (Front Side)', 'Front Side')}
+              {t('अगाडि', 'Front Side')}
             </button>
             <button
               type="button"
@@ -195,7 +195,7 @@ export const MemberDigitalSmartCardModal: React.FC<MemberDigitalSmartCardModalPr
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
               }`}
             >
-              {t('पछाडि (Back Side)', 'Back Side')}
+              {t('पछाडि', 'Back Side')}
             </button>
           </div>
 

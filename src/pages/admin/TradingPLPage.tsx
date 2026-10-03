@@ -237,7 +237,7 @@ export const TradingPLPage: React.FC = () => {
             {fmtCurrency(summary.netPL, true)}
           </div>
           <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            {t('लागतमा प्रतिफल: ', 'Return on cost base: ')}{fmtPercent(summary.plPercent.toFixed(2))}
+            {t('लागतमा प्रतिफल:', 'Return on cost base: ')}{fmtPercent(summary.plPercent.toFixed(2))}
           </div>
         </div>
 

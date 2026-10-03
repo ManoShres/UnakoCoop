@@ -116,7 +116,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
               </div>
               <h3 className="text-base sm:text-lg font-bold text-white">
                 {t(
-                  'ब्याजदर अन्तर (Spread Rate) तथा सन्दर्भ दर अनुगमन प्रणाली',
+                  'ब्याजदर अन्तर तथा सन्दर्भ दर अनुगमन प्रणाली',
                   'Interest Rate Spread (<= 4.75%) & Reference Rate Compliance'
                 )}
               </h3>
@@ -169,7 +169,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
             }`}
           >
             <span className="block text-[10px] uppercase font-semibold">
-              {t('ब्याजदर अन्तर (Spread Rate)', 'Net Interest Spread')}
+              {t('ब्याजदर अन्तर', 'Net Interest Spread')}
             </span>
             <div className="flex items-center gap-1.5 mt-0.5">
               <strong className="text-base font-mono font-black">
@@ -181,10 +181,10 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
             </div>
             <span className="text-[10px] block">
               {baselineAnalysis.spreadStatus === 'COMPLIANT'
-                ? t('कानूनी सीमाभित्र (Compliant)', 'Fully Compliant')
+                ? t('कानूनी सीमाभित्र', 'Fully Compliant')
                 : baselineAnalysis.spreadStatus === 'WARNING'
-                ? t('सीमा नजिक (Warning)', 'Near Statutory Cap')
-                : t('कानून उल्लंघन (Breached)', 'Regulatory Breach')}
+                ? t('सीमा नजिक', 'Near Statutory Cap')
+                : t('कानून उल्लंघन', 'Regulatory Breach')}
             </span>
           </div>
 
@@ -214,7 +214,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
               }`}
             >
               <Building2 className="size-4" />
-              <span>{t('प्रडक्ट म्याट्रिक्स तथा दर (Matrix)', 'Product Rate Matrix')}</span>
+              <span>{t('प्रडक्ट म्याट्रिक्स तथा दर', 'Product Rate Matrix')}</span>
             </button>
 
             <button
@@ -227,7 +227,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
               }`}
             >
               <Sliders className="size-4" />
-              <span>{t('ब्याजदर परिमार्जन सिमुलेटर (Simulator)', 'Rate Revision Simulator')}</span>
+              <span>{t('ब्याजदर परिमार्जन सिमुलेटर', 'Rate Revision Simulator')}</span>
             </button>
 
             <button
@@ -240,7 +240,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
               }`}
             >
               <FileSpreadsheet className="size-4" />
-              <span>{t('नियामक प्रतिवेदन तथा सूचना (Notice)', 'Regulatory Filing Memo')}</span>
+              <span>{t('नियामक प्रतिवेदन तथा सूचना', 'Regulatory Filing Memo')}</span>
             </button>
           </div>
 
@@ -266,7 +266,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-white flex items-center gap-2">
                     <TrendingDown className="size-4 text-sky-400" />
-                    <span>{t('निक्षेप योजनाहरूको ब्याजदर तथा मौज्दात (Deposit Products)', 'Deposit Products Portfolio')}</span>
+                    <span>{t('निक्षेप योजनाहरूको ब्याजदर तथा मौज्दात', 'Deposit Products Portfolio')}</span>
                   </h4>
                   <span className="text-slate-400 font-mono text-[11px]">
                     WADR: {fmtPercent(baselineAnalysis.weightedAvgDepositRate)}
@@ -318,7 +318,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-white flex items-center gap-2">
                     <TrendingUp className="size-4 text-emerald-400" />
-                    <span>{t('कर्जा योजनाहरूको ब्याजदर तथा मौज्दात (Loan Products)', 'Loan Products Portfolio')}</span>
+                    <span>{t('कर्जा योजनाहरूको ब्याजदर तथा मौज्दात', 'Loan Products Portfolio')}</span>
                   </h4>
                   <span className="text-slate-400 font-mono text-[11px]">
                     WALR: {fmtPercent(baselineAnalysis.weightedAvgLendingRate)}
@@ -403,7 +403,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold transition cursor-pointer self-start sm:self-auto"
                 >
                   <RotateCcw className="size-3.5" />
-                  <span>{t('पूर्ववत (Reset)', 'Reset Rates')}</span>
+                  <span>{t('पूर्ववत', 'Reset Rates')}</span>
                 </button>
               </div>
 
@@ -524,7 +524,7 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
                   </p>
                   <div className="inline-block px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 font-bold text-xs mt-2 border border-indigo-500/30">
                     {t(
-                      'सहकारी ऐन २०७४ दफा ५० बमोजिम ब्याजदर अन्तर (Spread Rate) सार्वजनिक प्रतिवेदन',
+                      'सहकारी ऐन २०७४ दफा ५० बमोजिम ब्याजदर अन्तर सार्वजनिक प्रतिवेदन',
                       'Cooperative Act 2074 Sec 50 Interest Rate Spread Statutory Disclosure'
                     )}
                   </div>
@@ -548,11 +548,11 @@ export const InterestRateSpreadModal: React.FC<InterestRateSpreadModalProps> = (
                       <strong className="text-white block font-mono text-sm">{baselineAnalysis.weightedAvgDepositRate}%</strong>
                     </div>
                     <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-                      <span className="text-slate-400 text-[10px]">{t('ब्याजदर अन्तर (Spread):', 'Spread Rate:')}</span>
+                      <span className="text-slate-400 text-[10px]">{t('ब्याजदर अन्तर:', 'Spread Rate:')}</span>
                       <strong className="text-emerald-400 block font-mono text-sm">{baselineAnalysis.spreadRate}%</strong>
                     </div>
                     <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800">
-                      <span className="text-slate-400 text-[10px]">{t('कानूनी सीमा (Limit):', 'Statutory Limit:')}</span>
+                      <span className="text-slate-400 text-[10px]">{t('कानूनी सीमा:', 'Statutory Limit:')}</span>
                       <strong className="text-white block font-mono text-sm">४.७५% (Max 4.75%)</strong>
                     </div>
                   </div>

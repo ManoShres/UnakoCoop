@@ -108,7 +108,7 @@ export const LoanApplyModal: React.FC<LoanApplyModalProps> = ({
             </div>
             <div className="flex justify-between text-xs text-on-surface-variant">
               <span>{t('अनुदानित ब्याजदर', 'Subsidized Interest Rate')}</span>
-              <span className="font-bold text-status-success">9.5% p.a.</span>
+              <span className="font-bold text-status-success">{t('९.५% वार्षिक', '9.5% p.a.')}</span>
             </div>
             <div className="flex justify-between text-xs text-on-surface-variant">
               <span>{t('सहकारी ऋण बीमा', 'Coop Loan Insurance')}</span>

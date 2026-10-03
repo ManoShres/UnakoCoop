@@ -13,30 +13,33 @@ import {
   Building,
   AlertCircle,
 } from 'lucide-react';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useAuthStore, isDemoMode } from '../../store/useAuthStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { LanguageToggle } from '../../components/ui/LanguageToggle';
 import { useCoopStore } from '../../store/useCoopStore';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import { signInStaffWithSupabase } from '../../services/employeeService';
 import { signInMemberWithSupabase } from '../../services/memberAuthService';
+import { INITIAL_EMPLOYEES } from '../../store/initialData';
 
 export const UnifiedLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setRole, setCurrentMember, switchToPreset } = useAuthStore();
+  const { setRole, setCurrentMember, switchToPreset, signInStaff, setCurrentEmployee, setStaffRole } = useAuthStore();
   const { members, coopSettings } = useCoopStore();
   const { t } = useLanguageStore();
+
+  const demoActive = isDemoMode();
 
   // Mode: 'MEMBER' or 'STAFF'
   const [loginMode, setLoginMode] = useState<'MEMBER' | 'STAFF'>('MEMBER');
 
-  // Member form states
-  const [memberIdentifier, setMemberIdentifier] = useState('UK-88219');
-  const [memberPassword, setMemberPassword] = useState('password123');
+  // Member form states (pre-filled only if demo mode is active)
+  const [memberIdentifier, setMemberIdentifier] = useState(demoActive ? 'UK-88219' : '');
+  const [memberPassword, setMemberPassword] = useState(demoActive ? 'password123' : '');
 
-  // Staff form states
-  const [staffUsername, setStaffUsername] = useState('admin@unako.coop');
-  const [staffPassword, setStaffPassword] = useState('cbsAdmin2026');
+  // Staff form states (pre-filled only if demo mode is active)
+  const [staffUsername, setStaffUsername] = useState(demoActive ? 'admin@unako.coop' : '');
+  const [staffPassword, setStaffPassword] = useState(demoActive ? 'cbsAdmin2026' : '');
   const [staffBranch, setStaffBranch] = useState('Main Branch, Gadhwa-5');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -68,10 +71,17 @@ export const UnifiedLoginPage: React.FC = () => {
       return;
     }
 
-    // Offline demo: match against the local demo roster (original behaviour).
+    // Offline mode: match against the local member roster strictly
     setTimeout(() => {
       setIsLoading(false);
       const cleanId = memberIdentifier.trim().toLowerCase();
+      if (!cleanId) {
+        setErrorMessage(
+          t('कृपया सदस्य नं., फोन वा नागरिकता नं. राख्नुहोस्', 'Please provide Member No, Phone or Citizenship No')
+        );
+        return;
+      }
+
       const matched = members.find(
         (m) =>
           m.memberNo.toLowerCase() === cleanId ||
@@ -85,8 +95,13 @@ export const UnifiedLoginPage: React.FC = () => {
         setCurrentMember(matched);
         navigate('/member');
       } else {
-        switchToPreset('verified-member');
-        navigate('/member');
+        // Strict: Never silently escalate unknown users to a verified member!
+        setErrorMessage(
+          t(
+            'सदस्य विवरण फेला परेन। कृपया सही सदस्य नं., फोन वा नागरिकता नं. राख्नुहोस्।',
+            'Member not found. Please verify your Member No, Phone or Citizenship No.'
+          )
+        );
       }
     }, 600);
   };
@@ -96,7 +111,7 @@ export const UnifiedLoginPage: React.FC = () => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    // Supabase Auth when configured; otherwise fall back to the offline demo flow.
+    // Supabase Auth when configured; otherwise fall back to the offline flow.
     if (isSupabaseConfigured()) {
       const { data, error } = await signInStaffWithSupabase(staffUsername.trim(), staffPassword);
       setIsLoading(false);
@@ -117,12 +132,40 @@ export const UnifiedLoginPage: React.FC = () => {
 
     setTimeout(() => {
       setIsLoading(false);
-      if (!staffUsername.trim()) {
+      const cleanUser = staffUsername.trim().toLowerCase();
+      if (!cleanUser) {
         setErrorMessage(t('कृपया कर्मचारी युजरनेम वा इमेल राख्नुहोस्', 'Please provide your CBS Officer Credentials'));
         return;
       }
-      setRole('ADMIN');
-      setCurrentMember(null);
+
+      // Validate staff against the official employee roster
+      const matchedEmployee = INITIAL_EMPLOYEES.find(
+        (emp) =>
+          emp.email.toLowerCase() === cleanUser ||
+          emp.employeeNo.toLowerCase() === cleanUser ||
+          emp.phone.replace(/[^0-9]/g, '').includes(cleanUser.replace(/[^0-9]/g, ''))
+      );
+
+      const isMasterAdmin = cleanUser === 'admin@unako.coop' || cleanUser === 'admin';
+
+      if (!matchedEmployee && !isMasterAdmin) {
+        setErrorMessage(
+          t(
+            'कर्मचारी विवरण फेला परेन। अधिकृत कर्मचारी युजरनेम प्रयोग गर्नुहोस्।',
+            'Staff employee credentials not found. Please provide authorized CBS officer credentials.'
+          )
+        );
+        return;
+      }
+
+      if (matchedEmployee) {
+        signInStaff(matchedEmployee);
+      } else {
+        setRole('ADMIN');
+        setCurrentMember(null);
+        setCurrentEmployee(INITIAL_EMPLOYEES[0] ?? null);
+        setStaffRole('SUPER_ADMIN');
+      }
       navigate('/admin');
     }, 600);
   };
@@ -409,28 +452,30 @@ export const UnifiedLoginPage: React.FC = () => {
                 </form>
               )}
 
-              {/* ─── QUICK DEMO LOGINS ─── */}
-              <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 space-y-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-                  {t('द्रुत डेमो एक-क्लिक पहुँच', 'Quick Demo One-Click Access')}
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo('MEMBER')}
-                    className="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-[11px] font-medium transition text-center"
-                  >
-                    {t('डेमो सदस्य: राम श्रेष्ठ', 'Load Member: Ram Shrestha')}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQuickDemo('STAFF')}
-                    className="py-1.5 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-slate-700 dark:text-slate-300 hover:text-blue-600 text-[11px] font-medium transition text-center"
-                  >
-                    {t('डेमो स्टाफ: केन्द्रीय एडमिन', 'Load Staff: Central Admin')}
-                  </button>
+              {/* ─── QUICK DEMO LOGINS (VISIBLE ONLY WHEN DEMO MODE IS ENABLED) ─── */}
+              {demoActive && (
+                <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 space-y-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
+                    {t('द्रुत डेमो एक-क्लिक पहुँच (डेमो मोड)', 'Quick Demo One-Click Access (Demo Mode)')}
+                  </span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleQuickDemo('MEMBER')}
+                      className="py-2 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-xs font-bold transition-all duration-150 ease-out active:scale-95 cursor-pointer text-center"
+                    >
+                      {t('डेमो सदस्य: राम श्रेष्ठ', 'Load Member: Ram Shrestha')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleQuickDemo('STAFF')}
+                      className="py-2 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-slate-700 dark:text-slate-300 hover:text-blue-600 text-xs font-bold transition-all duration-150 ease-out active:scale-95 cursor-pointer text-center"
+                    >
+                      {t('डेमो स्टाफ: केन्द्रीय एडमिन', 'Load Staff: Central Admin')}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -441,7 +486,9 @@ export const UnifiedLoginPage: React.FC = () => {
               <span>{t('२५६-बिट एसएसएल इन्क्रिप्टेड • आईएसओ २७००१ सुरक्षा मापदण्ड', '256-Bit SSL Encrypted • ISO 27001 Cooperative Security Standard')}</span>
             </p>
             <p>
-              {t('सहकारी दर्ता नं:', 'Department of Cooperatives Reg. No:')} {coopSettings.regNo} • {coopSettings.address}
+              {t('सहकारी दर्ता नं:', 'Department of Cooperatives Reg. No:')}{' '}
+              {t(coopSettings.regNo, coopSettings.regNoEnglish || coopSettings.regNo)} •{' '}
+              {t(coopSettings.addressNepali || coopSettings.address, coopSettings.addressEnglish || coopSettings.address)}
             </p>
           </div>
         </div>

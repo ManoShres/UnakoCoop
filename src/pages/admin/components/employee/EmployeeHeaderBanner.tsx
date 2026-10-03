@@ -85,7 +85,7 @@ export const EmployeeHeaderBanner: React.FC<EmployeeHeaderBannerProps> = ({
             )}
           >
             <PiggyBank className="size-4" />
-            <span>{t('सञ्चय कोष र उपदान (PF & Gratuity)', 'PF & Gratuity Fund')}</span>
+            <span>{t('सञ्चय कोष र उपदान', 'PF & Gratuity Fund')}</span>
           </button>
         )}
         <button

@@ -253,7 +253,7 @@ export const ShareConcentrationCeilingModal: React.FC<ShareConcentrationCeilingM
               {metrics.totalIssuedShares.toLocaleString('en-IN')}
             </div>
             <span className="text-[10px] text-slate-500">
-              रु. {fmtCurrency(metrics.totalIssuedCapital, true)}
+              {fmtCurrency(metrics.totalIssuedCapital, true)}
             </span>
           </div>
 
@@ -356,7 +356,7 @@ export const ShareConcentrationCeilingModal: React.FC<ShareConcentrationCeilingM
             }`}
           >
             <ShieldAlert className="size-4" />
-            <span>{t('दफा ३७ म्याद सूचना (Notice Generator)', 'Ceiling Rectification Notice')}</span>
+            <span>{t('दफा ३७ म्याद सूचना', 'Ceiling Rectification Notice')}</span>
           </button>
 
           <button
@@ -731,7 +731,7 @@ export const ShareConcentrationCeilingModal: React.FC<ShareConcentrationCeilingM
               {/* Bracket Distribution Cards */}
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
-                  {t('सेयर कित्ता स्वामित्व समूह (Shareholding Brackets)', 'Shareholding Brackets')}
+                  {t('सेयर कित्ता स्वामित्व समूह', 'Shareholding Brackets')}
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
                   <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-center">

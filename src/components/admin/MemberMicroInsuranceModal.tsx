@@ -450,7 +450,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-blue-200 dark:border-blue-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
-              {t('कुल बीमाङ्क दायित्व (Risk)', 'Total Sum Assured')}
+              {t('कुल बीमाङ्क दायित्व', 'Total Sum Assured')}
             </span>
             <span className="text-lg font-black text-blue-600 dark:text-blue-400 mt-0.5 block font-mono">
               {fmtCurrency(fundMetrics.totalSumAssuredActive)}
@@ -460,19 +460,19 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-teal-200 dark:border-teal-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider block">
-              {t('राहत कोष मौज्दात (Reserve)', 'Mutual Fund Reserve')}
+              {t('राहत कोष मौज्दात', 'Mutual Fund Reserve')}
             </span>
             <span className="text-lg font-black text-teal-600 dark:text-teal-400 mt-0.5 block font-mono">
               {fmtCurrency(fundMetrics.currentFundBalance)}
             </span>
             <span className="text-[10px] text-teal-600 font-bold">
-              {fundMetrics.isFundSolvent ? t('सुरक्षित मौज्दात (Solvent)', 'Solvent & Ring-fenced') : t('थप पुँजीकरण आवश्यक', 'Needs Capital')}
+              {fundMetrics.isFundSolvent ? t('सुरक्षित मौज्दात', 'Solvent & Ring-fenced') : t('थप पुँजीकरण आवश्यक', 'Needs Capital')}
             </span>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-purple-200 dark:border-purple-950/60 shadow-sm">
             <span className="text-[11px] font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider block">
-              {t('दावी भुक्तानी (Claims Disbursed)', 'Claims Disbursed')}
+              {t('दावी भुक्तानी', 'Claims Disbursed')}
             </span>
             <span className="text-lg font-black text-purple-600 dark:text-purple-400 mt-0.5 block font-mono">
               {fmtCurrency(fundMetrics.totalClaimsPaid)}
@@ -494,7 +494,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
             }`}
           >
             <ShieldCheck className="size-4" />
-            <span>{t('सक्रिय पोलिसी अभिलेख (Policy Register)', 'Active Policies Register')}</span>
+            <span>{t('सक्रिय पोलिसी अभिलेख', 'Active Policies Register')}</span>
           </button>
 
           <button
@@ -506,7 +506,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
             }`}
           >
             <AlertTriangle className="size-4" />
-            <span>{t('राहत दावी तथा स्वीकृति (Claims & Review)', 'Claims & Approvals')}</span>
+            <span>{t('राहत दावी तथा स्वीकृति', 'Claims & Approvals')}</span>
           </button>
 
           <button
@@ -518,7 +518,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
             }`}
           >
             <Coins className="size-4" />
-            <span>{t('राहत कोष तथा वित्तीय स्थिति (Fund Health)', 'Relief Fund & Solvency')}</span>
+            <span>{t('राहत कोष तथा वित्तीय स्थिति', 'Relief Fund & Solvency')}</span>
           </button>
 
           <button
@@ -530,7 +530,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
             }`}
           >
             <Receipt className="size-4" />
-            <span>{t('दावी फछ्र्यौट भौचर (Disbursement Voucher)', 'Settlement Voucher')}</span>
+            <span>{t('दावी फछ्र्यौट भौचर', 'Settlement Voucher')}</span>
           </button>
         </div>
 
@@ -549,7 +549,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     onChange={(e) => setSelectedSchemeFilter(e.target.value as 'ALL' | InsuranceSchemeType)}
                     className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-bold"
                   >
-                    <option value="ALL">{t('सबै सुरक्षण योजनाहरू (All Schemes)', 'All Schemes')}</option>
+                    <option value="ALL">{t('सबै सुरक्षण योजनाहरू', 'All Schemes')}</option>
                     <option value="MEMBER_LIFE">सदस्य जीवन तथा ऋण मिनाहा (Life & Loan)</option>
                     <option value="LIVESTOCK_AGRICULTURE">पशुधन तथा कृषि सुरक्षण (Livestock)</option>
                     <option value="CRITICAL_ILLNESS">घातक रोग तथा उपचार राहत (Critical Illness)</option>
@@ -592,7 +592,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                 <form onSubmit={handleCreatePolicy} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-4 animate-in fade-in">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <Plus className="size-4 text-teal-600" />
-                    <span>{t('नयाँ सदस्य लघु-बीमा पोलिसी दर्ता (Enroll New Member Insurance Policy)', 'Enroll New Member Policy')}</span>
+                    <span>{t('नयाँ सदस्य लघु-बीमा पोलिसी दर्ता', 'Enroll New Member Policy')}</span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -612,7 +612,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('सुरक्षण योजना (Scheme)', 'Insurance Scheme')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('सुरक्षण योजना', 'Insurance Scheme')}</label>
                       <select
                         value={newSchemeType}
                         onChange={(e) => setNewSchemeType(e.target.value as InsuranceSchemeType)}
@@ -626,7 +626,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('बीमाङ्क रकम (Sum Assured NPR)', 'Sum Assured NPR')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('बीमाङ्क रकम', 'Sum Assured NPR')}</label>
                       <input
                         type="number"
                         min="5000"
@@ -639,7 +639,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('हकवालाको नाम (Nominee Name)', 'Nominee Name')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('हकवालाको नाम', 'Nominee Name')}</label>
                       <input
                         type="text"
                         placeholder="e.g. सुनिता चौधरी"
@@ -651,7 +651,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('हकवाला नाता (Relation)', 'Relation')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('हकवाला नाता', 'Relation')}</label>
                       <input
                         type="text"
                         placeholder="e.g. श्रीमती / श्रीमान / छोरा"
@@ -676,7 +676,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
 
                     {newSchemeType === 'LIVESTOCK_AGRICULTURE' && (
                       <div>
-                        <label className="block text-slate-500 font-bold mb-1">{t('पशु कानको ट्याग नं. (Tag No)', 'Livestock Ear Tag No.')}</label>
+                        <label className="block text-slate-500 font-bold mb-1">{t('पशु कानको ट्याग नं.', 'Livestock Ear Tag No.')}</label>
                         <input
                           type="text"
                           placeholder="e.g. GADH-COW-9922"
@@ -723,9 +723,9 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                         <th className="py-3 px-3.5">{t('पोलिसी नं.', 'Policy No')}</th>
                         <th className="py-3 px-3.5">{t('सदस्यको विवरण', 'Member Details')}</th>
                         <th className="py-3 px-3.5">{t('योजना प्रकार', 'Scheme')}</th>
-                        <th className="py-3 px-3.5 text-right">{t('बीमाङ्क रकम (Sum)', 'Sum Assured')}</th>
+                        <th className="py-3 px-3.5 text-right">{t('बीमाङ्क रकम', 'Sum Assured')}</th>
                         <th className="py-3 px-3.5 text-right">{t('वार्षिक प्रिमियम', 'Premium')}</th>
-                        <th className="py-3 px-3.5">{t('हकवाला (Nominee)', 'Nominee')}</th>
+                        <th className="py-3 px-3.5">{t('हकवाला', 'Nominee')}</th>
                         <th className="py-3 px-3.5">{t('कर्जा सम्बन्ध', 'Linked Loan')}</th>
                         <th className="py-3 px-3.5 text-center">{t('स्थिति', 'Status')}</th>
                       </tr>
@@ -821,7 +821,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                 <form onSubmit={handleCreateClaim} className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-md space-y-4 animate-in fade-in">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                     <AlertTriangle className="size-4 text-red-600" />
-                    <span>{t('राहत तथा सुरक्षण दावी फाराम (File Micro-Insurance Claim)', 'File Relief & Insurance Claim')}</span>
+                    <span>{t('राहत तथा सुरक्षण दावी फाराम', 'File Relief & Insurance Claim')}</span>
                   </h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -841,7 +841,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('घटना मिति वि.सं. (Incident Date)', 'Incident Date BS')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('घटना मिति वि.सं.', 'Incident Date BS')}</label>
                       <input
                         type="text"
                         value={claimIncidentDateBS}
@@ -852,7 +852,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('दावी रकम रु. (Claim Amount)', 'Claim Amount NPR')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('दावी रकम रु.', 'Claim Amount NPR')}</label>
                       <input
                         type="number"
                         min="1000"
@@ -864,7 +864,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('दावीकर्ताको नाम (Claimant Name)', 'Claimant Name')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('दावीकर्ताको नाम', 'Claimant Name')}</label>
                       <input
                         type="text"
                         placeholder="e.g. सुनिता चौधरी"
@@ -876,7 +876,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                     </div>
 
                     <div>
-                      <label className="block text-slate-500 font-bold mb-1">{t('दावीकर्ताको नाता (Relation)', 'Claimant Relation')}</label>
+                      <label className="block text-slate-500 font-bold mb-1">{t('दावीकर्ताको नाता', 'Claimant Relation')}</label>
                       <input
                         type="text"
                         placeholder="e.g. श्रीमती / छोरा / स्वयं"
@@ -1044,14 +1044,14 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                       ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                       : 'bg-amber-100 text-amber-800'
                   }`}>
-                    {fundMetrics.isFundSolvent ? t('✓ कोष पूर्ण सुरक्षित (Solvent)', 'Fund Solvent') : t('चेतावनी', 'Warning')}
+                    {fundMetrics.isFundSolvent ? t('✓ कोष पूर्ण सुरक्षित', 'Fund Solvent') : t('चेतावनी', 'Warning')}
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                   <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-bold text-slate-400 block uppercase">
-                      {t('सुरुवाती राहत कोष मौज्दात (Reserve)', 'Initial Reserve Balance')}
+                      {t('सुरुवाती राहत कोष मौज्दात', 'Initial Reserve Balance')}
                     </span>
                     <strong className="text-lg font-mono text-slate-900 dark:text-white block mt-1">
                       {fmtCurrency(fundMetrics.initialFundReserve)}
@@ -1083,7 +1083,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                 {/* Net Formula */}
                 <div className="p-4 rounded-xl bg-teal-50 dark:bg-teal-950/30 border border-teal-200 dark:border-teal-800 flex items-center justify-between text-xs">
                   <span className="text-teal-900 dark:text-teal-200 font-bold">
-                    {t('वर्तमान खुद राहत कोष जगेडा (Net Segregated Relief Fund Balance):', 'Net Segregated Relief Fund Balance:')}
+                    {t('वर्तमान खुद राहत कोष जगेडा:', 'Net Segregated Relief Fund Balance:')}
                   </span>
                   <span className="font-mono text-base font-black text-teal-700 dark:text-teal-300">
                     {fmtCurrency(fundMetrics.currentFundBalance)}
@@ -1102,7 +1102,7 @@ export const MemberMicroInsuranceModal: React.FC<MemberMicroInsuranceModalProps>
                   className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 cursor-pointer"
                 >
                   <Printer className="size-4" />
-                  <span>{t('भौचर प्रिन्ट गर्नुहोस् (Print Voucher)', 'Print Voucher')}</span>
+                  <span>{t('भौचर प्रिन्ट गर्नुहोस्', 'Print Voucher')}</span>
                 </button>
               </div>
 

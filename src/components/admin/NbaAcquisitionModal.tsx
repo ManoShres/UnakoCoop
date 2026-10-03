@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useLanguageStore } from '../../store/useLanguageStore';
+import { useCoopStore } from '../../store/useCoopStore';
 import { Loan, Member } from '../../types';
 import {
   NbaCollateralInfo,
@@ -44,6 +45,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
   onNbaAcquiredSuccess,
 }) => {
   const { t, fmtCurrency, fmtDigits, fmtPercent } = useLanguageStore();
+  const { coopSettings, recordLoanRepayment } = useCoopStore();
 
   const [activeTab, setActiveTab] = useState<'ASSESSMENT' | 'VOUCHER' | 'MALPOT_LETTER' | 'REGISTER'>('ASSESSMENT');
   const [selectedLoanId, setSelectedLoanId] = useState<string>(initialLoanId || loans[0]?.id || '');
@@ -208,6 +210,16 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
     };
 
     setNbaRecords((prev) => [newRecord, ...prev]);
+
+    // Wire to store: clear loan balance through NBA acquisition
+    if (selectedLoan.remainingBalance > 0) {
+      recordLoanRepayment(
+        selectedLoan.loanNo,
+        selectedLoan.remainingBalance,
+        'गैर-बैंकिङ्ग सम्पत्ति (NBA) सकार'
+      );
+    }
+
     if (onNbaAcquiredSuccess) {
       onNbaAcquiredSuccess(newRecord);
     }
@@ -380,7 +392,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-slate-500 block mb-1">
-                        {t('बाँकी साँवा दायित्व (Principal)', 'Principal Balance')}
+                        {t('बाँकी साँवा दायित्व', 'Principal Balance')}
                       </label>
                       <input
                         type="text"
@@ -392,7 +404,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                     <div>
                       <label className="text-xs text-slate-500 block mb-1">
-                        {t('पाकेको ब्याज (Accrued Interest)', 'Accrued Interest')}
+                        {t('पाकेको ब्याज', 'Accrued Interest')}
                       </label>
                       <input
                         type="number"
@@ -420,7 +432,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                     <div>
                       <label className="text-xs text-slate-500 block mb-1">
-                        {t('सकार/लिलाम मूल्यांकन (Distress Value)', 'Assessed Distress Value')}
+                        {t('सकार/लिलाम मूल्यांकन', 'Assessed Distress Value')}
                       </label>
                       <input
                         type="number"
@@ -434,7 +446,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                   <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between text-xs">
                     <span className="font-semibold text-slate-600 dark:text-slate-400">
-                      {t('कुल कर्जा दाबी रकम (Total Claim):', 'Total Debt Claim:')}
+                      {t('कुल कर्जा दाबी रकम:', 'Total Debt Claim:')}
                     </span>
                     <span className="font-mono font-bold text-slate-900 dark:text-white">
                       {fmtCurrency(assessment.totalClaimPayable, true)}
@@ -542,7 +554,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400">
-                    {t('सकार मूल्य (NBA Book Value)', 'Acquisition Book Value')}
+                    {t('सकार मूल्य', 'Acquisition Book Value')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-indigo-600 dark:text-indigo-400 mt-1">
                     {fmtCurrency(assessment.acquisitionAmount, true)}
@@ -566,7 +578,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {t('जगेडा धरौटी (Surplus Escrow)', 'Surplus Escrow')}
+                    {t('जगेडा धरौटी', 'Surplus Escrow')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
                     {fmtCurrency(assessment.surplusEscrowSuspense, true)}
@@ -578,7 +590,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    {t('अपुग व्यक्तिगत दायित्व (Shortfall)', 'Unrecovered Shortfall')}
+                    {t('अपुग व्यक्तिगत दायित्व', 'Unrecovered Shortfall')}
                   </p>
                   <p className="text-lg font-mono font-extrabold text-amber-600 dark:text-amber-400 mt-1">
                     {fmtCurrency(assessment.shortfallRemainingDebt, true)}
@@ -596,7 +608,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                   onClick={() => setActiveTab('VOUCHER')}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md cursor-pointer"
                 >
-                  <span>{t('लेखा भौचर हेर्नुहोस् (View Journal Voucher)', 'Proceed to Accounting Voucher')}</span>
+                  <span>{t('लेखा भौचर हेर्नुहोस्', 'Proceed to Accounting Voucher')}</span>
                   <ArrowRight className="size-4" />
                 </button>
               </div>
@@ -609,7 +621,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    {t('गैर-बैंकिङ्ग सम्पत्ति सकार लेखा भौचर (Journal Voucher)', 'NBA Acquisition Accounting Voucher')}
+                    {t('गैर-बैंकिङ्ग सम्पत्ति सकार लेखा भौचर', 'NBA Acquisition Accounting Voucher')}
                   </h3>
                   <p className="text-xs font-mono text-slate-500">
                     {voucher.voucherNo} | मिति: {voucher.voucherDateBS}
@@ -642,10 +654,10 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-900 text-slate-500 font-semibold border-b border-slate-200 dark:border-slate-800">
                     <tr>
-                      <th className="px-4 py-3">{t('खाता संकेत (A/C Code)', 'A/C Code')}</th>
-                      <th className="px-4 py-3">{t('हिसाब शीर्षक तथा विवरण (Description)', 'Account Name & Narration')}</th>
-                      <th className="px-4 py-3 text-right">{t('डेबिट (Debit NPR)', 'Debit (NPR)')}</th>
-                      <th className="px-4 py-3 text-right">{t('क्रेडिट (Credit NPR)', 'Credit (NPR)')}</th>
+                      <th className="px-4 py-3">{t('खाता संकेत', 'A/C Code')}</th>
+                      <th className="px-4 py-3">{t('हिसाब शीर्षक तथा विवरण', 'Account Name & Narration')}</th>
+                      <th className="px-4 py-3 text-right">{t('डेबिट', 'Debit (NPR)')}</th>
+                      <th className="px-4 py-3 text-right">{t('क्रेडिट', 'Credit (NPR)')}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
@@ -668,7 +680,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                     ))}
                     <tr className="bg-slate-100 dark:bg-slate-900 font-bold border-t-2 border-slate-300 dark:border-slate-700">
                       <td colSpan={2} className="px-4 py-3 text-right font-sans">
-                        {t('कुल जम्मा (Total):', 'Grand Total:')}
+                        {t('कुल जम्मा:', 'Grand Total:')}
                       </td>
                       <td className="px-4 py-3 text-right text-indigo-600 dark:text-indigo-400">
                         {fmtCurrency(voucher.totalDebit, false)}
@@ -714,7 +726,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
               <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex flex-wrap items-center gap-4">
                 <div className="grow">
                   <label className="text-xs text-slate-500 block mb-1">
-                    {t('सञ्चालक समिति निर्णय नं. (BOD Minute No)', 'BOD Decision Minute No')}
+                    {t('सञ्चालक समिति निर्णय नं.', 'BOD Decision Minute No')}
                   </label>
                   <input
                     type="text"
@@ -742,10 +754,10 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                 {/* Official Letterhead */}
                 <div className="text-center space-y-1 pb-4 border-b border-dashed border-slate-300 dark:border-slate-700">
                   <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
-                    उनको बचत तथा ऋण सहकारी संस्था लि.
+                    {coopSettings.nameNepali}
                   </h3>
                   <p className="text-xs text-slate-600 dark:text-slate-400">
-                    गढवा गाउँपालिका वडा नं. ५, दाङ | दर्ता नं. १२३/०६८/०६९
+                    {coopSettings.addressNepali} | {t('दर्ता नं.', 'Reg No.')} {coopSettings.regNo}
                   </p>
                   <div className="flex justify-between items-center text-xs font-mono text-slate-500 pt-3">
                     <span>पत्र संख्या: {transferLetter.referenceNo}</span>
@@ -838,7 +850,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                   className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-xs cursor-pointer"
                 >
                   <Download className="size-4" />
-                  <span>{t('CSV डाउनलोड (Export CSV)', 'Export CSV')}</span>
+                  <span>{t('CSV डाउनलोड', 'Export CSV')}</span>
                 </button>
               </div>
 
@@ -902,13 +914,13 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
               <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-4">
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 flex items-center gap-2">
                   <TrendingUp className="size-4 text-emerald-500" />
-                  <span>{t('सम्पत्ति लिलाम बिक्री तथा जगेडा फिर्ता सिमुलेटर (Tender Disposal Simulator)', 'Tender Disposal & Provision Reversal Simulator')}</span>
+                  <span>{t('सम्पत्ति लिलाम बिक्री तथा जगेडा फिर्ता सिमुलेटर', 'Tender Disposal & Provision Reversal Simulator')}</span>
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">
-                      {t('बोलपत्र लिलाम बिक्री रकम (Gross Sale)', 'Gross Tender Proceeds (NPR)')}
+                      {t('बोलपत्र लिलाम बिक्री रकम', 'Gross Tender Proceeds (NPR)')}
                     </label>
                     <input
                       type="number"
@@ -921,7 +933,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">
-                      {t('बिक्री तथा लिलाम खर्च (Disposal Costs)', 'Disposal & Auction Costs')}
+                      {t('बिक्री तथा लिलाम खर्च', 'Disposal & Auction Costs')}
                     </label>
                     <input
                       type="number"
@@ -934,7 +946,7 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
 
                   <div>
                     <label className="text-xs text-slate-500 block mb-1">
-                      {t('खुद बिक्री प्रतिफल (Net Proceeds)', 'Net Cash Proceeds')}
+                      {t('खुद बिक्री प्रतिफल', 'Net Cash Proceeds')}
                     </label>
                     <input
                       type="text"
@@ -949,8 +961,8 @@ export const NbaAcquisitionModal: React.FC<NbaAcquisitionModalProps> = ({
                   <div>
                     <span className="font-bold text-emerald-800 dark:text-emerald-200">
                       {disposalSettlement.isGain
-                        ? t('बिक्रीमा पूँजीगत मुनाफा (Capital Gain):', 'Gain on Disposal:')
-                        : t('बिक्रीमा नोक्सानी (Capital Loss):', 'Loss on Disposal:')}
+                        ? t('बिक्रीमा पूँजीगत मुनाफा:', 'Gain on Disposal:')
+                        : t('बिक्रीमा नोक्सानी:', 'Loss on Disposal:')}
                     </span>
                     <span className="font-mono font-extrabold text-emerald-700 dark:text-emerald-300 ml-2">
                       {fmtCurrency(Math.abs(disposalSettlement.gainLossOnDisposal), true)}

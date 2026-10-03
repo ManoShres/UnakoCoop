@@ -186,12 +186,12 @@ export const AgmAttendanceRosterModal: React.FC<AgmAttendanceRosterModalProps> =
                   {summary.isQuorumAchieved ? (
                     <>
                       <CheckCircle2 className="size-3.5 text-emerald-600" />
-                      <span>{t('वैधानिक गणपूरक संख्या पुगेको (Quorum Achieved)', 'Statutory Quorum Achieved')}</span>
+                      <span>{t('वैधानिक गणपूरक संख्या पुगेको', 'Statutory Quorum Achieved')}</span>
                     </>
                   ) : (
                     <>
                       <AlertCircle className="size-3.5 text-rose-600" />
-                      <span>{t('गणपूरक संख्या अपुग (Quorum Insufficient)', 'Quorum Insufficient (< 51%)')}</span>
+                      <span>{t('गणपूरक संख्या अपुग', 'Quorum Insufficient (< 51%)')}</span>
                     </>
                   )}
                 </span>
@@ -367,9 +367,9 @@ export const AgmAttendanceRosterModal: React.FC<AgmAttendanceRosterModalProps> =
                         }
                         className="text-[11px] py-1 px-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold disabled:opacity-40"
                       >
-                        <option value="IN_FAVOR">{t('पक्षमा (In Favor)', 'In Favor')}</option>
-                        <option value="AGAINST">{t('विपक्षमा (Against)', 'Against')}</option>
-                        <option value="ABSTAIN">{t('तटस्थ (Abstain)', 'Abstain')}</option>
+                        <option value="IN_FAVOR">{t('पक्षमा', 'In Favor')}</option>
+                        <option value="AGAINST">{t('विपक्षमा', 'Against')}</option>
+                        <option value="ABSTAIN">{t('तटस्थ', 'Abstain')}</option>
                       </select>
                     </td>
                   </tr>

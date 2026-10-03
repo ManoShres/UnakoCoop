@@ -246,7 +246,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
 
                 <div className="p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 space-y-3">
                   <label className="block text-xs font-black uppercase text-slate-700 dark:text-slate-300">
-                    {t('आर्थिक वर्ष (Fiscal Year)', 'Fiscal Year')}
+                    {t('आर्थिक वर्ष', 'Fiscal Year')}
                   </label>
                   <select
                     value={config.fiscalYear}
@@ -272,7 +272,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                 <div className="flex justify-between items-center">
                   <div>
                     <h3 className="text-sm font-black text-slate-900 dark:text-white">
-                      {t('कारोबार हिस्सा भार बाँडफाँड (Transaction Volume Weights)', 'Patronage Volume Weights Allocation')}
+                      {t('कारोबार हिस्सा भार बाँडफाँड', 'Patronage Volume Weights Allocation')}
                     </h3>
                     <p className="text-xs text-slate-500">
                       {t('सहकारी ऐन अनुसार बचत, ऋण र दुग्ध कारोबारलाई १००% मा विभाजन गर्नुहोस्', 'Allocate 100% across Savings, Loan, and Dairy turnover')}
@@ -311,7 +311,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                       className="w-full accent-amber-600 cursor-pointer"
                     />
                     <div className="text-[10px] text-slate-400">
-                      {t('कोष रकम:', 'Fund:')} रु. {fmtCurrency(summary.totalSavingsPoolDistributed, false)}
+                      {t('कोष रकम:', 'Fund:')} {fmtCurrency(summary.totalSavingsPoolDistributed, false)}
                     </div>
                   </div>
 
@@ -336,7 +336,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                       className="w-full accent-amber-600 cursor-pointer"
                     />
                     <div className="text-[10px] text-slate-400">
-                      {t('कोष रकम:', 'Fund:')} रु. {fmtCurrency(summary.totalLoanPoolDistributed, false)}
+                      {t('कोष रकम:', 'Fund:')} {fmtCurrency(summary.totalLoanPoolDistributed, false)}
                     </div>
                   </div>
 
@@ -361,7 +361,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                       className="w-full accent-amber-600 cursor-pointer"
                     />
                     <div className="text-[10px] text-slate-400">
-                      {t('कोष रकम:', 'Fund:')} रु. {fmtCurrency(summary.totalDairyPoolDistributed, false)}
+                      {t('कोष रकम:', 'Fund:')} {fmtCurrency(summary.totalDairyPoolDistributed, false)}
                     </div>
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
                   <div className="text-[10px] font-bold text-slate-400 uppercase">{t('कुल वितरण हुने रकम', 'Total Distributed')}</div>
                   <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1">
-                    रु. {fmtCurrency(summary.totalDistributed, false)}
+                    {fmtCurrency(summary.totalDistributed, false)}
                   </div>
                 </div>
 
@@ -386,14 +386,14 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
                   <div className="text-[10px] font-bold text-slate-400 uppercase">{t('औसत संरक्षकता फिर्ता', 'Avg Refund')}</div>
                   <div className="text-lg font-black font-mono text-slate-900 dark:text-white mt-1">
-                    रु. {fmtCurrency(summary.averageRefundPerMember, false)}
+                    {fmtCurrency(summary.averageRefundPerMember, false)}
                   </div>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
                   <div className="text-[10px] font-bold text-slate-400 uppercase">{t('अधिकतम फिर्ता रकम', 'Max Refund')}</div>
                   <div className="text-lg font-black font-mono text-amber-600 dark:text-amber-400 mt-1">
-                    रु. {fmtCurrency(summary.maxRefundAmount, false)}
+                    {fmtCurrency(summary.maxRefundAmount, false)}
                   </div>
                 </div>
               </div>
@@ -460,7 +460,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                           {fmtCurrency(d.dairyShareAmount, false)}
                         </td>
                         <td className="py-2.5 px-3 text-right font-black text-slate-900 dark:text-white">
-                          रु. {fmtCurrency(d.netPatronageRefund, false)}
+                          {fmtCurrency(d.netPatronageRefund, false)}
                         </td>
                         <td className="py-2.5 px-3 text-center font-sans">
                           <button
@@ -497,7 +497,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                   >
                     {distributions.map((d) => (
                       <option key={d.memberId} value={d.memberId}>
-                        {d.memberName} ({d.memberNo}) - {d.warrantNumber} (रु. {fmtCurrency(d.netPatronageRefund, false)})
+                        {d.memberName} ({d.memberNo}) - {d.warrantNumber} ({fmtCurrency(d.netPatronageRefund, false)})
                       </option>
                     ))}
                   </select>
@@ -576,7 +576,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-100 border-b border-slate-900 text-[10px] font-black uppercase">
                       <tr>
-                        <th className="py-2 px-3">{t('कारोबार आधार (Pillars)', 'Transaction Basis')}</th>
+                        <th className="py-2 px-3">{t('कारोबार आधार', 'Transaction Basis')}</th>
                         <th className="py-2 px-3 text-center">{t('संस्थागत भार', 'Weight')}</th>
                         <th className="py-2 px-3 text-right">{t('प्राप्त फिर्ता रकम (NPR)', 'Refund Amount')}</th>
                       </tr>
@@ -588,7 +588,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                         </td>
                         <td className="py-2.5 px-3 text-center font-bold">{config.savingsInterestWeight}%</td>
                         <td className="py-2.5 px-3 text-right font-bold text-emerald-700">
-                          रु. {fmtCurrency(selectedDistribution.savingsShareAmount, false)}
+                          {fmtCurrency(selectedDistribution.savingsShareAmount, false)}
                         </td>
                       </tr>
                       <tr>
@@ -597,7 +597,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                         </td>
                         <td className="py-2.5 px-3 text-center font-bold">{config.loanInterestWeight}%</td>
                         <td className="py-2.5 px-3 text-right font-bold text-blue-700">
-                          रु. {fmtCurrency(selectedDistribution.loanShareAmount, false)}
+                          {fmtCurrency(selectedDistribution.loanShareAmount, false)}
                         </td>
                       </tr>
                       <tr>
@@ -606,15 +606,15 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                         </td>
                         <td className="py-2.5 px-3 text-center font-bold">{config.dairyBusinessWeight}%</td>
                         <td className="py-2.5 px-3 text-right font-bold text-amber-700">
-                          रु. {fmtCurrency(selectedDistribution.dairyShareAmount, false)}
+                          {fmtCurrency(selectedDistribution.dairyShareAmount, false)}
                         </td>
                       </tr>
                       <tr className="bg-slate-100 font-black text-sm">
                         <td className="py-3 px-3 font-sans" colSpan={2}>
-                          {t('कुल संरक्षकता फिर्ता रकम (Total Net Patronage Refund):', 'Total Net Patronage Refund:')}
+                          {t('कुल संरक्षकता फिर्ता रकम:', 'Total Net Patronage Refund:')}
                         </td>
                         <td className="py-3 px-3 text-right text-slate-900">
-                          रु. {fmtCurrency(selectedDistribution.netPatronageRefund, false)}
+                          {fmtCurrency(selectedDistribution.netPatronageRefund, false)}
                         </td>
                       </tr>
                     </tbody>
@@ -668,7 +668,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                   </div>
                   <div>
                     <h3 className="text-base font-black text-slate-900 dark:text-white">
-                      {t('एकमुष्ट सीबीएस बचत खाता दाखिला (Batch CBS Savings Credit)', 'Batch CBS Savings Account Credit')}
+                      {t('एकमुष्ट सीबीएस बचत खाता दाखिला', 'Batch CBS Savings Account Credit')}
                     </h3>
                     <p className="text-xs text-slate-600 dark:text-slate-400">
                       {t('सबै योग्य सदस्यहरूको नियमित बचत खातामा सिधै रकम दाखिला गरी कारोबार भौचर जारी गर्नुहोस्', 'Post automated deposits with CBS audit vouchers for all eligible members')}
@@ -687,7 +687,7 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                   <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <span className="text-[10px] text-slate-400 font-bold uppercase">{t('कुल दाखिला रकम', 'Total Credit Sum')}</span>
                     <div className="text-xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
-                      रु. {fmtCurrency(summary.totalDistributed, false)}
+                      {fmtCurrency(summary.totalDistributed, false)}
                     </div>
                   </div>
 
@@ -696,10 +696,10 @@ export const PatronageRefundModal: React.FC<PatronageRefundModalProps> = ({
                     <div className="text-sm font-black mt-1.5">
                       {batchDisbursed ? (
                         <span className="text-emerald-600 flex items-center gap-1 font-bold">
-                          <CheckCircle2 className="size-4" /> {t('सम्पन्न (Posted)', 'Posted')}
+                          <CheckCircle2 className="size-4" /> {t('सम्पन्न', 'Posted')}
                         </span>
                       ) : (
-                        <span className="text-amber-600 font-bold">{t('तयार (Pending Action)', 'Ready')}</span>
+                        <span className="text-amber-600 font-bold">{t('तयार', 'Ready')}</span>
                       )}
                     </div>
                   </div>

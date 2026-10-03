@@ -113,7 +113,7 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
                     </div>
                     <div className="bg-primary/10 px-space-sm py-1.5 rounded-lg text-right">
                       <span className="text-xs text-primary font-bold block">{t('वार्षिक ब्याजदर', 'Annual Yield')}:</span>
-                      <span className="font-headline-sm font-extrabold text-primary">१०.०% p.a.</span>
+                      <span className="font-headline-sm font-extrabold text-primary">{t('१०.०% वार्षिक', '10.0% p.a.')}</span>
                     </div>
                   </div>
                   <div className="bg-surface-card p-space-sm rounded-lg border border-primary/10">
@@ -161,7 +161,7 @@ export function FdCertificateLoanModal({ isOpen, onClose }: FdCertificateLoanMod
                   </div>
                   <p className="font-body-sm text-body-sm text-surface-variant">
                     {t(
-                      'तपाईंको यस मुद्दती प्रमाणपत्र धितोमा रु. ३६,३१५ (९०%) सम्म तत्काल कर्जा उपलब्ध छ। ब्याजदर: मुद्दती दर + १.५% मात्र (११.५% p.a.) | बिना धितो मूल्याङ्कन शुल्क।',
+                      'तपाईंको यस मुद्दती प्रमाणपत्र धितोमा रु. ३६,३१५ (९०%) सम्म तत्काल कर्जा उपलब्ध छ। ब्याजदर: मुद्दती दर + १.५% मात्र (वार्षिक ११.५%) | बिना धितो मूल्याङ्कन शुल्क।',
                       'Available credit up to NPR 36,315 (90%) against this FD at FD rate + 1.5% (11.5% p.a.) with zero appraisal fees.'
                     )}
                   </p>
