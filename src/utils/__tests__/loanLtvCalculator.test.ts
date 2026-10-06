@@ -156,5 +156,24 @@ describe('Loan Collateral Valuation & LTV Safety Gate Engine', () => {
       expect(result.recommendedAction).toBe('REJECT');
       expect(result.breachReasons.length).toBeGreaterThanOrEqual(2);
     });
+
+    it('rejects a 50.04% LTV that would round to 50.0 and pass a 50% cap', () => {
+      // Regression (B11): thresholds were compared against the value pre-rounded to one
+      // decimal, so 50.04% rounded to 50.0 and passed the statutory 50% LTV ceiling.
+      const input: LoanSafetyInput = {
+        requestedAmount: 500400,
+        tenureMonths: 36,
+        annualInterestRate: 11.5,
+        monthlyIncome: 200000,
+        collateralType: 'LAND_LALPURJA',
+        collateralEstimatedValue: 1000000, // 50.04% LTV
+      };
+
+      const result = evaluateLoanSafetyGate(input);
+
+      expect(result.actualLtvPercent).toBe(50); // display value rounds to 50.0
+      expect(result.isLtvCompliant).toBe(false); // comparison uses the unrounded 50.04%
+      expect(result.breachReasons.some((b) => b.code === 'LTV_EXCEEDED')).toBe(true);
+    });
   });
 });

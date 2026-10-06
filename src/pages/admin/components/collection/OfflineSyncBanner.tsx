@@ -13,7 +13,7 @@ import {
 import { useLanguageStore } from '../../../../store/useLanguageStore';
 import { useCoopStore } from '../../../../store/useCoopStore';
 import { OfflineCollectionEntry, formatOfflineThermalReceipt } from '../../../../utils/offlineCollection';
-import { printRawHtml } from '../../../../utils/printHelper';
+import { printRawHtml, escapeHtml } from '../../../../utils/printHelper';
 
 interface OfflineSyncBannerProps {
   isOnline: boolean;
@@ -57,8 +57,10 @@ export const OfflineSyncBanner: React.FC<OfflineSyncBannerProps> = ({
 
   const handlePrintReceipt = (entry: OfflineCollectionEntry) => {
     const receiptText = formatOfflineThermalReceipt(entry, coopSettings);
+    // Receipt text embeds collector-entered member names/amounts: escape it before it is
+    // written into the printing iframe (raw interpolation was an XSS sink).
     printRawHtml(
-      `<pre style="font-family: monospace; font-size: 11px; white-space: pre-wrap; line-height: 1.25;">${receiptText}</pre>`,
+      `<pre style="font-family: monospace; font-size: 11px; white-space: pre-wrap; line-height: 1.25;">${escapeHtml(receiptText)}</pre>`,
       {
         title: `Offline-Receipt-${entry.id}`,
         format: 'thermal-58mm',

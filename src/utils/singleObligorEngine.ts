@@ -64,6 +64,8 @@ export interface SingleObligorAnalysis {
   securedSolLimit: number; // 15% of Core Capital
   totalLoanPortfolio: number;
   topBorrowers: BorrowerExposureProfile[];
+  /** Complete memberId → aggregate exposure map (topBorrowers is only a display slice of 20). */
+  memberExposureMap: Record<string, number>;
   familyClusters: FamilyClusterExposure[];
   crossGuaranteeAlerts: CrossGuaranteeAlert[];
   breachedBorrowersCount: number;
@@ -90,11 +92,19 @@ export function calculateSingleObligorExposure(
   const memberMap = new Map<string, Member>();
   members.forEach((m) => memberMap.set(m.id, m));
 
-  const totalLoanPortfolio = loans.reduce((acc, l) => acc + (l.remainingBalance || l.principalAmount || 0), 0);
+  // Only live exposure counts: a PAID_OFF (or not-yet-disbursed UNDER_REVIEW) loan must not
+  // be counted, and a zero remainingBalance must not fall back to the original principal.
+  const isExposureLoan = (l: Loan) => l.status === 'ACTIVE' || l.status === 'OVERDUE';
+  const exposureLoans = loans.filter(isExposureLoan);
+
+  const totalLoanPortfolio = exposureLoans.reduce(
+    (acc, l) => acc + (l.remainingBalance ?? l.principalAmount ?? 0),
+    0
+  );
 
   // Group loans by member
   const memberLoanMap = new Map<string, Loan[]>();
-  loans.forEach((l) => {
+  exposureLoans.forEach((l) => {
     const memId = l.memberId || 'UNKNOWN_MEMBER';
     const list = memberLoanMap.get(memId) || [];
     memberLoanMap.set(memId, [...list, l]);
@@ -108,13 +118,11 @@ export function calculateSingleObligorExposure(
     let totalSecured = 0;
 
     const loanDetails = memberLoans.map((l) => {
-      const balance = l.remainingBalance || l.principalAmount || 0;
-      // Determine if loan is secured/collateralized
-      const isSecured =
-        l.collateralType !== undefined ||
-        l.loanType === 'Small Business Enterprise' ||
-        l.loanType === 'Home & Land' ||
-        balance > 300000;
+      const balance = l.remainingBalance ?? l.principalAmount ?? 0;
+      // Secured classification is derived from the collateral register ONLY. The old
+      // `balance > 300000` heuristic marked any large loan as secured, letting borrowers
+      // bypass the Section 51(1) 10% UNSECURED limit simply by borrowing more.
+      const isSecured = Boolean(l.collateralType) || (l.collateralValue ?? 0) > 0;
 
       if (isSecured) {
         totalSecured += balance;
@@ -203,19 +211,11 @@ export function calculateSingleObligorExposure(
 
   familyClusters.sort((a, b) => b.totalFamilyBalance - a.totalFamilyBalance);
 
-  // Cross-guarantee risk mock analysis
+  // Cross-guarantee detection requires structured guarantor → member records. The Loan
+  // type carries no guarantor member linkage (only LoanApplication does), so the previous
+  // implementation FABRICATED an alert between the top two borrowers. Fabricated
+  // regulatory alerts are worse than none: return [] until real guarantor records exist.
   const crossGuaranteeAlerts: CrossGuaranteeAlert[] = [];
-  if (profiles.length >= 2) {
-    crossGuaranteeAlerts.push({
-      borrowerId: profiles[0].memberId,
-      borrowerName: profiles[0].memberName,
-      guarantorId: profiles[1].memberId,
-      guarantorName: profiles[1].memberName,
-      loanId: profiles[0].activeLoans[0]?.loanId || 'LN-001',
-      amount: profiles[0].activeLoans[0]?.amount || 500000,
-      isMutualCrossGuarantee: true,
-    });
-  }
 
   const breachedCount = profiles.filter((p) => p.complianceStatus === 'BREACH').length;
   const warningCount = profiles.filter((p) => p.complianceStatus === 'WARNING').length;
@@ -227,12 +227,19 @@ export function calculateSingleObligorExposure(
   const portfolioComplianceStatus: 'COMPLIANT' | 'WARNING' | 'BREACH' =
     breachedCount > 0 ? 'BREACH' : warningCount > 0 ? 'WARNING' : 'COMPLIANT';
 
+  // Complete exposure map — the top-20 display slice must never be used for compliance checks.
+  const memberExposureMap: Record<string, number> = {};
+  profiles.forEach((p) => {
+    memberExposureMap[p.memberId] = p.totalAggregateBalance;
+  });
+
   return {
     coreCapital,
     unsecuredSolLimit,
     securedSolLimit,
     totalLoanPortfolio,
     topBorrowers: profiles.slice(0, 20),
+    memberExposureMap,
     familyClusters: familyClusters.slice(0, 15),
     crossGuaranteeAlerts,
     breachedBorrowersCount: breachedCount,
@@ -258,8 +265,12 @@ export function simulateNewLoanSolPreCheck(
   headroomRemaining: number;
   breachAmount: number;
 } {
+  // Use the COMPLETE exposure map (topBorrowers is only a 20-row display slice, so any
+  // borrower outside it previously read as zero exposure).
+  const existingExposureFromMap = baseline.memberExposureMap?.[memberId];
   const existingProfile = baseline.topBorrowers.find((p) => p.memberId === memberId);
-  const currentExposure = existingProfile ? existingProfile.totalAggregateBalance : 0;
+  const currentExposure =
+    existingExposureFromMap ?? existingProfile?.totalAggregateBalance ?? 0;
   const projectedExposure = currentExposure + proposedAmount;
 
   const maxAllowedLimit = isMortgageBacked ? baseline.securedSolLimit : baseline.unsecuredSolLimit;

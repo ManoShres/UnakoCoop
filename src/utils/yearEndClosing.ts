@@ -27,9 +27,11 @@ export interface YearEndAppropriationInput {
 export interface StatutoryAppropriationResult {
   fiscalYear: string;
   netProfit: number;
+  /** Positive magnitude of a loss carried forward; 0 in a profitable year. */
+  lossCarryForward: number;
   // Mandatory Funds
   generalReserveFund: number; // min 25% (जगेडा कोष)
-  educationFund: number; // 0.5% (सहकारी शिक्षा कोष)
+  educationFund: number; // 5% (सहकारी शिक्षा कोष) — statutory; auditorComplianceEngine certifies 5%
   communityDevelopmentFund: number; // 0.5% (सामुदायिक विकास कोष)
   promotionFund: number; // 0.5% (सहकारी प्रवर्द्धन कोष)
   employeeWelfareFund: number; // 0.5% (कर्मचारी कल्याण कोष)
@@ -101,9 +103,13 @@ export function calculateStatutoryProfitAppropriation(
   const { netProfit, fiscalYear, shareCapital, customGeneralReservePercent = 25 } = input;
 
   if (netProfit <= 0) {
+    // A loss year must not be reported as "0 profit": the real negative result is
+    // returned and the absolute loss is exposed as a carry-forward figure so the next
+    // year's appropriation can absorb it. No statutory fund may be credited out of a loss.
     return {
       fiscalYear,
-      netProfit: 0,
+      netProfit,
+      lossCarryForward: Math.abs(netProfit),
       generalReserveFund: 0,
       educationFund: 0,
       communityDevelopmentFund: 0,
@@ -121,8 +127,12 @@ export function calculateStatutoryProfitAppropriation(
   const reservePercent = Math.max(25, customGeneralReservePercent);
   const generalReserve = Math.round(netProfit * (reservePercent / 100));
 
-  // 2. Cooperative Education Fund: 0.5%
-  const education = Math.round(netProfit * 0.005);
+  // 2. Cooperative Education Fund: 5% of net profit (सहकारी शिक्षा कोष).
+  //    Statutory rate per Cooperative Act 2074 / auditorComplianceEngine certification.
+  //    NOTE: the historical 0.5% "local cooperative education" sub-split is an internal
+  //    sub-allocation of this 5% fund and is kept separate from the fund itself — it is
+  //    NOT the fund's statutory rate.
+  const education = Math.round(netProfit * 0.05);
 
   // 3. Community Development Fund: 0.5%
   const community = Math.round(netProfit * 0.005);
@@ -148,6 +158,7 @@ export function calculateStatutoryProfitAppropriation(
   return {
     fiscalYear,
     netProfit,
+    lossCarryForward: 0,
     generalReserveFund: generalReserve,
     educationFund: education,
     communityDevelopmentFund: community,

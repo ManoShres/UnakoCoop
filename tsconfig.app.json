@@ -11,6 +11,11 @@
       "vite/client"
     ],
     "skipLibCheck": true,
+    /* Strictness: declared explicitly so the CI "strict typecheck" step tells the
+       truth and the setting cannot silently change. Measured with the pinned
+       typescript 6.0.3: `tsc --strict -p tsconfig.app.json` introduces 0 errors
+       beyond the current baseline (6.0 already defaults the strict family on). */
+    "strict": true,
     "moduleResolution": "bundler",
     "noEmit": true,
     "jsx": "react-jsx",

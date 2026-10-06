@@ -107,17 +107,75 @@ export const DEFAULT_UNAKO_TAX_INFO: CoopTaxWithholderInfo = {
 };
 
 /**
+ * Section 87 (employment income) progressive annual slab table — single individual.
+ * NEEDS SIGN-OFF: the couple / entity slab variants differ; confirm the applicable
+ * assessee category before using this as the authoritative payroll withholding table.
+ */
+export const SEC_87_ANNUAL_SLABS: readonly { upToAnnual: number; ratePercent: number }[] = [
+  { upToAnnual: 500000, ratePercent: 1 },
+  { upToAnnual: 700000, ratePercent: 10 },
+  { upToAnnual: 1000000, ratePercent: 20 },
+  { upToAnnual: 2000000, ratePercent: 30 },
+  { upToAnnual: Number.POSITIVE_INFINITY, ratePercent: 36 },
+];
+
+/** Progressive Sec 87 tax on an ANNUAL employment income using the slab table. */
+export function calculateSection87AnnualTax(annualIncome: number): number {
+  let remaining = Math.max(0, Number.isFinite(annualIncome) ? annualIncome : 0);
+  let lowerBound = 0;
+  let tax = 0;
+
+  for (const slab of SEC_87_ANNUAL_SLABS) {
+    if (remaining <= 0) break;
+    const bandWidth = slab.upToAnnual - lowerBound;
+    const taxable = Math.min(remaining, bandWidth);
+    tax += taxable * (slab.ratePercent / 100);
+    remaining -= taxable;
+    lowerBound = slab.upToAnnual;
+  }
+
+  return Math.round(tax * 100) / 100;
+}
+
+/**
+ * Monthly Sec 87 TDS on a monthly employment income (progressive, not a flat 1%).
+ * NPR 100,000/month → NPR 145,000 annual tax → NPR 12,083.33 monthly (≈12.083% effective),
+ * versus the previously returned flat 1% (NPR 1,000) — about NPR 11,000/month under-withheld.
+ */
+export function calculateSection87MonthlyTds(monthlyIncome: number): {
+  monthlyTds: number;
+  effectiveRatePercent: number;
+} {
+  const annualIncome = Math.max(0, Number.isFinite(monthlyIncome) ? monthlyIncome : 0) * 12;
+  if (annualIncome <= 0) {
+    return { monthlyTds: 0, effectiveRatePercent: 0 };
+  }
+  const annualTax = calculateSection87AnnualTax(annualIncome);
+  return {
+    monthlyTds: Math.round((annualTax / 12) * 100) / 100,
+    effectiveRatePercent: Math.round((annualTax / annualIncome) * 10000) / 100,
+  };
+}
+
+/**
  * Standard TDS Rates defined under Nepal Income Tax Act 2058
  */
 export function getStandardTdsRate(
   section: TdsSectionCode,
   deducteeType: 'INDIVIDUAL' | 'ENTITY' = 'INDIVIDUAL',
-  hasVatInvoice: boolean = true
+  hasVatInvoice: boolean = true,
+  monthlyIncome?: number
 ): number {
   switch (section) {
     case 'SEC_87':
-      // Progressive payroll tax (base deduction average or slab)
-      return 1.0;
+      // Progressive employment-income slab (Sec 87). When the monthly salary is supplied
+      // the EFFECTIVE slab rate is returned; otherwise only the lowest slab can be
+      // reported without an amount (callers with the salary should use
+      // calculateSection87MonthlyTds for the exact withholding).
+      if (typeof monthlyIncome === 'number' && Number.isFinite(monthlyIncome) && monthlyIncome > 0) {
+        return calculateSection87MonthlyTds(monthlyIncome).effectiveRatePercent;
+      }
+      return SEC_87_ANNUAL_SLABS[0].ratePercent;
     case 'SEC_88_INTEREST':
       // 5% for individuals, 15% for entities
       return deducteeType === 'INDIVIDUAL' ? 5.0 : 15.0;
@@ -348,15 +406,79 @@ export function generateIrdETdsCsv(
 }
 
 /**
+ * Bikram Sambat calendar helpers for filing deadlines.
+ * NEEDS SIGN-OFF: month lengths follow BS 2081 (a licensed BS calendar table is required
+ * for exact multi-year deadline maths); they are exact for the 2081/82 filing year.
+ */
+const BS_MONTH_DAYS: readonly number[] = [31, 31, 32, 31, 31, 31, 30, 30, 30, 30, 29, 30];
+const BS_ANCHOR = { year: 2081, month: 1, day: 1 };
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const BS_ANCHOR_AD_UTC = Date.UTC(2024, 3, 13); // BS 2081-01-01 = AD 2024-04-13
+
+const BS_MONTH_NUMBERS: Record<string, number> = {
+  बैशाख: 1, बैशाख्: 1, वैशाख: 1,
+  जेठ: 2, ज्येष्ठ: 2,
+  असार: 3, आषाढ: 3, असाढ: 3,
+  श्रावण: 4, साउन: 4,
+  भाद्र: 5, भदौ: 5, भाद्रा: 5,
+  आश्विन: 6, असोज: 6, आश्वीन: 6,
+  कार्तिक: 7, कात्तिक: 7,
+  मंसिर: 8, मंसीर: 8, मार्ग: 8,
+  पुष: 9, पौष: 9,
+  माघ: 10,
+  फाल्गुन: 11, फागुन: 11,
+  चैत: 12, चैत्र: 12,
+};
+
+/** Days from the BS anchor (2081-01-01) to the given BS date. */
+function bsToDayIndex(year: number, month: number, day: number): number {
+  let index = (year - BS_ANCHOR.year) * 365;
+  for (let m = 1; m < month; m += 1) index += BS_MONTH_DAYS[m - 1];
+  return index + (day - 1);
+}
+
+function indexToBsDate(index: number): { year: number; month: number; day: number } {
+  let remaining = Math.max(0, index);
+  let year = BS_ANCHOR.year;
+  let month = 1;
+  while (true) {
+    const monthLength = BS_MONTH_DAYS[month - 1];
+    if (remaining < monthLength) return { year, month, day: remaining + 1 };
+    remaining -= monthLength;
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
+}
+
+function formatBsIso(date: { year: number; month: number; day: number }): string {
+  return `${date.year}-${String(date.month).padStart(2, '0')}-${String(date.day).padStart(2, '0')}`;
+}
+
+/** Today (AD) expressed as a BS day index. */
+function todayBsIndex(): number {
+  const now = new Date();
+  const todayMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const daysFromAnchor = Math.floor((todayMs - BS_ANCHOR_AD_UTC) / MS_PER_DAY);
+  return bsToDayIndex(BS_ANCHOR.year, BS_ANCHOR.month, BS_ANCHOR.day) + daysFromAnchor;
+}
+
+/**
  * Check Monthly Filing Compliance & Late Fee Penalty
  * Under Nepal Income Tax Act 2058 Sec 117 & 120:
  * Penalty for failure to furnish statement = higher of 0.1% p.a. or Rs 100/month.
  * Interest for failure to pay withheld tax on time (Sec 119) = 15% p.a.
+ *
+ * `monthBS` is a Nepali month name (e.g. 'मंसिर'). The statutory due date is the 25th of
+ * the FOLLOWING BS month, and lateness is measured against the real elapsed days.
  */
 export function calculateFilingCompliance(
   monthBS: string,
   fiscalYear: string,
-  records: readonly TdsTransactionRecord[]
+  records: readonly TdsTransactionRecord[],
+  asOfDateBS?: string
 ): MonthlyIrdFilingStatus {
   const monthRecords = records.filter((r) => r.monthBS === monthBS && r.fiscalYear === fiscalYear);
   const totalWithheld = monthRecords.reduce((sum, r) => sum + r.tdsAmount, 0);
@@ -366,22 +488,50 @@ export function calculateFilingCompliance(
 
   const isFullyDeposited = totalWithheld > 0 && totalDeposited >= totalWithheld;
 
-  // Due date is by the 25th of the next month
-  const dueDateBS = `${fiscalYear.split('/')[0]}-${monthBS}-25`;
-
+  // Due date = 25th of the next BS month. The BS year of a filing month is the fiscal
+  // year's first year for Shrawan..Chaitra (4..12) and the second year for Baisakh..Asar (1..3).
+  const monthNumber = BS_MONTH_NUMBERS[monthBS.trim()] ?? null;
+  let dueDateBS = '';
   let daysDelayed = 0;
   let isOverdue = false;
   let estimatedLateFee = 0;
 
-  if (!isFullyDeposited && totalWithheld > 0) {
-    // If not deposited, evaluate overdue
-    isOverdue = true;
-    daysDelayed = 15; // default benchmark
-    // Sec 119 interest at 15% p.a.
-    const overdueInterest = (totalWithheld * 0.15 * (daysDelayed / 365));
-    // Sec 120 penalty minimum Rs 100 per month
-    const penalty = 100;
-    estimatedLateFee = Math.round((overdueInterest + penalty) * 100) / 100;
+  if (monthNumber !== null && totalWithheld > 0 && !isFullyDeposited) {
+    const fyStartYear = Number(fiscalYear.split('/')[0]);
+    const safeFyStartYear = Number.isFinite(fyStartYear) ? fyStartYear : BS_ANCHOR.year;
+    const filingYear = monthNumber >= 4 ? safeFyStartYear : safeFyStartYear + 1;
+    const nextMonth = monthNumber === 12 ? 1 : monthNumber + 1;
+    const nextMonthYear = monthNumber === 12 ? filingYear + 1 : filingYear;
+
+    const dueIndex = bsToDayIndex(nextMonthYear, nextMonth, 25);
+    dueDateBS = formatBsIso(indexToBsDate(dueIndex));
+
+    let asOfIndex = todayBsIndex();
+    if (asOfDateBS) {
+      const match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(asOfDateBS.trim());
+      if (match) {
+        asOfIndex = bsToDayIndex(Number(match[1]), Number(match[2]), Number(match[3]));
+      }
+    }
+
+    daysDelayed = Math.max(0, asOfIndex - dueIndex);
+    isOverdue = daysDelayed > 0;
+
+    if (isOverdue) {
+      // Sec 119 interest at 15% p.a. on the withheld amount for the real delay.
+      const overdueInterest = totalWithheld * 0.15 * (daysDelayed / 365);
+      // Sec 120 penalty minimum Rs 100 per month.
+      const penalty = 100;
+      estimatedLateFee = Math.round((overdueInterest + penalty) * 100) / 100;
+    }
+  } else if (monthNumber !== null) {
+    // Nothing outstanding: still report the real due date for reference.
+    const fyStartYear = Number(fiscalYear.split('/')[0]);
+    const safeFyStartYear = Number.isFinite(fyStartYear) ? fyStartYear : BS_ANCHOR.year;
+    const filingYear = monthNumber >= 4 ? safeFyStartYear : safeFyStartYear + 1;
+    const nextMonth = monthNumber === 12 ? 1 : monthNumber + 1;
+    const nextMonthYear = monthNumber === 12 ? filingYear + 1 : filingYear;
+    dueDateBS = formatBsIso(indexToBsDate(bsToDayIndex(nextMonthYear, nextMonth, 25)));
   }
 
   return {

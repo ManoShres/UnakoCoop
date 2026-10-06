@@ -17,29 +17,41 @@ import { useAuthStore, isDemoMode } from '../../store/useAuthStore';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { LanguageToggle } from '../../components/ui/LanguageToggle';
 import { useCoopStore } from '../../store/useCoopStore';
-import { isSupabaseConfigured } from '../../lib/supabase';
-import { signInStaffWithSupabase } from '../../services/employeeService';
-import { signInMemberWithSupabase } from '../../services/memberAuthService';
-import { INITIAL_EMPLOYEES } from '../../store/initialData';
+import {
+  authenticateStaffWithSupabase,
+  LIVE_AUTH_REQUIRED,
+} from '../../services/employeeService';
+import {
+  authenticateMemberWithSupabase,
+  MEMBER_LIVE_AUTH_REQUIRED,
+} from '../../services/memberAuthService';
 
 export const UnifiedLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setRole, setCurrentMember, switchToPreset, signInStaff, setCurrentEmployee, setStaffRole } = useAuthStore();
-  const { members, coopSettings } = useCoopStore();
+  const { signInMember, signInStaff, switchToPreset } = useAuthStore();
+  const { coopSettings } = useCoopStore();
   const { t } = useLanguageStore();
 
   const demoActive = isDemoMode();
 
+  /**
+   * Development-only one-click demo affordance. `import.meta.env.DEV` is
+   * statically replaced with `false` by Vite for production builds, so this
+   * block (and the credential-less member preset it triggers) is compiled out of
+   * shipped bundles. There is intentionally NO demo staff/admin entry point.
+   */
+  const showDevDemoPresets = import.meta.env.DEV === true && demoActive;
+
   // Mode: 'MEMBER' or 'STAFF'
   const [loginMode, setLoginMode] = useState<'MEMBER' | 'STAFF'>('MEMBER');
 
-  // Member form states (pre-filled only if demo mode is active)
-  const [memberIdentifier, setMemberIdentifier] = useState(demoActive ? 'UK-88219' : '');
-  const [memberPassword, setMemberPassword] = useState(demoActive ? 'password123' : '');
+  // Credentials are never pre-filled. Hardcoded demo passwords would otherwise
+  // be constant-folded straight into the production bundle.
+  const [memberIdentifier, setMemberIdentifier] = useState('');
+  const [memberPassword, setMemberPassword] = useState('');
 
-  // Staff form states (pre-filled only if demo mode is active)
-  const [staffUsername, setStaffUsername] = useState(demoActive ? 'admin@unako.coop' : '');
-  const [staffPassword, setStaffPassword] = useState(demoActive ? 'cbsAdmin2026' : '');
+  const [staffUsername, setStaffUsername] = useState('');
+  const [staffPassword, setStaffPassword] = useState('');
   const [staffBranch, setStaffBranch] = useState('Main Branch, Gadhwa-5');
 
   const [showPassword, setShowPassword] = useState(false);
@@ -51,59 +63,29 @@ export const UnifiedLoginPage: React.FC = () => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    // Live mode: real Supabase Auth sign-in; RLS then scopes the session to
-    // the member's own rows (members.auth_user_id = auth.uid()).
-    if (isSupabaseConfigured()) {
-      const { data, error } = await signInMemberWithSupabase(memberIdentifier.trim(), memberPassword);
-      setIsLoading(false);
-      if (error || !data) {
-        setErrorMessage(
-          t(
-            `सदस्य लगइन असफल: ${error || 'अज्ञात त्रुटि'}`,
-            `Member sign-in failed: ${error || 'unknown error'}`
-          )
-        );
-        return;
-      }
-      setRole('MEMBER');
-      setCurrentMember(data);
-      navigate('/member');
+    // Live Supabase Auth only; RLS then scopes the session to the member's own
+    // rows (members.auth_user_id = auth.uid()). The service fails closed when
+    // live auth is unavailable - there is no offline roster match any more.
+    const { data, error } = await authenticateMemberWithSupabase(memberIdentifier, memberPassword);
+    setIsLoading(false);
+
+    if (error || !data) {
+      setErrorMessage(
+        error === MEMBER_LIVE_AUTH_REQUIRED
+          ? t(
+              'प्रत्यक्ष प्रमाणीकरण सेवा उपलब्ध छैन। सदस्य पोर्टल लगइनका लागि सीबीएस प्रमाणीकरण आवश्यक छ; अफलाइन पहुँच अस्वीकृत।',
+              'Live authentication is unavailable. Member portal sign-in requires the CBS authentication service; offline access is refused.'
+            )
+          : t(
+              `सदस्य लगइन असफल: ${error || 'अज्ञात त्रुटि'}`,
+              `Member sign-in failed: ${error || 'unknown error'}`
+            )
+      );
       return;
     }
 
-    // Offline mode: match against the local member roster strictly
-    setTimeout(() => {
-      setIsLoading(false);
-      const cleanId = memberIdentifier.trim().toLowerCase();
-      if (!cleanId) {
-        setErrorMessage(
-          t('कृपया सदस्य नं., फोन वा नागरिकता नं. राख्नुहोस्', 'Please provide Member No, Phone or Citizenship No')
-        );
-        return;
-      }
-
-      const matched = members.find(
-        (m) =>
-          m.memberNo.toLowerCase() === cleanId ||
-          m.phone.replace(/[^0-9]/g, '').includes(cleanId.replace(/[^0-9]/g, '')) ||
-          m.citizenshipNo.toLowerCase() === cleanId ||
-          m.name.toLowerCase().includes(cleanId)
-      );
-
-      if (matched) {
-        setRole('MEMBER');
-        setCurrentMember(matched);
-        navigate('/member');
-      } else {
-        // Strict: Never silently escalate unknown users to a verified member!
-        setErrorMessage(
-          t(
-            'सदस्य विवरण फेला परेन। कृपया सही सदस्य नं., फोन वा नागरिकता नं. राख्नुहोस्।',
-            'Member not found. Please verify your Member No, Phone or Citizenship No.'
-          )
-        );
-      }
-    }, 600);
+    signInMember(data);
+    navigate('/member');
   };
 
   const handleStaffLogin = async (e: React.FormEvent) => {
@@ -111,73 +93,35 @@ export const UnifiedLoginPage: React.FC = () => {
     setIsLoading(true);
     setErrorMessage(null);
 
-    // Supabase Auth when configured; otherwise fall back to the offline flow.
-    if (isSupabaseConfigured()) {
-      const { data, error } = await signInStaffWithSupabase(staffUsername.trim(), staffPassword);
-      setIsLoading(false);
-      if (error || !data) {
-        setErrorMessage(
-          t(
-            `सुपाबेस प्रमाणीकरण असफल: ${error || 'Unknown error'}`,
-            `Supabase authentication failed: ${error || 'Unknown error'}`
-          )
-        );
-        return;
-      }
-      setRole('ADMIN');
-      setCurrentMember(null);
-      navigate('/admin');
+    // Staff/admin authority is granted ONLY after live Supabase Auth succeeds AND
+    // the authenticated account is linked to an ACTIVE employee row (verified
+    // inside the service). Any failure fails closed - never ADMIN.
+    const { data: employee, error } = await authenticateStaffWithSupabase(staffUsername, staffPassword);
+    setIsLoading(false);
+
+    if (error || !employee) {
+      setErrorMessage(
+        error === LIVE_AUTH_REQUIRED
+          ? t(
+              'प्रत्यक्ष प्रमाणीकरण सेवा उपलब्ध छैन। कर्मचारी/एडमिन लगइनका लागि सीबीएस प्रमाणीकरण आवश्यक छ; अफलाइन कर्मचारी पहुँच अस्वीकृत।',
+              'Live authentication is unavailable. Staff/admin sign-in requires the CBS authentication service; offline staff access is refused.'
+            )
+          : t(
+              `कर्मचारी प्रमाणीकरण असफल: ${error || 'अज्ञात त्रुटि'}`,
+              `Staff authentication failed: ${error || 'unknown error'}`
+            )
+      );
       return;
     }
 
-    setTimeout(() => {
-      setIsLoading(false);
-      const cleanUser = staffUsername.trim().toLowerCase();
-      if (!cleanUser) {
-        setErrorMessage(t('कृपया कर्मचारी युजरनेम वा इमेल राख्नुहोस्', 'Please provide your CBS Officer Credentials'));
-        return;
-      }
-
-      // Validate staff against the official employee roster
-      const matchedEmployee = INITIAL_EMPLOYEES.find(
-        (emp) =>
-          emp.email.toLowerCase() === cleanUser ||
-          emp.employeeNo.toLowerCase() === cleanUser ||
-          emp.phone.replace(/[^0-9]/g, '').includes(cleanUser.replace(/[^0-9]/g, ''))
-      );
-
-      const isMasterAdmin = cleanUser === 'admin@unako.coop' || cleanUser === 'admin';
-
-      if (!matchedEmployee && !isMasterAdmin) {
-        setErrorMessage(
-          t(
-            'कर्मचारी विवरण फेला परेन। अधिकृत कर्मचारी युजरनेम प्रयोग गर्नुहोस्।',
-            'Staff employee credentials not found. Please provide authorized CBS officer credentials.'
-          )
-        );
-        return;
-      }
-
-      if (matchedEmployee) {
-        signInStaff(matchedEmployee);
-      } else {
-        setRole('ADMIN');
-        setCurrentMember(null);
-        setCurrentEmployee(INITIAL_EMPLOYEES[0] ?? null);
-        setStaffRole('SUPER_ADMIN');
-      }
-      navigate('/admin');
-    }, 600);
+    signInStaff(employee);
+    navigate('/admin');
   };
 
-  const handleQuickDemo = (role: 'MEMBER' | 'STAFF') => {
-    if (role === 'MEMBER') {
-      switchToPreset('verified-member');
-      navigate('/member');
-      return;
-    }
-    switchToPreset('admin');
-    navigate('/admin');
+  // Dev-only demo preset (never rendered in a production build).
+  const handleQuickDemoMember = () => {
+    switchToPreset('verified-member');
+    navigate('/member');
   };
 
   return (
@@ -370,7 +314,7 @@ export const UnifiedLoginPage: React.FC = () => {
                         required
                         value={staffUsername}
                         onChange={(e) => setStaffUsername(e.target.value)}
-                        placeholder={t('admin@unako.coop वा अधिकृत कोड', 'admin@unako.coop or AD-01')}
+                        placeholder={t('officer@unako.coop.np वा AD-01', 'officer@unako.coop.np or AD-01')}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition"
                       />
                     </div>
@@ -400,10 +344,6 @@ export const UnifiedLoginPage: React.FC = () => {
                       <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
                         {t('सीबीएस मास्टर सेक्युरिटी कुञ्जी', 'CBS Master Security Key')}
                       </label>
-                      <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono flex items-center gap-1">
-                        <Lock className="size-3" />
-                        <span>{t('२एफए सुरक्षित', '2FA Protected')}</span>
-                      </span>
                     </div>
                     <div className="relative">
                       <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -444,34 +384,29 @@ export const UnifiedLoginPage: React.FC = () => {
                     <ShieldCheck className="size-4 text-blue-600 shrink-0 mt-0.5" />
                     <span>
                       {t(
-                        'सबै प्रशासनिक सत्रहरू सीबीएस अडिट ट्रेलमा सुरक्षित रूपमा अभिलेख गरिन्छ।',
-                        'All administrative sessions are logged cryptographically in the CBS immutable audit trail.'
+                        'कोर बैंकिङ पहुँच केवल प्रमाणित सक्रिय कर्मचारी खाताहरूका लागि मात्र हो।',
+                        'Core banking access is restricted to verified, active staff accounts.'
                       )}
                     </span>
                   </div>
                 </form>
               )}
 
-              {/* ─── QUICK DEMO LOGINS (VISIBLE ONLY WHEN DEMO MODE IS ENABLED) ─── */}
-              {demoActive && (
+              {/* ─── DEV-ONLY DEMO PRESET (compiled out of production builds) ───
+                  Deliberately member-only: there is no one-click staff/admin
+                  entry point, so no credential-less path to ADMIN exists. */}
+              {showDevDemoPresets && (
                 <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 space-y-2">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
-                    {t('द्रुत डेमो एक-क्लिक पहुँच (डेमो मोड)', 'Quick Demo One-Click Access (Demo Mode)')}
+                    {t('द्रुत डेमो पहुँच (केवल विकास बिल्ड)', 'Quick Demo Access (development build only)')}
                   </span>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     <button
                       type="button"
-                      onClick={() => handleQuickDemo('MEMBER')}
+                      onClick={handleQuickDemoMember}
                       className="py-2 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-xs font-bold transition-all duration-150 ease-out active:scale-95 cursor-pointer text-center"
                     >
                       {t('डेमो सदस्य: राम श्रेष्ठ', 'Load Member: Ram Shrestha')}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickDemo('STAFF')}
-                      className="py-2 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-950/30 text-slate-700 dark:text-slate-300 hover:text-blue-600 text-xs font-bold transition-all duration-150 ease-out active:scale-95 cursor-pointer text-center"
-                    >
-                      {t('डेमो स्टाफ: केन्द्रीय एडमिन', 'Load Staff: Central Admin')}
                     </button>
                   </div>
                 </div>
@@ -483,7 +418,7 @@ export const UnifiedLoginPage: React.FC = () => {
           <div className="mt-6 text-center space-y-1 text-[11px] text-slate-400">
             <p className="flex items-center justify-center gap-1.5">
               <Lock className="size-3.5 text-emerald-500" />
-              <span>{t('२५६-बिट एसएसएल इन्क्रिप्टेड • आईएसओ २७००१ सुरक्षा मापदण्ड', '256-Bit SSL Encrypted • ISO 27001 Cooperative Security Standard')}</span>
+              <span>{t('सुरक्षित पहुँच • अनधिकृत प्रयोग निषेध', 'Secured access • Unauthorized use prohibited')}</span>
             </p>
             <p>
               {t('सहकारी दर्ता नं:', 'Department of Cooperatives Reg. No:')}{' '}

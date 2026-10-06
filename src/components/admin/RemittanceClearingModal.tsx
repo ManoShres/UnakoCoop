@@ -10,6 +10,7 @@ import {
   verifyAndDisburseRemittance,
   computeInterBranchClearingLedger,
   exportRemittanceSettlementCsv,
+  hashSecurityPin,
 } from '../../utils/remittanceClearing';
 import {
   X,
@@ -71,7 +72,9 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
       payingBranchCommission: 60,
       headOfficeCommission: 30,
       status: 'PAID_OUT',
-      securityPinHash: 'pin_h_7829',
+      // Demo fixture only: hashed with the salted iterated KDF (PIN 7829). Never a literal
+      // marker string — the old `pin_h_7829` sentinel made any PIN authorise a payout.
+      securityPinHash: hashSecurityPin('7829'),
       sentTimestampBS: '2081/06/25 10:15',
       paidTimestampBS: '2081/06/25 11:40',
       paidByTellerId: 'TELLER-02',
@@ -95,7 +98,8 @@ export const RemittanceClearingModal: React.FC<RemittanceClearingModalProps> = (
       payingBranchCommission: 40,
       headOfficeCommission: 20,
       status: 'SEND_PENDING_PAYOUT',
-      securityPinHash: 'pin_h_3344',
+      // Demo fixture only: hashed with the salted iterated KDF (PIN 3344).
+      securityPinHash: hashSecurityPin('3344'),
       sentTimestampBS: '2081/06/25 12:30',
     },
   ]);

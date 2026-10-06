@@ -10,6 +10,7 @@ import {
   generateMembershipExitCsv,
   MembershipExitCertificate,
 } from '../../utils/membershipExit';
+import { escapeHtml, sanitizePrintableHtml } from '../../utils/printHelper';
 import {
   X,
   UserMinus,
@@ -144,7 +145,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
     if (!printWindow) return;
     const coop = useCoopStore.getState().coopSettings;
 
-    printWindow.document.write(`
+    printWindow.document.write(sanitizePrintableHtml(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -167,36 +168,36 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">${coop?.nameNepali || coop?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
-          <p class="inst-sub">${coop?.addressNepali || coop?.address || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश'}</p>
-          <p class="inst-sub">दर्ता नं: ${coop?.regNo || '१२९०/०६७/०६८'} | पान नं: ${coop?.panNo || '३००१२४८९०'}</p>
+          <p class="inst-name">${escapeHtml(coop?.nameNepali || coop?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.')}</p>
+          <p class="inst-sub">${escapeHtml(coop?.addressNepali || coop?.address || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश')}</p>
+          <p class="inst-sub">दर्ता नं: ${escapeHtml(coop?.regNo || '१२९०/०६७/०६८')} | पान नं: ${escapeHtml(coop?.panNo || '३००१२४८९०')}</p>
         </div>
         <div class="meta-row">
-          <span>प्रमाणपत्र नं: <b>${completedCertificate.certificateNo}</b></span>
-          <span>भौचर नं: <b>${completedCertificate.voucherNo}</b></span>
-          <span>फर्छ्यौट मिति: <b>${completedCertificate.issueDateNepali}</b></span>
+          <span>प्रमाणपत्र नं: <b>${escapeHtml(completedCertificate.certificateNo)}</b></span>
+          <span>भौचर नं: <b>${escapeHtml(completedCertificate.voucherNo)}</b></span>
+          <span>फर्छ्यौट मिति: <b>${escapeHtml(completedCertificate.issueDateNepali)}</b></span>
         </div>
         <div class="title">सहकारी सदस्यता त्याग तथा अन्तिम हिसाब फरफारक प्रमाणपत्र</div>
         
         <p class="declaration">
-          ${completedCertificate.declarationText}
+          ${escapeHtml(completedCertificate.declarationText)}
         </p>
 
         <table class="table-box">
           <tr><th colspan="2">१. खातावाला तथा सदस्यता विवरण</th></tr>
-          <tr><td width="35%">सदस्यको नाम / थर:</td><td><b>${completedCertificate.memberName}</b> (सदस्य नं: ${completedCertificate.memberNo})</td></tr>
-          <tr><td>नागरिकता नं. / ठेगाना:</td><td>${completedCertificate.citizenshipNo} | ${completedCertificate.address}</td></tr>
-          <tr><td>सदस्यता ग्रहण मिति:</td><td>${completedCertificate.joinedDateNepali}</td></tr>
-          <tr><td>सदस्यता त्यागको कारण:</td><td>${completedCertificate.exitReason} ${completedCertificate.nomineeOrHeirName ? `(हकवाला: ${completedCertificate.nomineeOrHeirName})` : ''}</td></tr>
-          <tr><td>भुक्तानी माध्यम:</td><td>${completedCertificate.payoutMethod}</td></tr>
+          <tr><td width="35%">सदस्यको नाम / थर:</td><td><b>${escapeHtml(completedCertificate.memberName)}</b> (सदस्य नं: ${escapeHtml(completedCertificate.memberNo)})</td></tr>
+          <tr><td>नागरिकता नं. / ठेगाना:</td><td>${escapeHtml(completedCertificate.citizenshipNo)} | ${escapeHtml(completedCertificate.address)}</td></tr>
+          <tr><td>सदस्यता ग्रहण मिति:</td><td>${escapeHtml(completedCertificate.joinedDateNepali)}</td></tr>
+          <tr><td>सदस्यता त्यागको कारण:</td><td>${escapeHtml(completedCertificate.exitReason)} ${completedCertificate.nomineeOrHeirName ? escapeHtml(`(हकवाला: ${completedCertificate.nomineeOrHeirName})`) : ''}</td></tr>
+          <tr><td>भुक्तानी माध्यम:</td><td>${escapeHtml(completedCertificate.payoutMethod)}</td></tr>
 
           <tr><th colspan="2">२. अन्तिम हिसाब फर्छ्यौट विवरण (सहकारी ऐन २०७४ दफा ३२)</th></tr>
-          <tr><td>फिर्ता हुने सेयर पूँजी रकम:</td><td class="num">रु. ${completedCertificate.settlement.shareCapitalRefund.toLocaleString()}</td></tr>
-          <tr><td>साधारण तथा अनिवार्य बचत फिर्ता:</td><td class="num">रु. ${(completedCertificate.settlement.regularSavingsRefund + completedCertificate.settlement.compulsorySavingsRefund + completedCertificate.settlement.fixedDepositRefund).toLocaleString()}</td></tr>
-          <tr><td>पाकेको खुद ब्याज (५% आयकर कट्टी पश्चात):</td><td class="num">रु. ${completedCertificate.settlement.netAccruedInterest.toLocaleString()}</td></tr>
-          <tr><td>अवितरित लाभांश तथा बोनस रकम:</td><td class="num">रु. ${completedCertificate.settlement.unpaidDividendsAndPatronage.toLocaleString()}</td></tr>
-          <tr><td>सदस्यता खारेजी प्रशासनिक शुल्क (कट्टी):</td><td class="num" style="color:#b91c1c;">- रु. ${completedCertificate.settlement.membershipExitAdminFee.toLocaleString()}</td></tr>
-          <tr style="background:#f8f9fa;"><td><b>कुल खुद भुक्तानी रकम (Net Paid):</b></td><td class="num" style="font-size: 13px;"><b>रु. ${completedCertificate.settlement.netPayableAmount.toLocaleString()}</b></td></tr>
+          <tr><td>फिर्ता हुने सेयर पूँजी रकम:</td><td class="num">रु. ${escapeHtml(completedCertificate.settlement.shareCapitalRefund.toLocaleString())}</td></tr>
+          <tr><td>साधारण तथा अनिवार्य बचत फिर्ता:</td><td class="num">रु. ${escapeHtml((completedCertificate.settlement.regularSavingsRefund + completedCertificate.settlement.compulsorySavingsRefund + completedCertificate.settlement.fixedDepositRefund).toLocaleString())}</td></tr>
+          <tr><td>पाकेको खुद ब्याज (५% आयकर कट्टी पश्चात):</td><td class="num">रु. ${escapeHtml(completedCertificate.settlement.netAccruedInterest.toLocaleString())}</td></tr>
+          <tr><td>अवितरित लाभांश तथा बोनस रकम:</td><td class="num">रु. ${escapeHtml(completedCertificate.settlement.unpaidDividendsAndPatronage.toLocaleString())}</td></tr>
+          <tr><td>सदस्यता खारेजी प्रशासनिक शुल्क (कट्टी):</td><td class="num" style="color:#b91c1c;">- रु. ${escapeHtml(completedCertificate.settlement.membershipExitAdminFee.toLocaleString())}</td></tr>
+          <tr style="background:#f8f9fa;"><td><b>कुल खुद भुक्तानी रकम (Net Paid):</b></td><td class="num" style="font-size: 13px;"><b>रु. ${escapeHtml(completedCertificate.settlement.netPayableAmount.toLocaleString())}</b></td></tr>
         </table>
 
         <div class="clearance-grid">
@@ -207,7 +208,7 @@ export const MembershipExitModal: React.FC<MembershipExitModalProps> = ({
         </div>
       </body>
       </html>
-    `);
+    `));
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

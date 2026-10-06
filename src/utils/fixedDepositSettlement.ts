@@ -9,6 +9,9 @@ import { SavingsAccount, Member } from '../types';
 export type FdSettlementType = 'MATURITY' | 'PREMATURE_BREAK' | 'AUTO_RENEWAL';
 export type FdRolloverMode = 'PRINCIPAL_ONLY' | 'COMPOUND_PRINCIPAL_AND_NET_INTEREST';
 
+/** Monotonic counter guaranteeing unique renewal account numbers within a session. */
+let fdRenewalSerial = 0;
+
 export interface FdSettlementCalculation {
   readonly accountNo: string;
   readonly memberName: string;
@@ -86,9 +89,11 @@ export function calculateFdSettlement(
   const totalContractDays = Math.round(tenureMonths * 30.416);
   const days = isPremature ? Math.max(1, actualDaysHeld ?? Math.round(totalContractDays * 0.6)) : totalContractDays;
 
-  // For premature break, rate is reduced by penaltyRatePercent (e.g. 10% - 2% = 8%)
+  // Premature break applies the contracted rate minus the penalty, clamped to
+  // [0, contractedRate]. The old `Math.max(4.5, ...)` floor could apply a rate ABOVE the
+  // contract rate (3% contract, 2% penalty → 4.5% paid, more than the contract).
   const appliedRate = isPremature
-    ? Math.max(4.5, contractedRate - penaltyRatePercent)
+    ? Math.min(contractedRate, Math.max(0, contractedRate - penaltyRatePercent))
     : contractedRate;
 
   // Simple daily compounding interest: Principal * (Rate / 100) * (Days / 365)
@@ -153,7 +158,11 @@ export function calculateFdAutoRenewal(
   const interestPayoutToSavings =
     rolloverMode === 'PRINCIPAL_ONLY' ? netInterestEarned : 0;
 
-  const newAccountNo = `${currentAccount.accountNo}-R${newTenureYears}Y`;
+  // Unique renewal account number. The previous deterministic `${accountNo}-R${n}Y`
+  // collided whenever the same account was rolled over twice for the same tenure.
+  // A time+counter serial keeps the human-readable `-R{n}Y` prefix but is never reused.
+  const renewalSerial = `${Date.now().toString(36)}${(fdRenewalSerial++).toString(36)}`.toUpperCase();
+  const newAccountNo = `${currentAccount.accountNo}-R${newTenureYears}Y-${renewalSerial}`;
   const currentYearBs = 2081;
   const newMaturityYearBs = currentYearBs + newTenureYears;
 

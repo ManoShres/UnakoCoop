@@ -7,6 +7,12 @@ import { ProfitPayoutLine, DividendPayoutSummary, BonusSharePayoutSummary } from
  */
 export const STATUTORY_DIVIDEND_TAX_RATE = 0.05;
 
+/**
+ * Statutory ceiling on the annual share dividend rate (Cooperative Act 2074 s.44(2)).
+ * A distribution may never exceed 18% of paid-up share capital.
+ */
+export const STATUTORY_MAX_DIVIDEND_RATE_PERCENT = 18;
+
 export interface SingleMemberDividendResult {
   grossAmount: number;
   taxDeduction: number;
@@ -15,13 +21,22 @@ export interface SingleMemberDividendResult {
 
 /**
  * Calculates single-member dividend with 5% statutory TDS.
+ *
+ * Rates outside (0, 18%] are rejected (zeroed result) rather than silently paid:
+ * the 18% ceiling is statutory. Callers that need an error should validate first.
  */
 export function calculateMemberDividend(
   shareCapital: number,
   ratePercent: number,
   deductTax: boolean = true
 ): SingleMemberDividendResult {
-  if (!shareCapital || shareCapital <= 0 || ratePercent <= 0) {
+  if (
+    !shareCapital ||
+    shareCapital <= 0 ||
+    !Number.isFinite(ratePercent) ||
+    ratePercent <= 0 ||
+    ratePercent > STATUTORY_MAX_DIVIDEND_RATE_PERCENT
+  ) {
     return { grossAmount: 0, taxDeduction: 0, netPayable: 0 };
   }
 
@@ -40,16 +55,42 @@ export interface BulkDividendRow extends ProfitPayoutLine {
 export interface BulkDividendCalculationResult {
   rows: BulkDividendRow[];
   summary: DividendPayoutSummary;
+  /** Set when the requested distribution is statutorily invalid; rows/summary are zeroed. */
+  validationError?: string;
 }
+
+const EMPTY_DIVIDEND_SUMMARY: DividendPayoutSummary = {
+  totalGross: 0,
+  totalTaxWithheld: 0,
+  totalNet: 0,
+  totalShareCapital: 0,
+  memberCount: 0,
+};
 
 /**
  * Computes bulk dividend distribution across all eligible members.
+ *
+ * Rejects a rate outside (0, 18%] with a `validationError` and a zeroed result so
+ * a UI render cannot accidentally display (or a caller accidentally post) an
+ * illegal distribution.
  */
 export function calculateBulkDividend(
   members: Member[],
   ratePercent: number,
   deductTax: boolean = true
 ): BulkDividendCalculationResult {
+  if (
+    !Number.isFinite(ratePercent) ||
+    ratePercent <= 0 ||
+    ratePercent > STATUTORY_MAX_DIVIDEND_RATE_PERCENT
+  ) {
+    return {
+      rows: [],
+      summary: { ...EMPTY_DIVIDEND_SUMMARY },
+      validationError: `Dividend rate ${ratePercent}% is invalid: rate must be > 0 and <= ${STATUTORY_MAX_DIVIDEND_RATE_PERCENT}% (statutory ceiling).`,
+    };
+  }
+
   const eligibleMembers = members.filter(
     (m) => (m.status === 'VERIFIED' || !m.status) && (m.shareCapital > 0 || (m.shareKitta && m.shareKitta > 0))
   );
@@ -190,6 +231,18 @@ export function buildDividendTransactionRef(fiscalYear: string, sequence: number
   const cleanFy = (fiscalYear || '2081/82').replace(/[^0-9]/g, '');
   const seqStr = String(sequence).padStart(6, '0');
   return `DIV-${cleanFy}-${seqStr}`;
+}
+
+/**
+ * Stable per-fiscal-year lock token embedded in every transaction produced by a bulk
+ * dividend distribution. Because the token travels with the persisted ledger, the
+ * distribution can be proven executed (and re-execution rejected) after a reload —
+ * this is the period lock reused by `executeBulkDividendDistribution`.
+ */
+export const DIVIDEND_FISCAL_LOCK_PREFIX = 'DIV-FY-LOCK';
+
+export function buildDividendFiscalLockToken(fiscalYear: string): string {
+  return `${DIVIDEND_FISCAL_LOCK_PREFIX}[${fiscalYear}]`;
 }
 
 /**

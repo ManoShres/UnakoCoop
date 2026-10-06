@@ -77,22 +77,104 @@ export function determineProvisionCategory(overdueDays: number): LoanProvisionRu
   return STATUTORY_PROVISION_RULES[4];
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const BS_EPOCH_AD_UTC = Date.UTC(2024, 3, 13); // BS 2081-01-01 = AD 2024-04-13
+const BS_EPOCH_YEAR = 2081;
+// Month lengths of BS 2081 (Baisakh..Chaitra). BS leap years carry 366 days.
+const BS_MONTH_DAYS: readonly number[] = [31, 31, 32, 31, 31, 31, 30, 30, 30, 30, 29, 30];
+
+/**
+ * Convert a Bikram Sambat 'YYYY-MM-DD' date to an approximate Gregorian UTC timestamp.
+ *
+ * NEEDS SIGN-OFF: precise statutory classification requires a licensed BS calendar
+ * table. This implementation anchors on BS 2081-01-01 = AD 2024-04-13 and uses BS 2081
+ * month lengths plus a fixed 365-day year, so it can drift by ~1 day per BS leap year
+ * (≈±5 days across 2080–2090). Provisioning bucket edges (30/90/180/365 days) can
+ * therefore shift by a few days near a boundary. Replace with the server calendar
+ * before using this as the authoritative regulatory classification.
+ */
+export function bsDateToUtcMs(bsDate: string): number | null {
+  const match = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec((bsDate || '').trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 32) return null;
+
+  let days = 0;
+  if (year >= BS_EPOCH_YEAR) {
+    days += (year - BS_EPOCH_YEAR) * 365;
+  } else {
+    days -= (BS_EPOCH_YEAR - year) * 365;
+  }
+  for (let i = 0; i < month - 1; i += 1) days += BS_MONTH_DAYS[i];
+  days += day - 1;
+
+  return BS_EPOCH_AD_UTC + days * MS_PER_DAY;
+}
+
+/** Parse an explicit calendar date. Years >= 2070 are treated as Bikram Sambat. */
+function toUtcMs(dateString: string | undefined): number | null {
+  if (!dateString) return null;
+  const match = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(dateString.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  if (year >= 2070) return bsDateToUtcMs(dateString);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return Date.UTC(year, month - 1, day);
+}
+
+/**
+ * Real elapsed days past `nextDueDate` as of `asOfDate` (defaults to today).
+ * Returns null when the due date cannot be interpreted.
+ */
+export function computeOverdueDays(
+  nextDueDate: string | undefined,
+  asOfDate?: string
+): number | null {
+  const dueMs = toUtcMs(nextDueDate);
+  if (dueMs === null) return null;
+  let asOfMs: number;
+  if (asOfDate) {
+    const parsed = toUtcMs(asOfDate);
+    if (parsed === null) return null;
+    asOfMs = parsed;
+  } else {
+    const now = new Date();
+    asOfMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  }
+  return Math.max(0, Math.floor((asOfMs - dueMs) / MS_PER_DAY));
+}
+
 /**
  * Classifies an individual loan and calculates required provision in NPR.
+ *
+ * `simulatedOverdueDays` (when explicitly supplied) always wins. Otherwise the real
+ * days past due are computed from `nextDueDate`/`asOfDate`; a regulatory category is
+ * NEVER defaulted. An OVERDUE loan without an interpretable due date is a hard error
+ * rather than silently being provisioned at an arbitrary tier.
  */
 export function classifyLoanItem(
   loan: Loan,
   member?: Member,
-  simulatedOverdueDays?: number
+  simulatedOverdueDays?: number,
+  asOfDate?: string
 ): ClassifiedLoan {
-  // If simulatedOverdueDays is provided, use it; otherwise infer from loan status
-  let days = simulatedOverdueDays ?? 0;
-  if (simulatedOverdueDays === undefined) {
-    if (loan.status === 'OVERDUE') {
-      days = 45; // Default overdue demo simulation
-    } else if (loan.status === 'ACTIVE') {
-      days = 0;
+  let days: number;
+  if (simulatedOverdueDays !== undefined) {
+    days = Math.max(0, simulatedOverdueDays);
+  } else if (loan.status === 'OVERDUE') {
+    const computed = computeOverdueDays(loan.nextDueDate, asOfDate);
+    if (computed === null) {
+      throw new Error(
+        `Cannot classify overdue loan ${loan.loanNo}: nextDueDate "${loan.nextDueDate}" is missing or not a valid date.`
+      );
     }
+    days = computed;
+  } else {
+    days = 0;
   }
 
   const rule = determineProvisionCategory(days);
@@ -158,7 +240,10 @@ export function computePortfolioRiskRatios(classifiedLoans: readonly ClassifiedL
 
   const nplBalance = nplLoans.reduce((sum, l) => sum + l.remainingBalance, 0);
   const nplRatioPercent = totalBalance > 0 ? (nplBalance / totalBalance) * 100 : 0;
-  const coverageRatioPercent = nplBalance > 0 ? (totalProvision / nplBalance) * 100 : 100;
+  // Coverage ratio numerator must be NPL provisions only — using the whole portfolio's
+  // provisions overstated coverage.
+  const nplProvision = nplLoans.reduce((sum, l) => sum + l.requiredProvisionAmount, 0);
+  const coverageRatioPercent = nplBalance > 0 ? (nplProvision / nplBalance) * 100 : 100;
 
   return {
     totalLoansCount: classifiedLoans.length,

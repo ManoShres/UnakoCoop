@@ -399,7 +399,9 @@ describe('Mother Group Collection Posting', () => {
       expect(memberSavingsAfter).toBe(memberSavingsBefore + 40000);
 
       const latestTx = useCoopStore.getState().transactions[0];
-      expect(latestTx.type).toBe('DEPOSIT');
+      // Regression (A4d): a pledge disbursement is a LOAN_DISBURSEMENT, not a DEPOSIT
+      // (booking it as DEPOSIT inflated deposit liabilities).
+      expect(latestTx.type).toBe('LOAN_DISBURSEMENT');
       expect(latestTx.amount).toBe(40000);
     });
 

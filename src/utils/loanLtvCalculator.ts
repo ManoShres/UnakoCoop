@@ -101,13 +101,15 @@ export function evaluateLoanSafetyGate(input: LoanSafetyInput): LoanSafetyEvalua
   const statutoryMaxLtvPercent = STATUTORY_LTV_LIMITS[collateralType] ?? 40;
   const isUnsecured = collateralType === 'GUARANTOR' || collateralType === 'GROUP_GUARANTEE';
 
-  // 1. LTV calculation
-  const actualLtvPercent =
+  // 1. LTV calculation — thresholds are compared against the UNROUNDED ratio; rounding
+  //    is for display only (50.04% must not round to 50.0 and pass a 50% cap).
+  const rawLtvPercent =
     collateralEstimatedValue > 0
-      ? Math.round((requestedAmount / collateralEstimatedValue) * 100 * 10) / 10
+      ? (requestedAmount / collateralEstimatedValue) * 100
       : isUnsecured
       ? 0
       : 100;
+  const actualLtvPercent = Math.round(rawLtvPercent * 10) / 10;
 
   const maxAllowableLoanByCollateral = isUnsecured
     ? MAX_UNSECURED_LOAN_CEILING
@@ -115,7 +117,7 @@ export function evaluateLoanSafetyGate(input: LoanSafetyInput): LoanSafetyEvalua
 
   const isLtvCompliant = isUnsecured
     ? requestedAmount <= MAX_UNSECURED_LOAN_CEILING
-    : actualLtvPercent <= statutoryMaxLtvPercent;
+    : rawLtvPercent <= statutoryMaxLtvPercent;
 
   // 2. EMI & DSTI calculation
   const monthlyEmi = calculateLoanEmi(requestedAmount, annualInterestRate, tenureMonths);

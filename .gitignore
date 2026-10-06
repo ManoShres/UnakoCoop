@@ -8,9 +8,12 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+
+# Build output — build artifacts can contain inlined secrets, never commit them.
 dist
-dist-ssr
-*.local
+dist-*
+.vite
+*.tsbuildinfo
 
 # Temporary build / lint / debug artifacts
 .tmp-*
@@ -18,10 +21,29 @@ dist-ssr
 # Test / preview distributions
 dist-test
 
-# Environment variables
+# Coverage output
+coverage
+
+# Environment variables (gitignored: they hold live secrets; .env.example is the template)
 .env
-.env.local
-.env.*.local
+.env.*
+*.local
+!.env.example
+!.env.*.example
+
+# Supabase CLI local state
+supabase/.temp/
+
+# Local databases / backups
+*.sqlite
+*.sqlite3
+*.db
+
+# Secrets and certificates
+*.pem
+*.key
+*.p12
+*.pfx
 
 # Editor directories and files
 .vscode/*

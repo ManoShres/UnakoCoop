@@ -31,6 +31,18 @@ export interface ServiceResult<T> {
 const NOT_CONFIGURED =
   'Supabase is not configured (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).';
 
+/**
+ * Staff/admin sign-in is only possible against the live CIS authentication
+ * service. When the deployment has no Supabase configuration the login flow
+ * fails closed with this message - there is no offline credential path.
+ */
+export const LIVE_AUTH_REQUIRED =
+  'Live authentication is required: the CBS authentication service is not configured on this deployment.';
+
+/** An authenticated account with no ACTIVE employee row holds no staff authority. */
+export const STAFF_NOT_LINKED =
+  'This account is not linked to an active staff record. Administrative access denied.';
+
 export const rowToEmployee = (row: EmployeeRow): Employee => ({
   id: row.id,
   employeeNo: row.employee_no,
@@ -178,6 +190,75 @@ export const deleteEmployeeInSupabase = async (
   } catch (err) {
     return { data: null, error: err instanceof Error ? err.message : 'Unknown network error.' };
   }
+};
+
+/**
+ * Resolves the ACTIVE employee row linked to a Supabase Auth user.
+ *
+ * This is the single source of truth for turning an authenticated Supabase
+ * session into staff authority: a login with no ACTIVE employee link resolves
+ * to `data: null` and MUST NOT be granted any administrative role.
+ */
+export const fetchActiveEmployeeByAuthUserId = async (
+  authUserId: string
+): Promise<ServiceResult<Employee>> => {
+  if (!supabase) return { data: null, error: NOT_CONFIGURED };
+  if (!authUserId) return { data: null, error: null };
+
+  try {
+    const { data, error } = await supabase
+      .from('employees')
+      .select('*')
+      .eq('auth_user_id', authUserId)
+      .eq('status', 'ACTIVE')
+      .maybeSingle();
+
+    if (error) return { data: null, error: error.message };
+    if (!data) return { data: null, error: null };
+    return { data: rowToEmployee(data as EmployeeRow), error: null };
+  } catch (err) {
+    return { data: null, error: err instanceof Error ? err.message : 'Unknown network error.' };
+  }
+};
+
+/**
+ * Full staff sign-in: Supabase Auth plus mandatory ACTIVE employee linkage.
+ *
+ * FAIL CLOSED. This is the only supported staff login path:
+ *  - no Supabase configuration        -> LIVE_AUTH_REQUIRED, no session
+ *  - bad credentials                  -> auth error, no session
+ *  - authenticated but unlinked row    -> signs the session out, STAFF_NOT_LINKED
+ *  - authenticated with an ACTIVE row  -> the Employee (and its accessRole)
+ *
+ * It never returns an Employee without a resolved `accessRole`, so no caller can
+ * end up with `role === 'ADMIN'` and a null `staffRole`.
+ */
+export const authenticateStaffWithSupabase = async (
+  identifier: string,
+  password: string
+): Promise<ServiceResult<Employee>> => {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { data: null, error: LIVE_AUTH_REQUIRED };
+  }
+
+  const signIn = await signInStaffWithSupabase(identifier.trim(), password);
+  const userId = signIn.data?.userId;
+  if (signIn.error || !userId) {
+    return { data: null, error: signIn.error || 'Staff sign-in returned no user session.' };
+  }
+
+  const linked = await fetchActiveEmployeeByAuthUserId(userId);
+  if (linked.error) {
+    await signOutOfSupabase();
+    return { data: null, error: linked.error };
+  }
+  if (!linked.data || !linked.data.accessRole) {
+    // Never keep an authenticated-but-unlinked session alive with admin reach.
+    await signOutOfSupabase();
+    return { data: null, error: STAFF_NOT_LINKED };
+  }
+
+  return { data: linked.data, error: null };
 };
 
 /** Real staff authentication through Supabase Auth (email + password). */

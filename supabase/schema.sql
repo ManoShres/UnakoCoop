@@ -172,7 +172,8 @@ create table if not exists public.transactions (
   member_id    uuid references public.members (id) on delete set null,
   date         date not null default current_date,
   type         text not null
-               check (type in ('DEPOSIT', 'WITHDRAWAL', 'LOAN_EMI', 'DIVIDEND', 'SHARE_PURCHASE')),
+               check (type in ('DEPOSIT', 'WITHDRAWAL', 'LOAN_EMI', 'DIVIDEND', 'SHARE_PURCHASE',
+                               'LOAN_DISBURSEMENT')),
   description  text not null default '',
   amount       numeric(14, 2) not null default 0,
   reference_no text not null default '',
@@ -182,6 +183,16 @@ create table if not exists public.transactions (
 );
 
 create index if not exists transactions_date_idx on public.transactions (date desc);
+
+-- LOAN_DISBURSEMENT was added for the server-side ledger
+-- (supabase/migrations/0001_ledger.sql). The inline CHECK above covers fresh
+-- installs; this block re-points the auto-named column constraint on databases
+-- that were created before the value existed. Idempotent: drop + re-add, and
+-- safe to re-run because the inline CHECK already rejected every other value.
+alter table public.transactions drop constraint if exists transactions_type_check;
+alter table public.transactions add constraint transactions_type_check
+  check (type in ('DEPOSIT', 'WITHDRAWAL', 'LOAN_EMI', 'DIVIDEND', 'SHARE_PURCHASE',
+                  'LOAN_DISBURSEMENT'));
 
 create table if not exists public.inquiries (
   id         uuid primary key default gen_random_uuid(),
@@ -532,6 +543,49 @@ create unique index if not exists employees_auth_user_id_uq
   on public.employees (auth_user_id) where auth_user_id is not null;
 create index if not exists employees_auth_user_id_idx on public.employees (auth_user_id);
 
+-- Explicit invite/allowlist gate for staff accounts (SECURITY FIX 1/2).
+-- Defaults to true so a fresh install can still bootstrap its first
+-- SUPER_ADMIN through a verified email signup (otherwise nobody could ever
+-- reach a staff-only policy to approve anyone). Operators who want strict
+-- invite-only staff onboarding should run:
+--     update public.employees set auth_link_allowed = false;   -- lock down
+-- and then link each officer through public.admin_link_employee_auth(...)
+-- or by setting the column back to true for that one row.
+alter table public.employees
+  add column if not exists auth_link_allowed boolean not null default true;
+
+-- SECURITY FIX 2: an employee email must be unique (case-insensitively).
+-- Without this, two employee rows can share an email and the auth-link trigger
+-- becomes ambiguous; a duplicate-email signup could also make the trigger's
+-- UPDATE hit the employees_auth_user_id_uq index and abort the auth.users
+-- INSERT (a denial-of-service on staff signup). The trigger now updates at most
+-- one deterministic row, and this index removes the duplicate source entirely.
+--
+-- MIGRATION: on an existing database that already contains duplicate employee
+-- emails this statement fails with 23505. The block below prints the offending
+-- addresses first so the operator can merge them and re-run. Find/fix with:
+--     select lower(email), count(*) from public.employees
+--      group by 1 having count(*) > 1;
+do $$
+declare
+  dup_list text;
+begin
+  select string_agg(format('%s (%s rows)', email, cnt), ', ')
+    into dup_list
+  from (
+    select lower(email) as email, count(*) as cnt
+    from public.employees
+    group by lower(email)
+    having count(*) > 1
+  ) d;
+  if dup_list is not null then
+    raise warning 'employees: duplicate emails must be merged before employees_email_lower_uq can be created: %', dup_list;
+  end if;
+end $$;
+
+create unique index if not exists employees_email_lower_uq
+  on public.employees (lower(email));
+
 -- ---------------------------------------------------------------------------
 -- RLS HELPER FUNCTIONS
 --    • anon (public website)  → read-only access to directories & rate cards
@@ -578,8 +632,153 @@ as $$
   select m.id from public.members m where m.auth_user_id = auth.uid();
 $$;
 
--- Auto-link: when an auth user is created, link to employees if staff email matches,
--- or members if member email matches.
+-- Role helpers (SECURITY FIX 6). Mirror the intent of src/utils/permissions.ts:
+-- staff policies must key on the acting employee's access_role, not merely on
+-- "is an authenticated employee". Otherwise any TELLER/FIELD_OFFICER can write
+-- employees, share_pool, coop_settings and loan ledgers.
+create or replace function public.staff_role_in(p_roles text[])
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.employees e
+    where e.auth_user_id = auth.uid()
+      and e.status = 'ACTIVE'
+      and e.access_role = any(p_roles)
+  );
+$$;
+
+-- Supervisory write gate for CMS / cooperative configuration. Note this is
+-- deliberately slightly broader than permissions.ts (where manage_settings is
+-- SUPER_ADMIN-only) so branch managers can keep operating the branch CMS;
+-- tighten to public.staff_has_permission('manage_settings') for strict parity.
+create or replace function public.staff_can_manage_config()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select public.staff_role_in(array['SUPER_ADMIN', 'BRANCH_MANAGER']);
+$$;
+
+-- Permission check kept in sync (by hand) with ROLE_PERMISSIONS in
+-- src/utils/permissions.ts. Update BOTH when a role's grants change.
+create or replace function public.staff_has_permission(p_permission text)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.employees e
+    where e.auth_user_id = auth.uid()
+      and e.status = 'ACTIVE'
+      and p_permission = any((
+        case e.access_role
+          when 'SUPER_ADMIN' then array[
+            'manage_employees', 'manage_members', 'manage_loans', 'manage_savings',
+            'process_transactions', 'view_reports', 'manage_mother_groups',
+            'record_mother_group_meetings', 'record_deposits', 'record_trading',
+            'reconcile_entries', 'manage_settings', 'export_data', 'view_audit_logs'
+          ]
+          when 'BRANCH_MANAGER' then array[
+            'manage_members', 'manage_loans', 'manage_savings', 'process_transactions',
+            'view_reports', 'manage_mother_groups', 'record_mother_group_meetings',
+            'record_deposits', 'record_trading', 'reconcile_entries', 'export_data',
+            'view_audit_logs'
+          ]
+          when 'ACCOUNTANT' then array[
+            'manage_savings', 'view_reports', 'record_trading', 'reconcile_entries',
+            'export_data', 'view_audit_logs'
+          ]
+          when 'TELLER' then array[
+            'process_transactions', 'record_mother_group_meetings', 'record_deposits',
+            'view_reports'
+          ]
+          when 'LOAN_OFFICER' then array[
+            'manage_loans', 'process_transactions', 'view_reports'
+          ]
+          when 'FIELD_OFFICER' then array[
+            'record_mother_group_meetings', 'view_reports'
+          ]
+          else array[]::text[]
+        end
+      )));
+$$;
+
+-- SECURITY FIX 1: link an auth user to a staff/member row ONLY from a verified
+-- account, and never let a linking failure abort the auth.users INSERT.
+--
+-- Threat closed: the previous trigger linked rows purely on an email string
+-- match for ANY auth.users INSERT. An attacker could self-register using a
+-- known employee or member email and immediately inherit staff policies
+-- (is_staff() looked only at employees.auth_user_id) or that member's portal
+-- data before the real owner ever confirmed the address. Requiring
+-- email_confirmed_at means the registrant must actually control the mailbox.
+-- Employees are additionally gated on employees.auth_link_allowed so a
+-- cooperative can run invite-only staff onboarding.
+--
+-- MIGRATION IMPLICATION: links created before this change from unverified
+-- accounts are NOT touched (no data is rewritten). Review them with
+--     select employee_no, email, auth_user_id from public.employees
+--      where auth_user_id is not null;
+-- and, if any are suspect, re-link them with public.admin_link_employee_auth()
+-- or by updating auth_user_id as service_role. Members whose auth users were
+-- never email-confirmed likewise keep their old link until an admin re-links
+-- or the member confirms; see the note on trg_auth_user_link_confirm.
+create or replace function public.link_auth_user_account(
+  p_auth_user_id uuid,
+  p_email text
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  -- 1. Staff link: verified email + allowlisted employee + deterministic single row.
+  update public.employees e
+     set auth_user_id = p_auth_user_id
+   where e.auth_link_allowed
+     and e.id = (
+       select e2.id from public.employees e2
+       where e2.auth_user_id is null
+         and e2.auth_link_allowed
+         and lower(e2.email) = lower(coalesce(p_email, ''))
+       order by e2.created_at, e2.id
+       limit 1
+     )
+     and not exists (
+       select 1 from public.employees x where x.auth_user_id = p_auth_user_id
+     );
+
+  -- 2. Member link: verified email + deterministic single row.
+  update public.members m
+     set auth_user_id = p_auth_user_id
+   where m.id = (
+       select m2.id from public.members m2
+       where m2.auth_user_id is null
+         and lower(m2.email) = lower(coalesce(p_email, ''))
+       order by m2.created_at, m2.id
+       limit 1
+     )
+     and not exists (
+       select 1 from public.members x where x.auth_user_id = p_auth_user_id
+     );
+exception
+  -- A malformed/duplicate link must never roll back the caller's auth.users
+  -- INSERT (DoS). Report and move on; an admin can link manually.
+  when others then
+    raise warning 'link_auth_user_account: skipped link for auth user % (%): %',
+      p_auth_user_id, p_email, sqlerrm;
+end;
+$$;
+
 create or replace function public.handle_auth_user_link()
 returns trigger
 language plpgsql
@@ -587,18 +786,24 @@ security definer
 set search_path = public
 as $$
 begin
-  -- 1. Check and link to employees
-  update public.employees
-     set auth_user_id = new.id
-   where auth_user_id is null
-     and lower(email) = lower(coalesce(new.email, ''));
+  -- Only verified accounts may claim a staff/member identity.
+  if new.email_confirmed_at is not null then
+    perform public.link_auth_user_account(new.id, new.email);
+  end if;
+  return new;
+end;
+$$;
 
-  -- 2. Check and link to members
-  update public.members
-     set auth_user_id = new.id
-   where auth_user_id is null
-     and lower(email) = lower(coalesce(new.email, ''));
-
+-- Confirmation may happen after INSERT when Supabase "Confirm email" is on, so
+-- link on the null -> not-null transition as well.
+create or replace function public.handle_auth_user_confirm()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  perform public.link_auth_user_account(new.id, new.email);
   return new;
 end;
 $$;
@@ -609,8 +814,59 @@ create trigger trg_auth_user_link
   after insert on auth.users
   for each row execute function public.handle_auth_user_link();
 
--- Column guard: a signed-in member may edit only the contact fields of their
--- own row; financial / governance columns are frozen unless staff writes.
+drop trigger if exists trg_auth_user_link_confirm on auth.users;
+create trigger trg_auth_user_link_confirm
+  after update of email_confirmed_at on auth.users
+  for each row
+  when (old.email_confirmed_at is null and new.email_confirmed_at is not null)
+  execute function public.handle_auth_user_confirm();
+
+-- Staff-only recovery path for MIGRATION: re-link (or unlink) an employee auth
+-- account after verifying identity out-of-band. SUPER_ADMIN only.
+create or replace function public.admin_link_employee_auth(
+  p_employee_no text,
+  p_auth_user_id uuid default null
+)
+returns public.employees
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_emp public.employees;
+begin
+  if not public.staff_has_permission('manage_employees') then
+    raise exception 'admin_link_employee_auth: SUPER_ADMIN only' using errcode = '42501';
+  end if;
+
+  update public.employees
+     set auth_user_id = p_auth_user_id,
+         auth_link_allowed = true,
+         updated_at = now()
+   where employee_no = p_employee_no
+  returning * into v_emp;
+
+  if not found then
+    raise exception 'admin_link_employee_auth: employee % not found', p_employee_no
+      using errcode = 'P0002';
+  end if;
+
+  return v_emp;
+end;
+$$;
+
+-- SECURITY FIX 5: complete column guard.
+-- A signed-in member may change only the contact fields on their own row.
+-- Everything else - identity, KYC, payout/bank details, balances, credit score,
+-- status, notes, timestamps and auth linkage - is reset to its previous value.
+-- A jsonb diff safety net freezes any column added by a future migration until
+-- it is explicitly allowlisted here.
+--
+-- COMPANION STAFF PATH (so the member portal is not read-only): legitimate
+-- changes to frozen fields (name, email, avatar, bank details, KYC, status, ...)
+-- are performed by staff through the admin portal, where members_self_update
+-- permits public.is_staff() and this trigger returns early. Members retain
+-- self-service updates to phone and address.
 create or replace function public.members_guard_self_writes()
 returns trigger
 language plpgsql
@@ -621,20 +877,50 @@ begin
   if public.is_staff() then
     return new;
   end if;
-  if new.auth_user_id is not null and new.auth_user_id = auth.uid() then
-    new.member_no           := old.member_no;
-    new.citizenship_no      := old.citizenship_no;
-    new.joined_date         := old.joined_date;
-    new.status              := old.status;
-    new.share_capital       := old.share_capital;
-    new.total_savings       := old.total_savings;
-    new.active_loan_balance := old.active_loan_balance;
-    new.accrued_dividend    := old.accrued_dividend;
-    new.credit_score        := old.credit_score;
-    new.kyc_documents       := old.kyc_documents;
-    new.auth_user_id        := old.auth_user_id;
+
+  -- Ownership is decided from the EXISTING row, never from the client-supplied
+  -- new value: otherwise a member could send auth_user_id = null (or another id)
+  -- to skip the freeze below. RLS has already restricted this UPDATE to the row
+  -- owner (or staff, returned above).
+  if old.auth_user_id is null or old.auth_user_id is distinct from auth.uid() then
     return new;
   end if;
+
+  -- Frozen: identity & governance.
+  new.id              := old.id;
+  new.member_no       := old.member_no;
+  new.name            := old.name;
+  new.name_nepali     := old.name_nepali;
+  new.email           := old.email;
+  new.citizenship_no  := old.citizenship_no;
+  new.pan_no          := old.pan_no;
+  new.joined_date     := old.joined_date;
+  new.status          := old.status;
+  new.avatar_url      := old.avatar_url;
+  new.notes           := old.notes;
+  new.created_at      := old.created_at;
+  new.auth_user_id    := old.auth_user_id;
+
+  -- Frozen: financial & KYC.
+  new.share_capital       := old.share_capital;
+  new.total_savings       := old.total_savings;
+  new.active_loan_balance := old.active_loan_balance;
+  new.accrued_dividend    := old.accrued_dividend;
+  new.credit_score        := old.credit_score;
+  new.bank_details        := old.bank_details;
+  new.kyc_documents       := old.kyc_documents;
+
+  -- Intentionally NOT reset (explicitly-allowed contact set): phone, address.
+  -- updated_at is owned by trg_members_updated_at, which runs after this trigger.
+
+  -- Safety net: reject a change to any column that is neither frozen above nor
+  -- on the allowlist - catches columns added by future migrations.
+  if (to_jsonb(new) - array['phone', 'address', 'updated_at'])
+     is distinct from (to_jsonb(old) - array['phone', 'address', 'updated_at']) then
+    raise exception 'members: only phone and address may be changed by a member; use the staff approval workflow for other profile changes'
+      using errcode = '42501';
+  end if;
+
   return new;
 end;
 $$;
@@ -644,14 +930,148 @@ create trigger trg_members_guard_self_writes
   before update on public.members
   for each row execute function public.members_guard_self_writes();
 
+-- SECURITY FIX 4: members may submit loan applications for their own profile
+-- only, and only into the SUBMITTED state. Staff (manage_loans) bypass this and
+-- keep full workflow control. This backstops the RLS insert check below.
+create or replace function public.loan_applications_guard_member_submit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_member public.members%rowtype;
+begin
+  if public.is_staff() then
+    return new;
+  end if;
+
+  if new.member_id is distinct from public.current_member_id() then
+    raise exception 'loan_applications: members may only submit applications for their own member profile'
+      using errcode = '42501';
+  end if;
+
+  select * into v_member from public.members m where m.id = new.member_id;
+  if not found then
+    raise exception 'loan_applications: unknown member profile' using errcode = '42501';
+  end if;
+
+  -- Server-authoritative fields: the applicant may not self-approve, inject
+  -- committee notes, backdate the application, or claim another member identity.
+  new.status          := 'SUBMITTED';
+  new.committee_notes := null;
+  new.member_name     := v_member.name;
+  new.member_no       := v_member.member_no;
+  new.applied_date    := current_date;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_loan_applications_guard_member_submit on public.loan_applications;
+create trigger trg_loan_applications_guard_member_submit
+  before insert or update on public.loan_applications
+  for each row execute function public.loan_applications_guard_member_submit();
+
+-- ===========================================================================
+-- 6b. PUBLIC MEMBERSHIP APPLICATION RPC  (SECURITY FIX 3)
+-- ---------------------------------------------------------------------------
+-- The direct anon INSERT policy on public.members used to accept ANY column
+-- value as long as status = 'PENDING'. An anonymous visitor could therefore
+-- forge share_capital / total_savings / credit_score / kyc_documents /
+-- bank_details / member_no and even impersonate another person's identity
+-- fields. That policy is gone; this SECURITY DEFINER function is the ONLY
+-- anon-reachable write path into public.members.
+--
+-- It whitelists the applicant-supplied columns and server-generates every
+-- sensitive field: member_no, status, auth_user_id and all financial/KYC data.
+--
+-- NOTE: the previous anon INSERT accepted a full row payload. Any public
+-- onboarding form must now call:
+--     select public.submit_member_application(
+--              p_name, p_email, p_phone, p_citizenship_no,
+--              p_name_nepali, p_pan_no, p_address);
+-- ===========================================================================
+create sequence if not exists public.member_application_no_seq start with 900001;
+
+create or replace function public.submit_member_application(
+  p_name           text,
+  p_email          text,
+  p_phone          text,
+  p_citizenship_no text,
+  p_name_nepali    text default null,
+  p_pan_no         text default null,
+  p_address        text default null
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_member_no text;
+  v_id        uuid;
+begin
+  if p_name is null or length(btrim(p_name)) < 2 then
+    raise exception 'submit_member_application: name is required' using errcode = '22023';
+  end if;
+  if p_email is null or p_email !~ '^[^@[:space:]]+@[^@[:space:]]+\.[^@[:space:]]+$' then
+    raise exception 'submit_member_application: a valid email is required' using errcode = '22023';
+  end if;
+  if p_phone is null or length(btrim(p_phone)) < 7 then
+    raise exception 'submit_member_application: a valid phone is required' using errcode = '22023';
+  end if;
+  if p_citizenship_no is null or length(btrim(p_citizenship_no)) < 4 then
+    raise exception 'submit_member_application: citizenship_no is required' using errcode = '22023';
+  end if;
+
+  -- Server-generated, collision-free member number (sequence-backed).
+  v_member_no := 'UK-' || lpad(nextval('public.member_application_no_seq')::text, 6, '0');
+
+  insert into public.members (
+    member_no, name, name_nepali, email, phone, citizenship_no, pan_no,
+    address, status, avatar_url,
+    share_capital, total_savings, active_loan_balance, accrued_dividend,
+    credit_score, bank_details, kyc_documents, auth_user_id
+  ) values (
+    v_member_no,
+    btrim(p_name),
+    nullif(btrim(coalesce(p_name_nepali, '')), ''),
+    lower(btrim(p_email)),
+    btrim(p_phone),
+    btrim(p_citizenship_no),
+    nullif(btrim(coalesce(p_pan_no, '')), ''),
+    coalesce(nullif(btrim(coalesce(p_address, '')), ''), 'Gadhwa-5, Dang'),
+    'PENDING',
+    '/assets/kyc/avatar_hari.png',
+    0, 0, 0, 0,
+    700,
+    '{}'::jsonb,
+    '{}'::jsonb,
+    null
+  )
+  returning id into v_id;
+
+  return jsonb_build_object(
+    'id', v_id,
+    'member_no', v_member_no,
+    'status', 'PENDING'
+  );
+end;
+$$;
+
+revoke all on function public.submit_member_application(text, text, text, text, text, text, text) from public;
+grant execute on function public.submit_member_application(text, text, text, text, text, text, text) to anon, authenticated;
+
 do $$
 declare
-  t text;
+  t    text;
+  perm text;
   staff_only     text[] := array['employees'];
-  member_scoped  text[] := array[
-    'savings_accounts', 'loans', 'transactions', 'notifications',
-    'loan_applications'
-  ];
+  -- Member-readable ledgers whose writes are staff-only (SECURITY FIX 4).
+  member_owned   text[] := array['savings_accounts', 'loans', 'transactions'];
+  -- The single member self-INSERT surface.
+  member_apps    text[] := array['loan_applications'];
+  member_notif   text[] := array['notifications'];
   staff_data     text[] := array[
     'trading_transactions', 'bank_statements', 'reconciliation_entries',
     'mother_group_deposits', 'inquiries'
@@ -659,14 +1079,20 @@ declare
   member_visible text[] := array[
     'mother_groups', 'mother_group_members', 'mother_group_meetings'
   ];
+  -- Public read-only directories / rate cards / CMS.
+  -- SECURITY FIX 8: generated_reports has been REMOVED from this list.
   public_read    text[] := array[
     'notices', 'coop_settings', 'share_pool', 'agm_details', 'loan_schemes',
-    'gateway_rails', 'field_officers', 'generated_reports'
+    'gateway_rails', 'field_officers'
   ];
+  internal_read  text[] := array['generated_reports'];
 begin
-  -- members: signed-in members read/update only their own profile (column
-  -- guard trigger freezes protected fields), staff keep full control, the
-  -- public website may only submit a PENDING application row.
+  -- ------------------------------------------------------------------
+  -- members: owner read/update (column guard trigger), staff full control.
+  -- SECURITY FIX 3: the anonymous members_public_apply INSERT policy is
+  -- REMOVED - anon writes go exclusively through
+  -- public.submit_member_application() created above.
+  -- ------------------------------------------------------------------
   execute 'alter table public.members enable row level security';
 
   execute 'drop policy if exists members_public_read on public.members';
@@ -685,26 +1111,98 @@ begin
     || 'to authenticated with check (public.is_staff())';
 
   execute 'drop policy if exists members_public_apply on public.members';
-  execute 'create policy members_public_apply on public.members for insert '
-    || 'to anon with check (status = ''PENDING'' and auth_user_id is null)';
 
   execute 'drop policy if exists members_staff_delete on public.members';
   execute 'create policy members_staff_delete on public.members for delete '
     || 'to authenticated using (public.is_staff())';
 
-  -- HR registry: staff eyes only
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 6a: employees (HR registry). All staff may READ; only
+  -- SUPER_ADMIN (manage_employees, mirrored from permissions.ts) may INSERT,
+  -- UPDATE or DELETE. Previously `for all ... is_staff()` let any TELLER or
+  -- FIELD_OFFICER edit the HR registry and their own access_role.
+  -- ------------------------------------------------------------------
   foreach t in array staff_only loop
     execute format('alter table public.%I enable row level security', t);
+
     execute format('drop policy if exists %I on public.%I', t || '_staff_all', t);
+    execute format('drop policy if exists %I on public.%I', t || '_staff_read', t);
     execute format(
-      'create policy %I on public.%I for all to authenticated using (public.is_staff()) with check (public.is_staff())',
-      t || '_staff_all', t
+      'create policy %I on public.%I for select to authenticated using (public.is_staff())',
+      t || '_staff_read', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
+    execute format(
+      'create policy %I on public.%I for insert to authenticated with check (public.staff_has_permission(''manage_employees''))',
+      t || '_staff_insert', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
+    execute format(
+      'create policy %I on public.%I for update to authenticated using (public.staff_has_permission(''manage_employees'')) with check (public.staff_has_permission(''manage_employees''))',
+      t || '_staff_update', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
+    execute format(
+      'create policy %I on public.%I for delete to authenticated using (public.staff_has_permission(''manage_employees''))',
+      t || '_staff_delete', t
     );
   end loop;
 
-  -- Member-owned tables: members read/insert rows linked to their own
-  -- member id; updates/deletes stay staff-only.
-  foreach t in array member_scoped loop
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 4: savings_accounts / loans / transactions.
+  -- Members may READ their own rows but may NOT insert or update them (the
+  -- legacy _member_insert policy is dropped). Writes require the matching
+  -- staff permission (SECURITY FIX 6b uses the same role map as
+  -- src/utils/permissions.ts).
+  -- ------------------------------------------------------------------
+  foreach t in array member_owned loop
+    execute format('alter table public.%I enable row level security', t);
+
+    perm := case t
+              when 'savings_accounts' then 'manage_savings'
+              when 'loans'            then 'manage_loans'
+              else                         'process_transactions'
+            end;
+
+    execute format('drop policy if exists %I on public.%I', t || '_public_read', t);
+    execute format('drop policy if exists %I on public.%I', t || '_member_read', t);
+    execute format(
+      'create policy %I on public.%I for select to authenticated '
+      || 'using (member_id = public.current_member_id() or public.is_staff())',
+      t || '_member_read', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_member_insert', t);
+    execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
+    execute format(
+      'create policy %I on public.%I for insert to authenticated with check (public.staff_has_permission(%L))',
+      t || '_staff_insert', t, perm
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
+    execute format(
+      'create policy %I on public.%I for update to authenticated using (public.staff_has_permission(%L)) with check (public.staff_has_permission(%L))',
+      t || '_staff_update', t, perm, perm
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
+    execute format(
+      'create policy %I on public.%I for delete to authenticated using (public.staff_has_permission(%L))',
+      t || '_staff_delete', t, perm
+    );
+  end loop;
+
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 4b: loan_applications - the ONLY member self-INSERT surface.
+  -- Members read their own applications and may submit for their own
+  -- member_id; trg_loan_applications_guard_member_submit forces
+  -- status='SUBMITTED' and freezes staff-only fields. Staff writes need
+  -- manage_loans.
+  -- ------------------------------------------------------------------
+  foreach t in array member_apps loop
     execute format('alter table public.%I enable row level security', t);
 
     execute format('drop policy if exists %I on public.%I', t || '_public_read', t);
@@ -719,14 +1217,59 @@ begin
     execute format('drop policy if exists %I on public.%I', t || '_member_insert', t);
     execute format(
       'create policy %I on public.%I for insert to authenticated '
-      || 'with check (member_id = public.current_member_id() or public.is_staff())',
+      || 'with check (member_id = public.current_member_id() or public.staff_has_permission(''manage_loans''))',
       t || '_member_insert', t
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
     execute format(
       'create policy %I on public.%I for update to authenticated '
-      || 'using (public.is_staff()) with check (public.is_staff())',
+      || 'using (public.staff_has_permission(''manage_loans'')) '
+      || 'with check (public.staff_has_permission(''manage_loans''))',
+      t || '_staff_update', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
+    execute format(
+      'create policy %I on public.%I for delete to authenticated using (public.staff_has_permission(''manage_loans''))',
+      t || '_staff_delete', t
+    );
+  end loop;
+
+  -- ------------------------------------------------------------------
+  -- notifications: members read their own and may mark them read; creation
+  -- and deletion stay staff-side so members cannot forge SYSTEM/FINANCE/ALERT
+  -- messages for themselves.
+  -- ------------------------------------------------------------------
+  foreach t in array member_notif loop
+    execute format('alter table public.%I enable row level security', t);
+
+    execute format('drop policy if exists %I on public.%I', t || '_public_read', t);
+    execute format('drop policy if exists %I on public.%I', t || '_member_read', t);
+    execute format(
+      'create policy %I on public.%I for select to authenticated '
+      || 'using (member_id = public.current_member_id() or public.is_staff())',
+      t || '_member_read', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_member_insert', t);
+    execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
+    execute format(
+      'create policy %I on public.%I for insert to authenticated with check (public.is_staff())',
+      t || '_staff_insert', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_member_update', t);
+    execute format(
+      'create policy %I on public.%I for update to authenticated '
+      || 'using (member_id = public.current_member_id()) '
+      || 'with check (member_id = public.current_member_id())',
+      t || '_member_update', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
+    execute format(
+      'create policy %I on public.%I for update to authenticated using (public.is_staff()) with check (public.is_staff())',
       t || '_staff_update', t
     );
 
@@ -737,16 +1280,21 @@ begin
     );
   end loop;
 
-  -- Members may mark their own notifications as read.
-  execute 'drop policy if exists notifications_member_update on public.notifications';
-  execute 'create policy notifications_member_update on public.notifications for update '
-    || 'to authenticated '
-    || 'using (member_id = public.current_member_id()) '
-    || 'with check (member_id = public.current_member_id())';
-
-  -- Operational / financial data: staff only (anon + member read removed).
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 6c: operational / financial registries. All staff may read;
+  -- writes are keyed to the acting role's permission. (inquiries is the
+  -- public contact queue - any staff member may triage it.)
+  -- ------------------------------------------------------------------
   foreach t in array staff_data loop
     execute format('alter table public.%I enable row level security', t);
+
+    perm := case t
+              when 'trading_transactions'   then 'record_trading'
+              when 'bank_statements'        then 'reconcile_entries'
+              when 'reconciliation_entries' then 'reconcile_entries'
+              when 'mother_group_deposits'  then 'record_deposits'
+              else null
+            end;
 
     execute format('drop policy if exists %I on public.%I', t || '_public_read', t);
     execute format('drop policy if exists %I on public.%I', t || '_staff_read', t);
@@ -756,56 +1304,86 @@ begin
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
-    execute format(
-      'create policy %I on public.%I for insert to authenticated with check (public.is_staff())',
-      t || '_staff_insert', t
-    );
-
     execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
-    execute format(
-      'create policy %I on public.%I for update to authenticated using (public.is_staff()) with check (public.is_staff())',
-      t || '_staff_update', t
-    );
-
     execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
-    execute format(
-      'create policy %I on public.%I for delete to authenticated using (public.is_staff())',
-      t || '_staff_delete', t
-    );
+
+    if perm is null then
+      execute format(
+        'create policy %I on public.%I for insert to authenticated with check (public.is_staff())',
+        t || '_staff_insert', t
+      );
+      execute format(
+        'create policy %I on public.%I for update to authenticated using (public.is_staff()) with check (public.is_staff())',
+        t || '_staff_update', t
+      );
+      execute format(
+        'create policy %I on public.%I for delete to authenticated using (public.is_staff())',
+        t || '_staff_delete', t
+      );
+    else
+      execute format(
+        'create policy %I on public.%I for insert to authenticated with check (public.staff_has_permission(%L))',
+        t || '_staff_insert', t, perm
+      );
+      execute format(
+        'create policy %I on public.%I for update to authenticated using (public.staff_has_permission(%L)) with check (public.staff_has_permission(%L))',
+        t || '_staff_update', t, perm, perm
+      );
+      execute format(
+        'create policy %I on public.%I for delete to authenticated using (public.staff_has_permission(%L))',
+        t || '_staff_delete', t, perm
+      );
+    end if;
   end loop;
 
-  -- Cooperative directories (SHG / mother groups): visible to any signed-in
-  -- user (staff + members), writes stay staff-only.
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 7: SHG / mother-group directories. Previously
+  -- `using (true)` exposed every member name and contribution to ANY
+  -- authenticated account, including self-signed-up non-members. Now only
+  -- staff or a linked portal member may read. (SECURITY FIX 6d gates writes.)
+  -- ------------------------------------------------------------------
   foreach t in array member_visible loop
     execute format('alter table public.%I enable row level security', t);
+
+    perm := case t
+              when 'mother_group_meetings' then 'record_mother_group_meetings'
+              else                              'manage_mother_groups'
+            end;
 
     execute format('drop policy if exists %I on public.%I', t || '_public_read', t);
     execute format('drop policy if exists %I on public.%I', t || '_auth_read', t);
     execute format(
-      'create policy %I on public.%I for select to authenticated using (true)',
+      'create policy %I on public.%I for select to authenticated '
+      || 'using (public.is_staff() or public.current_member_id() is not null)',
       t || '_auth_read', t
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
     execute format(
-      'create policy %I on public.%I for insert to authenticated with check (public.is_staff())',
-      t || '_staff_insert', t
+      'create policy %I on public.%I for insert to authenticated with check (public.staff_has_permission(%L))',
+      t || '_staff_insert', t, perm
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
     execute format(
-      'create policy %I on public.%I for update to authenticated using (public.is_staff()) with check (public.is_staff())',
-      t || '_staff_update', t
+      'create policy %I on public.%I for update to authenticated using (public.staff_has_permission(%L)) with check (public.staff_has_permission(%L))',
+      t || '_staff_update', t, perm, perm
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
     execute format(
-      'create policy %I on public.%I for delete to authenticated using (public.is_staff())',
-      t || '_staff_delete', t
+      'create policy %I on public.%I for delete to authenticated using (public.staff_has_permission(%L))',
+      t || '_staff_delete', t, perm
     );
   end loop;
 
-  -- Public website directory / rate cards: anon read-only, staff write.
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 6e: public website directory / rate cards / CMS. anon may
+  -- READ (transparency pages); writes are limited to supervisory roles
+  -- (SUPER_ADMIN + BRANCH_MANAGER) instead of any staff member.
+  -- SECURITY FIX 8: generated_reports is NOT in this list any more - report
+  -- payloads are internal and handled by the staff-only block below.
+  -- ------------------------------------------------------------------
   foreach t in array public_read loop
     execute format('alter table public.%I enable row level security', t);
 
@@ -817,19 +1395,54 @@ begin
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
     execute format(
-      'create policy %I on public.%I for insert to authenticated with check (public.is_staff())',
+      'create policy %I on public.%I for insert to authenticated with check (public.staff_can_manage_config())',
       t || '_staff_insert', t
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
     execute format(
-      'create policy %I on public.%I for update to authenticated using (public.is_staff()) with check (public.is_staff())',
+      'create policy %I on public.%I for update to authenticated using (public.staff_can_manage_config()) with check (public.staff_can_manage_config())',
       t || '_staff_update', t
     );
 
     execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
     execute format(
-      'create policy %I on public.%I for delete to authenticated using (public.is_staff())',
+      'create policy %I on public.%I for delete to authenticated using (public.staff_can_manage_config())',
+      t || '_staff_delete', t
+    );
+  end loop;
+
+  -- ------------------------------------------------------------------
+  -- SECURITY FIX 8: generated_reports is internal. No anon read; only active
+  -- staff may SELECT, and report generation/writes require view_reports.
+  -- The legacy generated_reports_public_read policy (created by earlier
+  -- versions of this schema) is dropped explicitly so re-running is clean.
+  -- ------------------------------------------------------------------
+  foreach t in array internal_read loop
+    execute format('alter table public.%I enable row level security', t);
+
+    execute format('drop policy if exists %I on public.%I', t || '_public_read', t);
+    execute format('drop policy if exists %I on public.%I', t || '_staff_read', t);
+    execute format(
+      'create policy %I on public.%I for select to authenticated using (public.is_staff())',
+      t || '_staff_read', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_insert', t);
+    execute format(
+      'create policy %I on public.%I for insert to authenticated with check (public.staff_has_permission(''view_reports''))',
+      t || '_staff_insert', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_update', t);
+    execute format(
+      'create policy %I on public.%I for update to authenticated using (public.staff_has_permission(''view_reports'')) with check (public.staff_has_permission(''view_reports''))',
+      t || '_staff_update', t
+    );
+
+    execute format('drop policy if exists %I on public.%I', t || '_staff_delete', t);
+    execute format(
+      'create policy %I on public.%I for delete to authenticated using (public.staff_has_permission(''view_reports''))',
       t || '_staff_delete', t
     );
   end loop;
@@ -838,5 +1451,42 @@ end $$;
 grant usage on schema public to anon, authenticated;
 grant select on all tables in schema public to anon;
 grant select, insert, update, delete on all tables in schema public to authenticated;
--- Public website write paths (RLS still scopes what those rows may contain):
-grant insert on public.members, public.inquiries to anon;
+-- NOTE: the blanket GRANT above is deliberately narrowed again at the very end
+-- of this file for the ledger-owned money tables (transactions / savings_accounts).
+-- Those REVOKEs are the LAST privilege statements so that re-running
+-- schema.sql can never silently re-grant direct writes.
+-- SECURITY FIX 3: anon may no longer write public.members directly (the RLS
+-- INSERT policy was removed above). Membership applications go through the
+-- SECURITY DEFINER RPC instead.
+-- NOTE (pre-existing, deliberately unchanged): anon holds INSERT on
+-- public.inquiries but inquiries has no anon policy, so that insert is blocked
+-- by RLS both before and after this change. Widening the public contact form is
+-- a product decision, not part of this hardening task.
+revoke insert on public.members from anon;
+grant insert on public.inquiries to anon;
+grant execute on function public.submit_member_application(text, text, text, text, text, text, text) to anon, authenticated;
+grant execute on function public.admin_link_employee_auth(text, uuid) to authenticated;
+
+-- ---------------------------------------------------------------------------
+-- MONEY-TABLE PRIVILEGE LOCKDOWN
+-- Coordinated with supabase/migrations/0001_ledger.sql, which owns transactional
+-- posting (post_deposit / post_withdrawal / post_dividend_payout /
+-- post_loan_disbursement). Those SECURITY DEFINER functions are the only writers
+-- of these two tables; direct INSERT/UPDATE by `authenticated` is removed here
+-- AND in that migration, so the final state is identical whichever file runs last.
+-- The role-aware RLS policies created earlier remain as defense-in-depth.
+--
+-- Effective privileges for `authenticated` once this file and 0001_ledger.sql
+-- are both applied:
+--   public.transactions     : SELECT, DELETE   (NO INSERT, NO UPDATE)
+--   public.savings_accounts : SELECT, DELETE   (NO INSERT, NO UPDATE)
+-- `anon` keeps SELECT only, and RLS still returns zero rows to it.
+--
+-- MIGRATION IMPLICATION: src/services/transactionService.ts and
+-- src/services/savingsService.ts currently INSERT/UPDATE these tables directly
+-- and will now fail with "permission denied for table ...". They must be wired
+-- to the post_* RPCs (this is the explicit intent of migration 0001); no store
+-- path in src/ writes these two tables today at runtime in this snapshot.
+-- ---------------------------------------------------------------------------
+revoke insert, update on table public.transactions from authenticated;
+revoke insert, update on table public.savings_accounts from authenticated;

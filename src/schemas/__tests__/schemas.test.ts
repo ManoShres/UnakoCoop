@@ -153,18 +153,36 @@ describe('Financial Schemas', () => {
     expect(result.success).toBe(false);
   });
 
-  it('validates savings account creation', () => {
+  it('validates savings account creation and requires a zero opening balance (D22)', () => {
+    // Updated by task-7: a new account must open EMPTY. The old assertion accepted a
+    // caller-supplied opening balance, which injected a single-entry balance with no
+    // source transaction.
     const savings = {
       memberId: 'mem-123',
       accountNo: 'SAV-00123',
       accountType: 'Regular Voluntary Savings',
-      balance: 5000,
+      balance: 0,
       interestRate: 7.5,
       status: 'ACTIVE' as const,
       openedDate: '2023-01-01',
     };
-    const result = CreateSavingsAccountSchema.safeParse(savings);
-    expect(result.success).toBe(true);
+    expect(CreateSavingsAccountSchema.safeParse(savings).success).toBe(true);
+
+    // A non-zero opening balance is now rejected...
+    const funded = { ...savings, balance: 5000 };
+    const fundedResult = CreateSavingsAccountSchema.safeParse(funded);
+    expect(fundedResult.success).toBe(false);
+    if (!fundedResult.success) {
+      expect(fundedResult.error.issues[0]?.message).toContain('zero balance');
+    }
+
+    // ...and the new upper bound is exercised.
+    const oversized = { ...savings, balance: 2_000_000_000 };
+    const oversizedResult = CreateSavingsAccountSchema.safeParse(oversized);
+    expect(oversizedResult.success).toBe(false);
+    if (!oversizedResult.success) {
+      expect(oversizedResult.error.issues.some((i) => i.path.join('.') === 'balance')).toBe(true);
+    }
   });
 
   it('validates transaction creation', () => {

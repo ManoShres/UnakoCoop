@@ -29,6 +29,8 @@ import {
   calculateBulkBonusShares,
   buildDividendTransactionRef,
   buildBonusShareTransactionRef,
+  buildDividendFiscalLockToken,
+  STATUTORY_MAX_DIVIDEND_RATE_PERCENT,
 } from '../../utils/dividendDistribution';
 import {
   INITIAL_WAREHOUSE_RECEIPTS,
@@ -36,6 +38,7 @@ import {
   generateWarehouseReceiptNo,
   generateCropPledgeLoanNo,
   calculateHarvestLiquidationSettlement,
+  STATUTORY_MAX_PLEDGE_LTV_PERCENT,
 } from '../../utils/warehouseReceiptEngine';
 
 export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSlice> = (set, get) => ({
@@ -69,8 +72,16 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
       const tx = state.transactions.find((t) => t.id === transactionId);
       if (!tx || tx.status !== 'PENDING' || tx.type !== 'DEPOSIT') return state;
 
-      const memberAcc = state.savings.find((s) => s.memberId === tx.memberId) || state.savings[0];
-      const accNo = memberAcc ? memberAcc.accountNo : '004-10294-88-01';
+      // LEDGER INTEGRITY: a deposit is only ever credited to the depositor's OWN
+      // savings account. There is deliberately NO fallback to `state.savings[0]`
+      // (that credited an unrelated member). If no account matches, the deposit
+      // stays PENDING and no balance/member total moves.
+      const memberAcc = tx.memberId
+        ? state.savings.find((s) => s.memberId === tx.memberId)
+        : undefined;
+      if (!memberAcc) return state;
+
+      const accNo = memberAcc.accountNo;
 
       const updatedTxns = state.transactions.map((t) =>
         t.id === transactionId ? { ...t, status: 'COMPLETED' as const } : t
@@ -80,6 +91,7 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
         s.accountNo === accNo ? { ...s, balance: s.balance + tx.amount } : s
       );
 
+      // Only touch member totals when the matching account was actually credited.
       const updatedMembers = tx.memberId
         ? state.members.map((m) =>
             m.id === tx.memberId ? { ...m, totalSavings: (m.totalSavings || 0) + tx.amount } : m
@@ -237,7 +249,52 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
   executeBulkDividendDistribution: (params) => {
     const state = get();
     const deductTax = params.deductTax ?? true;
-    const calc = calculateBulkDividend(state.members, params.ratePercent, deductTax);
+    const ratePercent = Number(params.ratePercent);
+
+    // Statutory guard: dividend rate must be within (0, 18%] of share capital
+    // (Cooperative Act 2074 s.44(2)).
+    if (
+      !Number.isFinite(ratePercent) ||
+      ratePercent <= 0 ||
+      ratePercent > STATUTORY_MAX_DIVIDEND_RATE_PERCENT
+    ) {
+      throw new Error(
+        `Invalid dividend rate ${params.ratePercent}%: rate must be > 0 and <= the statutory ${STATUTORY_MAX_DIVIDEND_RATE_PERCENT}% ceiling.`
+      );
+    }
+
+    // Per-fiscal-year idempotency. Every transaction produced by a distribution
+    // carries a stable fiscal-year lock token, so re-executing the same year is
+    // rejected even after a store reload (the token is persisted with the ledger).
+    const lockToken = buildDividendFiscalLockToken(params.fiscalYear);
+    if (state.transactions.some((t) => t.description.includes(lockToken))) {
+      throw new Error(
+        `Dividend distribution for fiscal year ${params.fiscalYear} has already been executed (period locked).`
+      );
+    }
+
+    const calc = calculateBulkDividend(state.members, ratePercent, deductTax);
+    if (calc.validationError) {
+      throw new Error(calc.validationError);
+    }
+
+    // Cap the aggregate gross payout at the distributable surplus. The client store
+    // does not persist a period net profit, so a caller may pass an explicit
+    // `distributableSurplus`; otherwise the share pool reserve fund is the only
+    // surplus aggregate available client-side.
+    // NEEDS SIGN-OFF: the authoritative distributable surplus must come from the
+    // year-end closing engine server-side, not from the demo store aggregate.
+    const explicitSurplus = (params as { distributableSurplus?: number }).distributableSurplus;
+    const distributableSurplus =
+      typeof explicitSurplus === 'number' && Number.isFinite(explicitSurplus) && explicitSurplus >= 0
+        ? explicitSurplus
+        : state.sharePool.totalReserveFund;
+    if (distributableSurplus > 0 && calc.summary.totalGross > distributableSurplus) {
+      throw new Error(
+        `Dividend gross NPR ${calc.summary.totalGross} exceeds the distributable surplus NPR ${distributableSurplus}.`
+      );
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const newTransactions: Transaction[] = [];
     let seq = 1;
@@ -269,7 +326,7 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
         memberId: m.id,
         date: today,
         type: 'DIVIDEND',
-        description: `Annual AGM Dividend (${params.ratePercent}%) - ${params.destination === 'SAVINGS' && creditedMemberIds.has(m.id) ? 'Credited to Regular Savings' : 'Accrued to Member Ledger'} [Gross: NPR ${payout.grossDividend.toFixed(2)}, TDS 5%: NPR ${payout.taxDeduction.toFixed(2)}]`,
+        description: `Annual AGM Dividend (${ratePercent}%) ${lockToken} - ${params.destination === 'SAVINGS' && creditedMemberIds.has(m.id) ? 'Credited to Regular Savings' : 'Accrued to Member Ledger'} [Gross: NPR ${payout.grossDividend.toFixed(2)}, TDS 5%: NPR ${payout.taxDeduction.toFixed(2)}]`,
         amount: payout.netPayable,
         referenceNo: ref,
         status: 'COMPLETED',
@@ -290,10 +347,10 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
 
     const newNotice: Notice = {
       id: 'not-' + Date.now(),
-      title: `वार्षिक साधारण सभा लाभांश वितरण (${params.ratePercent}%) सम्पन्न (Annual Dividend Payout Disbursed)`,
-      titleNepali: `वार्षिक साधारण सभा लाभांश वितरण (${params.ratePercent}%) सम्पन्न`,
+      title: `वार्षिक साधारण सभा लाभांश वितरण (${ratePercent}%) सम्पन्न (Annual Dividend Payout Disbursed)`,
+      titleNepali: `वार्षिक साधारण सभा लाभांश वितरण (${ratePercent}%) सम्पन्न`,
       category: 'DIVIDEND',
-      content: `आर्थिक वर्ष ${params.fiscalYear} को लागि साधारण सभाद्वारा स्वीकृत ${params.ratePercent}% सेयर लाभांश ५% कर कट्टी गरी सम्पूर्ण सक्रिय सदस्यहरूको खातामा सफलतापूर्वक जम्मा गरिएको छ।`,
+      content: `आर्थिक वर्ष ${params.fiscalYear} को लागि साधारण सभाद्वारा स्वीकृत ${ratePercent}% सेयर लाभांश ५% कर कट्टी गरी सम्पूर्ण सक्रिय सदस्यहरूको खातामा सफलतापूर्वक जम्मा गरिएको छ।`,
       publishedDate: today,
       isUrgent: true,
       isActive: true,
@@ -302,7 +359,7 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
     const newNotification: Notification = {
       id: 'notif-' + Date.now(),
       title: 'Dividend Distributed / लाभांश वितरण',
-      message: `Annual dividend of ${params.ratePercent}% distributed to ${calc.summary.memberCount} members (Net: NPR ${calc.summary.totalNet.toLocaleString()}).`,
+      message: `Annual dividend of ${ratePercent}% distributed to ${calc.summary.memberCount} members (Net: NPR ${calc.summary.totalNet.toLocaleString()}).`,
       type: 'FINANCE',
       date: today,
       isRead: false,
@@ -316,7 +373,7 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
       notifications: [newNotification, ...state.notifications],
       sharePool: {
         ...state.sharePool,
-        annualDividendPercent: params.ratePercent,
+        annualDividendPercent: ratePercent,
       },
     }));
 
@@ -331,40 +388,80 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
       return { transactionRef: '', netAmount: 0, taxDeducted: 0 };
     }
 
+    // LEDGER INTEGRITY: the payable amount is derived from the member's statutory
+    // entitlement rather than trusting the caller-supplied figure.
+    //   entitlement = min(shareCapital × approved rate, 18% statutory ceiling)
+    //                 further capped by the outstanding accrued dividend when one exists.
+    // When an accrual exists it is already an approved liability, so the annual-rate
+    // bound is relaxed to the hard 18% statutory ceiling.
+    // NEEDS SIGN-OFF: the exact rate basis when sharePool.annualDividendPercent is
+    // unset (0) but an accrual exists — currently the 18% ceiling bounds the accrual.
+    const shareCapital = member.shareCapital || 0;
+    const configuredRate = state.sharePool?.annualDividendPercent ?? 0;
+    const approvedRate = Math.min(
+      Math.max(0, configuredRate),
+      STATUTORY_MAX_DIVIDEND_RATE_PERCENT
+    );
+    const statutoryCeiling = Math.floor(
+      (shareCapital * STATUTORY_MAX_DIVIDEND_RATE_PERCENT) / 100
+    );
+    const computedEntitlement = Math.floor((shareCapital * approvedRate) / 100);
+    const accrued = member.accruedDividend || 0;
+    const entitlement =
+      accrued > 0 ? Math.min(accrued, statutoryCeiling) : computedEntitlement;
+
+    const gross = Math.floor(Number(params.amount));
+    if (!Number.isFinite(gross) || gross <= 0 || gross > entitlement) {
+      // Hard rejection: no ledger entry, no balance change, no accrued reduction.
+      return { transactionRef: '', netAmount: 0, taxDeducted: 0 };
+    }
+
     const deductTax = params.deductTax ?? true;
-    const tax = deductTax ? Math.round(params.amount * 0.05) : 0;
-    const net = Math.max(0, params.amount - tax);
+    const tax = deductTax ? Math.round(gross * 0.05) : 0;
+    const net = Math.max(0, gross - tax);
     const ref = buildDividendTransactionRef('2081/82', Math.floor(Math.random() * 900000) + 100000);
+
+    let updatedSavings = state.savings;
+    let credited = false;
+    if (params.destination === 'SAVINGS') {
+      updatedSavings = state.savings.map((s) => {
+        if (
+          !credited &&
+          s.memberId === member.id &&
+          (params.savingsAccountNo ? s.accountNo === params.savingsAccountNo : true)
+        ) {
+          credited = true;
+          return { ...s, balance: s.balance + net };
+        }
+        return s;
+      });
+
+      if (!credited) {
+        // No matching savings account: never leave a phantom transaction and never
+        // zero the member's entitlement.
+        return { transactionRef: '', netAmount: 0, taxDeducted: 0 };
+      }
+    }
 
     const newTx: Transaction = {
       id: 'tx-div-' + Date.now(),
       memberId: member.id,
       date: today,
       type: 'DIVIDEND',
-      description: `Single Member Dividend Payout (${params.destination === 'SAVINGS' ? 'Direct Savings Credit' : 'Cash Counter Disbursement'}) [TDS 5%: NPR ${tax}]`,
+      description: `Single Member Dividend Payout (${params.destination === 'SAVINGS' ? 'Direct Savings Credit' : 'Cash Counter Disbursement'}) [Gross: NPR ${gross}, TDS 5%: NPR ${tax}]`,
       amount: net,
       referenceNo: ref,
       status: 'COMPLETED',
     };
 
-    let updatedSavings = state.savings;
-    if (params.destination === 'SAVINGS') {
-      let credited = false;
-      updatedSavings = state.savings.map((s) => {
-        if (!credited && s.memberId === member.id && (params.savingsAccountNo ? s.accountNo === params.savingsAccountNo : true)) {
-          credited = true;
-          return { ...s, balance: s.balance + net };
-        }
-        return s;
-      });
-    }
-
+    // Accrued dividend is reduced by the GROSS entitlement actually paid out (TDS is
+    // withheld and remitted); it is only touched after a confirmed credit/disbursement.
     const updatedMembers = state.members.map((m) => {
       if (m.id !== member.id) return m;
       return {
         ...m,
-        accruedDividend: Math.max(0, (m.accruedDividend || 0) - params.amount),
-        totalSavings: params.destination === 'SAVINGS' ? (m.totalSavings || 0) + net : m.totalSavings,
+        accruedDividend: Math.max(0, accrued - gross),
+        totalSavings: credited ? (m.totalSavings || 0) + net : m.totalSavings,
       };
     });
 
@@ -464,6 +561,13 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
         }
         return s;
       });
+
+      if (!credited) {
+        // LEDGER INTEGRITY: with no matching member savings account the entitlement
+        // must NOT be zeroed — the old code silently destroyed the member's dividend.
+        // Fall back to "unpaid" (accrual preserved; no ledger entry).
+        return { success: false, amountClaimed: 0 };
+      }
 
       const updatedMembers = state.members.map((m) => {
         if (m.id !== member.id) return m;
@@ -573,6 +677,45 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
     const receipt = state.warehouseReceipts.find((r) => r.id === receiptId);
     if (!receipt) throw new Error('Warehouse receipt not found');
 
+    // (a) Status guard: only a STORED receipt may be pledged. This also makes the
+    // operation idempotent — a second disbursement attempt after the receipt moved to
+    // PLEDGED throws instead of double-crediting the member.
+    if (receipt.status !== 'STORED') {
+      throw new Error(
+        `Pledge loan rejected: receipt ${receipt.receiptNo} is ${receipt.status}; only STORED receipts can be pledged.`
+      );
+    }
+    if (state.warehousePledgeLoans.some((l) => l.receiptId === receipt.id && l.status === 'ACTIVE')) {
+      throw new Error(
+        `Pledge loan rejected: receipt ${receipt.receiptNo} already has an active pledge loan.`
+      );
+    }
+
+    // (b) LTV / valuation cap from the receipt's permitted pledge ceiling.
+    const permittedLtvAmount =
+      receipt.maxEligiblePledgeLoanAmount > 0
+        ? receipt.maxEligiblePledgeLoanAmount
+        : Math.floor((receipt.totalMarketValuation * STATUTORY_MAX_PLEDGE_LTV_PERCENT) / 100);
+    if (!Number.isFinite(principalAmount) || principalAmount <= 0) {
+      throw new Error('Pledge loan rejected: principal amount must be greater than zero.');
+    }
+    if (principalAmount > permittedLtvAmount) {
+      throw new Error(
+        `Pledge loan rejected: principal NPR ${principalAmount} exceeds the permitted pledge ceiling NPR ${permittedLtvAmount} (${STATUTORY_MAX_PLEDGE_LTV_PERCENT}% of valuation).`
+      );
+    }
+
+    // (c) The credit account must belong to the receipt owner.
+    const targetAccount = state.savings.find((s) => s.accountNo === savingsAccountNo);
+    if (!targetAccount) {
+      throw new Error(`Pledge loan rejected: savings account ${savingsAccountNo} not found.`);
+    }
+    if (targetAccount.memberId !== receipt.memberId) {
+      throw new Error(
+        `Pledge loan rejected: savings account ${savingsAccountNo} does not belong to receipt owner ${receipt.memberId}.`
+      );
+    }
+
     const loanId = 'wln-' + Date.now();
     const loanNo = generateCropPledgeLoanNo(state.warehousePledgeLoans.length + 1);
     const today = new Date().toISOString().split('T')[0];
@@ -603,22 +746,25 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
       r.id === receiptId ? { ...r, status: 'PLEDGED' as const, activeLoanId: loanId } : r
     );
 
-    // Credit member savings
+    // Credit the verified owner's designated savings account only.
     const updatedSavings = state.savings.map((s) =>
       s.accountNo === savingsAccountNo ? { ...s, balance: s.balance + principalAmount } : s
     );
 
     // Update member activeLoanBalance
     const updatedMembers = state.members.map((m) =>
-      m.id === receipt.memberId ? { ...m, activeLoanBalance: m.activeLoanBalance + principalAmount } : m
+      m.id === receipt.memberId
+        ? { ...m, activeLoanBalance: (m.activeLoanBalance || 0) + principalAmount }
+        : m
     );
 
-    // Record CBS Transaction (Crediting regular savings)
+    // (d) Record the CBS transaction as a LOAN_DISBURSEMENT, never as DEPOSIT —
+    // booking it as DEPOSIT inflated deposit liabilities by the loan principal.
     const newTx: Transaction = {
       id: 'tx-pledge-' + Date.now(),
       memberId: receipt.memberId,
       date: today,
-      type: 'DEPOSIT',
+      type: 'LOAN_DISBURSEMENT',
       description: `Crop Pledge Loan Disbursed (${receipt.receiptNo} - ${receipt.varietyName})`,
       amount: principalAmount,
       referenceNo: loanNo,
@@ -652,6 +798,13 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
     const result = calculateHarvestLiquidationSettlement(params, elapsedMonths);
     const { receipt } = params;
 
+    // Idempotency guard: a receipt already liquidated must never be settled (and the
+    // member credited) twice.
+    const currentReceipt = state.warehouseReceipts.find((r) => r.id === receipt.id);
+    if (!currentReceipt || currentReceipt.status === 'LIQUIDATED_SOLD') {
+      return result;
+    }
+
     const updatedReceipts = state.warehouseReceipts.map((r) =>
       r.id === receipt.id ? { ...r, status: 'LIQUIDATED_SOLD' as const } : r
     );
@@ -666,40 +819,69 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
       return { ...m, activeLoanBalance: newLoanBal };
     });
 
-    let updatedSavings = state.savings;
-    if (result.netSurplusPayableToMember > 0) {
-      updatedSavings = state.savings.map((s) => {
-        if (s.memberId === receipt.memberId) {
-          return { ...s, balance: s.balance + result.netSurplusPayableToMember };
-        }
-        return s;
-      });
-    }
+    // Credit exactly ONE savings account of the receipt owner (the old code credited
+    // EVERY savings account of the member). When no active account exists the surplus
+    // is parked on the member's accrued ledger instead of being silently dropped.
+    const surplus = result.netSurplusPayableToMember;
+    const creditAccount =
+      surplus > 0
+        ? state.savings.find((s) => s.memberId === receipt.memberId && s.status === 'ACTIVE')
+        : undefined;
+    const credited = Boolean(creditAccount);
+    const creditedAccountNo = creditAccount?.accountNo;
+
+    const updatedSavings = credited
+      ? state.savings.map((s) =>
+          s.accountNo === creditedAccountNo ? { ...s, balance: s.balance + surplus } : s
+        )
+      : state.savings;
+
+    const membersWithTotals = credited
+      ? updatedMembers.map((m) =>
+          m.id === receipt.memberId
+            ? { ...m, totalSavings: (m.totalSavings || 0) + surplus }
+            : m
+        )
+      : surplus > 0
+        ? updatedMembers.map((m) =>
+            m.id === receipt.memberId
+              ? { ...m, accruedDividend: (m.accruedDividend || 0) + surplus }
+              : m
+          )
+        : updatedMembers;
 
     const today = new Date().toISOString().split('T')[0];
-    const newTx: Transaction = {
-      id: 'tx-wh-settle-' + Date.now(),
-      memberId: receipt.memberId,
-      date: today,
-      type: 'DEPOSIT',
-      description: `Harvest Liquidation Net Surplus (${receipt.receiptNo} - ${receipt.varietyName})`,
-      amount: result.netSurplusPayableToMember,
-      referenceNo: result.transactionRef,
-      status: 'COMPLETED',
-    };
+    // Only book a ledger entry when value actually moved to a member account; the
+    // accrued fallback is recorded in the notification instead of a phantom deposit.
+    const newTx: Transaction | null =
+      credited && surplus > 0
+        ? {
+            id: 'tx-wh-settle-' + Date.now(),
+            memberId: receipt.memberId,
+            date: today,
+            type: 'DEPOSIT',
+            description: `Harvest Liquidation Net Surplus (${receipt.receiptNo} - ${receipt.varietyName})`,
+            amount: surplus,
+            referenceNo: result.transactionRef,
+            status: 'COMPLETED',
+          }
+        : null;
 
     set((s) => ({
       warehouseReceipts: updatedReceipts,
       warehousePledgeLoans: updatedLoans,
-      members: updatedMembers,
+      members: membersWithTotals,
       savings: updatedSavings,
-      transactions: [newTx, ...s.transactions],
+      transactions: newTx ? [newTx, ...s.transactions] : s.transactions,
       notifications: [
         {
           id: 'notif-' + Date.now(),
           type: 'FINANCE',
           title: 'अन्न बिक्री मिलान तथा नाफा भुक्तानी',
-          message: result.summaryNe,
+          message:
+            credited || surplus <= 0
+              ? result.summaryNe
+              : `${result.summaryNe} (खुद बचत रकम रु. ${surplus.toLocaleString()} सदस्य बचत खाता नभएकोले बक्यौता महाजनीमा राखिएको छ।)`,
           date: today,
           isRead: false,
         },
@@ -714,19 +896,68 @@ export const createOperationsSlice: StateCreator<CoopState, [], [], OperationsSl
     const state = get();
     const receipt = state.warehouseReceipts.find((r) => r.id === receiptId);
     if (!receipt) return;
+
+    // Idempotency: an already released receipt is a no-op (no double settlement).
+    if (receipt.status === 'RELEASED') return;
+
     const today = new Date().toISOString().split('T')[0];
+
+    // A6: releasing the crop must also retire the pledge liability. Settle the
+    // outstanding ACTIVE pledge principal through the same arithmetic used by the
+    // repayment path (Math.max(0, balance - amount)) and mirror it on the member's
+    // activeLoanBalance so no phantom liability is left behind.
+    const activePledgeLoans = state.warehousePledgeLoans.filter(
+      (l) => l.receiptId === receiptId && l.status === 'ACTIVE'
+    );
+    const outstandingPledgePrincipal = activePledgeLoans.reduce(
+      (sum, l) => sum + l.principalDisbursed,
+      0
+    );
 
     const updatedReceipts = state.warehouseReceipts.map((r) =>
       r.id === receiptId ? { ...r, status: 'RELEASED' as const } : r
     );
 
     const updatedLoans = state.warehousePledgeLoans.map((l) =>
-      l.receiptId === receiptId ? { ...l, status: 'SETTLED' as const } : l
+      l.receiptId === receiptId && l.status === 'ACTIVE'
+        ? { ...l, status: 'SETTLED' as const }
+        : l
     );
+
+    const updatedMembers =
+      outstandingPledgePrincipal > 0
+        ? state.members.map((m) =>
+            m.id === receipt.memberId
+              ? {
+                  ...m,
+                  activeLoanBalance: Math.max(
+                    0,
+                    (m.activeLoanBalance || 0) - outstandingPledgePrincipal
+                  ),
+                }
+              : m
+          )
+        : state.members;
+
+    const settlementTx: Transaction | null =
+      outstandingPledgePrincipal > 0
+        ? {
+            id: 'tx-wh-release-' + Date.now(),
+            memberId: receipt.memberId,
+            date: today,
+            type: 'LOAN_EMI',
+            description: `Crop Pledge Loan Settled on Receipt Release (${receipt.receiptNo}${notes ? ' - ' + notes : ''})`,
+            amount: outstandingPledgePrincipal,
+            referenceNo: `WH-RELEASE-${receipt.receiptNo}`,
+            status: 'COMPLETED',
+          }
+        : null;
 
     set((s) => ({
       warehouseReceipts: updatedReceipts,
       warehousePledgeLoans: updatedLoans,
+      members: updatedMembers,
+      transactions: settlementTx ? [settlementTx, ...s.transactions] : s.transactions,
       notifications: [
         {
           id: 'notif-' + Date.now(),

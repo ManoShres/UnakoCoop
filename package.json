@@ -5,11 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/check-prod-build.mjs && tsc -b && vite build",
+    "build:demo": "node scripts/check-prod-build.mjs --allow-demo && tsc -b && vite build",
+    "preview": "vite preview",
     "lint": "oxlint",
+    "lint:ci": "oxlint --max-warnings 520",
+    "typecheck": "tsc -b",
     "test": "vitest run",
+    "test:threads": "vitest run --pool=threads",
+    "secret-scan": "node scripts/check-secrets.mjs",
+    "secret-scan:dist": "node scripts/check-secrets.mjs --require-dist",
     "db:check": "node scripts/check-supabase.mjs",
-    "preview": "vite preview"
+    "verify": "npm run secret-scan && npm run lint:ci && npm run typecheck && npm test && npm run build && npm run secret-scan:dist"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

@@ -9,6 +9,8 @@ import {
   generateIrdETdsCsv,
   calculateFilingCompliance,
   generateTdsCertificate,
+  calculateSection87AnnualTax,
+  calculateSection87MonthlyTds,
   TdsTransactionRecord,
   DEFAULT_UNAKO_TAX_INFO,
 } from '../irdTdsEngine';
@@ -35,6 +37,23 @@ describe('irdTdsEngine - Nepal Income Tax Act 2058 Statutory TDS Engine', () => 
 
     it('returns 1.5% for contract payments', () => {
       expect(getStandardTdsRate('SEC_89_CONTRACT')).toBe(1.5);
+    });
+
+    it('applies the progressive Section 87 slab instead of a flat 1%', () => {
+      // Regression (B15): Sec 87 returned a flat 1%, under-withholding ~11,000/month on
+      // a 100,000/month salary. Annual slab: 1%/10%/20%/30%/36%.
+      expect(calculateSection87AnnualTax(1200000)).toBe(145000);
+      const monthly = calculateSection87MonthlyTds(100000);
+      expect(monthly.monthlyTds).toBeCloseTo(12083.33, 2);
+      expect(monthly.effectiveRatePercent).toBeCloseTo(12.08, 2);
+
+      // 12,083.33 withheld vs the old flat 1,000 → ~11,000/month more.
+      expect(monthly.monthlyTds - 1000).toBeGreaterThan(11000);
+
+      expect(getStandardTdsRate('SEC_87', 'INDIVIDUAL', true, 100000)).toBeCloseTo(12.08, 2);
+      // Without an amount only the lowest slab is knowable.
+      expect(getStandardTdsRate('SEC_87')).toBe(1.0);
+      expect(calculateSection87AnnualTax(0)).toBe(0);
     });
   });
 
@@ -212,6 +231,21 @@ describe('irdTdsEngine - Nepal Income Tax Act 2058 Statutory TDS Engine', () => 
       expect(compliance.isFullyDeposited).toBe(true);
       expect(compliance.isOverdue).toBe(false);
       expect(compliance.estimatedLateFee).toBe(0);
+    });
+
+    it('builds a real next-month 25th BS due date and measures actual delay', () => {
+      // Regression (B15): the due date was built as `2081-मंसिर-25` (invalid) and the
+      // delay was hardcoded to 15 days with isOverdue always true.
+      const dueDateOnly = calculateFilingCompliance('मंसिर', '2081/82', sampleRecords, '2081-09-20');
+      expect(dueDateOnly.dueDateBS).toBe('2081-09-25'); // पुष (month 9) 25th
+      expect(dueDateOnly.daysDelayed).toBe(0);
+      expect(dueDateOnly.isOverdue).toBe(false); // not overdue before the 25th
+      expect(dueDateOnly.estimatedLateFee).toBe(0);
+
+      const late = calculateFilingCompliance('मंसिर', '2081/82', sampleRecords, '2081-09-30');
+      expect(late.isOverdue).toBe(true);
+      expect(late.daysDelayed).toBe(5);
+      expect(late.estimatedLateFee).toBeCloseTo(Math.round((6500 * 0.15 * (5 / 365) + 100) * 100) / 100, 2);
     });
   });
 

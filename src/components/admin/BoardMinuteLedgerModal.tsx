@@ -26,6 +26,7 @@ import {
   STATUTORY_QUORUM_PERCENT,
   MEETING_ALLOWANCE_TDS_RATE,
 } from '../../utils/boardMinuteEngine';
+import { sanitizePrintableHtml } from '../../utils/printHelper';
 
 interface BoardMinuteLedgerModalProps {
   isOpen: boolean;
@@ -159,7 +160,7 @@ export const BoardMinuteLedgerModal: React.FC<BoardMinuteLedgerModalProps> = ({
     const html = generateResolutionExtractHtml(currentMeeting, agendaNum);
     const win = window.open('', '_blank');
     if (win) {
-      win.document.write(html);
+      win.document.write(sanitizePrintableHtml(html));
       win.document.close();
       win.focus();
       setTimeout(() => win.print(), 250);

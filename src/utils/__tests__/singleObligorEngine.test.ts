@@ -135,4 +135,102 @@ describe('Cooperative Act 2074 Section 51 Single Obligor Limit (SOL) & Family Ex
     expect(csv).toContain('Bikram Bahadur Singh');
     expect(csv).toContain('BREACH');
   });
+
+  it('classifies a >300k uncollateralised loan as UNSECURED (no balance-based bypass)', () => {
+    // Regression (B10): balance > 300000 alone used to mark a loan SECURED, letting a
+    // borrower escape the Section 51(1) 10% unsecured limit just by borrowing more.
+    const member = { id: 'MEM-UNSEC', memberNo: 'UKO-900', name: 'No Collateral', phone: '9800000000' } as Member;
+    const loan: Loan = {
+      id: 'LN-UNSEC',
+      loanNo: 'LN-2081-900',
+      memberId: 'MEM-UNSEC',
+      principalAmount: 500000,
+      remainingBalance: 500000,
+      interestRate: 12,
+      tenureMonths: 24,
+      monthlyEmi: 25000,
+      disbursedDate: '2024-01-01',
+      nextDueDate: '2024-02-01',
+      status: 'ACTIVE',
+      loanType: 'Education & Career',
+      collateralDescription: 'Personal Guarantee',
+    };
+
+    const analysis = calculateSingleObligorExposure([loan], [member], sampleCoreCapital);
+    const profile = analysis.topBorrowers.find((b) => b.memberId === 'MEM-UNSEC');
+
+    expect(profile?.totalUnsecuredBalance).toBe(500000);
+    expect(profile?.totalSecuredBalance).toBe(0);
+    expect(profile?.activeLoans[0].isCollateralized).toBe(false);
+  });
+
+  it('excludes PAID_OFF loans and never falls back to principal for a zero balance', () => {
+    const member = { id: 'MEM-PAID', memberNo: 'UKO-901', name: 'Settled', phone: '9800000001' } as Member;
+    const paidOff: Loan = {
+      id: 'LN-PAID',
+      loanNo: 'LN-2081-901',
+      memberId: 'MEM-PAID',
+      principalAmount: 900000,
+      remainingBalance: 0,
+      interestRate: 12,
+      tenureMonths: 24,
+      monthlyEmi: 0,
+      disbursedDate: '2023-01-01',
+      nextDueDate: '2023-02-01',
+      status: 'PAID_OFF',
+      loanType: 'Education & Career',
+      collateralDescription: 'Closed',
+    };
+    const zeroActive: Loan = { ...paidOff, id: 'LN-ZERO', loanNo: 'LN-2081-902', status: 'ACTIVE' };
+
+    const analysis = calculateSingleObligorExposure([paidOff, zeroActive], [member], sampleCoreCapital);
+
+    expect(analysis.totalLoanPortfolio).toBe(0);
+    // No phantom exposure from the settled principal.
+    expect(analysis.memberExposureMap['MEM-PAID'] ?? 0).toBe(0);
+  });
+
+  it('reads exposure for a borrower outside the top-20 display slice', () => {
+    // Regression (B10): simulateNewLoanSolPreCheck looked borrowers up in
+    // baseline.topBorrowers (20 rows), so anyone outside it read exposure 0.
+    const members: Member[] = [];
+    const loans: Loan[] = [];
+    for (let i = 1; i <= 25; i += 1) {
+      members.push({
+        id: `MEM-${i}`,
+        memberNo: `UKO-${i}`,
+        name: `Borrower ${i}`,
+        phone: '9800000000',
+      } as Member);
+      loans.push({
+        id: `LN-${i}`,
+        loanNo: `LN-2081-${i}`,
+        memberId: `MEM-${i}`,
+        principalAmount: (26 - i) * 100000,
+        remainingBalance: (26 - i) * 100000,
+        interestRate: 12,
+        tenureMonths: 24,
+        monthlyEmi: 10000,
+        disbursedDate: '2024-01-01',
+        nextDueDate: '2024-02-01',
+        status: 'ACTIVE',
+        loanType: 'Education & Career',
+        collateralDescription: 'Personal Guarantee',
+      });
+    }
+
+    const analysis = calculateSingleObligorExposure(loans, members, sampleCoreCapital);
+    // MEM-25 holds the smallest loan (100,000) and is outside the top-20 slice.
+    expect(analysis.topBorrowers.some((b) => b.memberId === 'MEM-25')).toBe(false);
+    expect(analysis.memberExposureMap['MEM-25']).toBe(100000);
+
+    const check = simulateNewLoanSolPreCheck('MEM-25', 500000, false, analysis);
+    expect(check.currentExposure).toBe(100000);
+    expect(check.projectedExposure).toBe(600000);
+  });
+
+  it('does not fabricate cross-guarantee alerts when no guarantor records exist', () => {
+    const analysis = calculateSingleObligorExposure(sampleLoans, sampleMembers, sampleCoreCapital);
+    expect(analysis.crossGuaranteeAlerts).toEqual([]);
+  });
 });

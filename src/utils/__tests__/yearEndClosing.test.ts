@@ -39,8 +39,8 @@ describe('Year-End Closing (Asar Masanta / असार मसान्त) Engi
       // Mandatory 25% to General Reserve Fund
       expect(result.generalReserveFund).toBe(250000);
 
-      // Cooperative Education Fund (0.5%)
-      expect(result.educationFund).toBe(5000);
+      // Cooperative Education Fund (5% statutory — corrected from the old 0.5%)
+      expect(result.educationFund).toBe(50000);
 
       // Community Development Fund (0.5%)
       expect(result.communityDevelopmentFund).toBe(5000);
@@ -51,9 +51,38 @@ describe('Year-End Closing (Asar Masanta / असार मसान्त) Engi
       // Employee Welfare Fund (0.5%)
       expect(result.employeeWelfareFund).toBe(5000);
 
-      // Remaining Distributable Surplus: 1,000,000 - (250,000 + 20,000) = 730,000
-      expect(result.totalStatutoryAllocations).toBe(270000);
-      expect(result.distributableSurplus).toBe(730000);
+      // Remaining Distributable Surplus: 1,000,000 - (250,000 + 50,000 + 15,000) = 685,000
+      expect(result.totalStatutoryAllocations).toBe(315000);
+      expect(result.distributableSurplus).toBe(685000);
+      expect(result.lossCarryForward).toBe(0);
+    });
+
+    it('allocates the Cooperative Education Fund at the statutory 5% of net profit', () => {
+      // Regression (B8): the fund was allocated at 0.5% while the auditor engine
+      // certified 5%; the statutory rule is 5%.
+      const result = calculateStatutoryProfitAppropriation({
+        netProfit: 2000000,
+        fiscalYear: '2081/82',
+        shareCapital: 5000000,
+      });
+
+      expect(result.educationFund).toBe(100000); // 2,000,000 * 5%
+      expect(result.educationFund).toBe(Math.round(2000000 * 0.05));
+    });
+
+    it('preserves a real loss and exposes a carry-forward instead of reporting zero profit', () => {
+      const result = calculateStatutoryProfitAppropriation({
+        netProfit: -750000,
+        fiscalYear: '2081/82',
+        shareCapital: 5000000,
+      });
+
+      expect(result.netProfit).toBe(-750000);
+      expect(result.lossCarryForward).toBe(750000);
+      expect(result.generalReserveFund).toBe(0);
+      expect(result.educationFund).toBe(0);
+      expect(result.totalStatutoryAllocations).toBe(0);
+      expect(result.distributableSurplus).toBe(0);
     });
 
     it('enforces maximum 18% share dividend cap as per Nepal Cooperative Act 2074', () => {

@@ -11,6 +11,7 @@ import {
   calculateAuctionSettlement,
   BadDebtWriteOffVoucher,
 } from '../../utils/badDebtRecovery';
+import { escapeHtml, sanitizePrintableHtml } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -119,11 +120,11 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    printWindow.document.write(`
+    printWindow.document.write(sanitizePrintableHtml(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>${noticeData.titleNepali}</title>
+        <title>${escapeHtml(noticeData.titleNepali)}</title>
         <style>
           body { font-family: 'Mukti', 'Kalimati', 'Arial', sans-serif; padding: 30px; line-height: 1.6; color: #111; }
           .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 20px; }
@@ -140,43 +141,43 @@ export const BadDebtRecoveryModal: React.FC<BadDebtRecoveryModalProps> = ({
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">${coopSettings.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
-          <p class="inst-sub">${coopSettings.addressNepali || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश'}</p>
-          <p class="inst-sub">दर्ता नं: ${coopSettings.regNo || '२८३/०६५/०६६'} | पान नं: ${coopSettings.panNo || '३०२९५८४८१'}</p>
+          <p class="inst-name">${escapeHtml(coopSettings.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.')}</p>
+          <p class="inst-sub">${escapeHtml(coopSettings.addressNepali || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश')}</p>
+          <p class="inst-sub">दर्ता नं: ${escapeHtml(coopSettings.regNo || '२८३/०६५/०६६')} | पान नं: ${escapeHtml(coopSettings.panNo || '३०२९५८४८१')}</p>
         </div>
         <div class="meta">
-          <span>सूचना नं: ${noticeData.noticeNo}</span>
-          <span>प्रकाशन मिति: ${noticeData.issueDateNepali}</span>
+          <span>सूचना नं: ${escapeHtml(noticeData.noticeNo)}</span>
+          <span>प्रकाशन मिति: ${escapeHtml(noticeData.issueDateNepali)}</span>
         </div>
-        <div class="title">${noticeData.titleNepali}</div>
-        <div class="body-text">${noticeData.noticeBodyText}</div>
+        <div class="title">${escapeHtml(noticeData.titleNepali)}</div>
+        <div class="body-text">${escapeHtml(noticeData.noticeBodyText)}</div>
         
         <table class="details-table">
           <tr><th colspan="2">१. ऋणी तथा जमानीकर्ताको विवरण</th></tr>
-          <tr><td width="35%">ऋणी सदस्यको नाम / थर:</td><td><b>${noticeData.borrowerName}</b> (सदस्य नं: ${noticeData.borrowerMemberNo})</td></tr>
-          <tr><td>नागरिकता नं. / जिल्ला:</td><td>${noticeData.borrowerCitizenshipNo} (दाङ)</td></tr>
-          <tr><td>ठेगाना:</td><td>${noticeData.borrowerAddress}</td></tr>
-          <tr><td>जमानीकर्ता:</td><td>${noticeData.guarantors.map((g) => `${g.name} (${g.relation}, ना.नं: ${g.citizenshipNo})`).join(', ')}</td></tr>
+          <tr><td width="35%">ऋणी सदस्यको नाम / थर:</td><td><b>${escapeHtml(noticeData.borrowerName)}</b> (सदस्य नं: ${escapeHtml(noticeData.borrowerMemberNo)})</td></tr>
+          <tr><td>नागरिकता नं. / जिल्ला:</td><td>${escapeHtml(noticeData.borrowerCitizenshipNo)} (दाङ)</td></tr>
+          <tr><td>ठेगाना:</td><td>${escapeHtml(noticeData.borrowerAddress)}</td></tr>
+          <tr><td>जमानीकर्ता:</td><td>${noticeData.guarantors.map((g) => `${escapeHtml(g.name)} (${escapeHtml(g.relation)}, ना.नं: ${escapeHtml(g.citizenshipNo)})`).join(', ')}</td></tr>
           
           <tr><th colspan="2">२. लिलाम हुने धितो सम्पत्तिको विवरण</th></tr>
-          <tr><td>जग्गाको कित्ता नं. / क्षेत्रफल:</td><td>कित्ता नं. <b>${noticeData.collateral.kittaNo}</b> (क्षेत्रफल: ${noticeData.collateral.areaDesc})</td></tr>
-          <tr><td>जग्गाको स्थान:</td><td>${noticeData.collateral.district}, ${noticeData.collateral.municipality} ${noticeData.collateral.wardNo}</td></tr>
-          <tr><td>चारकिल्ला:</td><td>पूर्व: ${noticeData.collateral.eastBoundary}, पश्चिम: ${noticeData.collateral.westBoundary}, उत्तर: ${noticeData.collateral.northBoundary}, दक्षिण: ${noticeData.collateral.southBoundary}</td></tr>
+          <tr><td>जग्गाको कित्ता नं. / क्षेत्रफल:</td><td>कित्ता नं. <b>${escapeHtml(noticeData.collateral.kittaNo)}</b> (क्षेत्रफल: ${escapeHtml(noticeData.collateral.areaDesc)})</td></tr>
+          <tr><td>जग्गाको स्थान:</td><td>${escapeHtml(noticeData.collateral.district)}, ${escapeHtml(noticeData.collateral.municipality)} ${escapeHtml(noticeData.collateral.wardNo)}</td></tr>
+          <tr><td>चारकिल्ला:</td><td>पूर्व: ${escapeHtml(noticeData.collateral.eastBoundary)}, पश्चिम: ${escapeHtml(noticeData.collateral.westBoundary)}, उत्तर: ${escapeHtml(noticeData.collateral.northBoundary)}, दक्षिण: ${escapeHtml(noticeData.collateral.southBoundary)}</td></tr>
           
           <tr><th colspan="2">३. संस्थालाई बुझाउनुपर्ने चुक्ता हिसाव</th></tr>
-          <tr><td>बाँकी साँवा रकम:</td><td>रु. ${noticeData.principalOutstanding.toLocaleString()}</td></tr>
-          <tr><td>पाकेको ब्याज तथा हर्जाना:</td><td>रु. ${(noticeData.accruedInterest + noticeData.penaltyAmount).toLocaleString()}</td></tr>
-          <tr><td>कानूनी तथा सूचना प्रकाशन खर्च:</td><td>रु. ${noticeData.legalNoticeExpenses.toLocaleString()}</td></tr>
-          <tr><td><b>कुल चुक्ता गर्नुपर्ने रकम:</b></td><td><b>रु. ${noticeData.totalPayableAmount.toLocaleString()}</b></td></tr>
+          <tr><td>बाँकी साँवा रकम:</td><td>रु. ${escapeHtml(noticeData.principalOutstanding.toLocaleString())}</td></tr>
+          <tr><td>पाकेको ब्याज तथा हर्जाना:</td><td>रु. ${escapeHtml((noticeData.accruedInterest + noticeData.penaltyAmount).toLocaleString())}</td></tr>
+          <tr><td>कानूनी तथा सूचना प्रकाशन खर्च:</td><td>रु. ${escapeHtml(noticeData.legalNoticeExpenses.toLocaleString())}</td></tr>
+          <tr><td><b>कुल चुक्ता गर्नुपर्ने रकम:</b></td><td><b>रु. ${escapeHtml(noticeData.totalPayableAmount.toLocaleString())}</b></td></tr>
         </table>
 
         <div class="footer">
           <p>कर्जा असुली उपसमिति तथा व्यवस्थापन पक्ष</p>
-          <p>${coopSettings.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
+          <p>${escapeHtml(coopSettings.nameNepali || 'उनको बचत तथा ऋण सहकारी संस्था लि.')}</p>
         </div>
       </body>
       </html>
-    `);
+    `));
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

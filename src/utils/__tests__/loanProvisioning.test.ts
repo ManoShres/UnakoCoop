@@ -129,4 +129,61 @@ describe('Statutory Loan Loss Provisioning', () => {
     expect(metrics.nplBalance).toBe(50000);
     expect(metrics.nplRatioPercent).toBe(25); // 50k / 200k = 25%
   });
+
+  it('derives overdue days from nextDueDate instead of defaulting every OVERDUE loan to 45 days', () => {
+    // Regression (B9): an 800-day overdue loan was provisioned at the 5% watchlist
+    // tier (50,000) instead of the 100% BAD tier (1,000,000).
+    const overdue: Loan = {
+      ...mockLoan,
+      id: 'loan-bad',
+      remainingBalance: 1000000,
+      status: 'OVERDUE',
+      nextDueDate: '2081-01-01',
+    };
+
+    const classified = classifyLoanItem(overdue, mockMember, undefined, '2083-01-01');
+
+    expect(classified.category).toBe('BAD');
+    expect(classified.provisionPercent).toBe(100);
+    expect(classified.requiredProvisionAmount).toBe(1000000);
+    expect(classified.overdueDays).toBeGreaterThan(365);
+  });
+
+  it('classifies a genuinely short overdue loan using real date arithmetic', () => {
+    // BS 2081-11-15 -> BS 2081-12-20 is 34 days: WATCHLIST (5%), NOT BAD/SKIPPED.
+    const overdue: Loan = {
+      ...mockLoan,
+      id: 'loan-watch',
+      status: 'OVERDUE',
+      nextDueDate: '2081-11-15',
+    };
+
+    const classified = classifyLoanItem(overdue, mockMember, undefined, '2081-12-20');
+
+    expect(classified.overdueDays).toBe(34);
+    expect(classified.category).toBe('WATCHLIST');
+    expect(classified.provisionPercent).toBe(5);
+  });
+
+  it('hard-fails an OVERDUE loan with no interpretable due date instead of inventing a category', () => {
+    const overdue: Loan = { ...mockLoan, id: 'loan-nodate', status: 'OVERDUE', nextDueDate: '' };
+
+    expect(() => classifyLoanItem(overdue, mockMember, undefined, '2083-01-01')).toThrow(
+      /nextDueDate/
+    );
+  });
+
+  it('computes the provision coverage ratio from NPL provisions only', () => {
+    const good = classifyLoanItem(mockLoan, mockMember, 10); // 150,000 GOOD @1% = 1,500
+    const substandard = classifyLoanItem(
+      { ...mockLoan, id: 'loan-2', remainingBalance: 50000 },
+      mockMember,
+      120
+    ); // 50,000 SUBSTAND @25% = 12,500
+
+    const metrics = computePortfolioRiskRatios([good, substandard]);
+
+    // 12,500 NPL provision / 50,000 NPL balance = 25% (the old code used all provisions: 28%)
+    expect(metrics.coverageRatioPercent).toBe(25);
+  });
 });

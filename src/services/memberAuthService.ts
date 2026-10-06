@@ -7,6 +7,13 @@ const NOT_CONFIGURED =
   'Supabase is not configured (set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY).';
 
 /**
+ * Member sign-in is only possible against the live CIS authentication service.
+ * Without it the flow fails closed - there is no offline roster/password match.
+ */
+export const MEMBER_LIVE_AUTH_REQUIRED =
+  'Live authentication is required: the CBS authentication service is not configured on this deployment.';
+
+/**
  * Signs a member in through Supabase Auth (email + password) and resolves the
  * members row linked via members.auth_user_id. Row-level security guarantees
  * the browser can only ever read the signed-in member's own data.
@@ -52,6 +59,25 @@ export const signInMemberWithSupabase = async (
       error: err instanceof Error ? err.message : 'Unknown network error.',
     };
   }
+};
+
+/**
+ * Member login entry point used by the login page.
+ *
+ * FAIL CLOSED: when the deployment has no live authentication service this
+ * returns MEMBER_LIVE_AUTH_REQUIRED and authenticates nobody. There is no
+ * offline member-number / phone / citizenship / name-substring match any more.
+ */
+export const authenticateMemberWithSupabase = async (
+  identifier: string,
+  password: string
+): Promise<ServiceResult<Member>> => {
+  if (!isSupabaseConfigured() || !supabase) {
+    return { data: null, error: MEMBER_LIVE_AUTH_REQUIRED };
+  }
+  // signInMemberWithSupabase already verifies the members.auth_user_id link and
+  // signs the session out when the account is not a linked member.
+  return signInMemberWithSupabase(identifier.trim(), password);
 };
 
 /**

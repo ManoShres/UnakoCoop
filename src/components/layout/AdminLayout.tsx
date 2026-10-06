@@ -35,7 +35,6 @@ import {
 import { useCoopStore } from '../../store/useCoopStore';
 import { useAuthStore } from '../../store/useAuthStore';
 import { signOutOfSupabase } from '../../services/employeeService';
-import { isSupabaseConfigured } from '../../lib/supabase';
 import { useLanguageStore } from '../../store/useLanguageStore';
 import { LanguageToggle } from '../ui/LanguageToggle';
 import { ThemeToggle } from '../ui/ThemeToggle';
@@ -61,7 +60,7 @@ export const AdminLayout: React.FC = () => {
   const pendingDeposits = useCoopStore((s) =>
     s.motherGroupDeposits.filter((deposit) => deposit.status === 'PENDING').length
   );
-  const { role, authLoading, switchToPreset, theme: storedTheme, currentEmployee } = useAuthStore();
+  const { role, staffRole, authLoading, switchToPreset, theme: storedTheme, currentEmployee } = useAuthStore();
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', storedTheme === 'dark');
   }, [storedTheme]);
@@ -84,21 +83,21 @@ export const AdminLayout: React.FC = () => {
   const logoUrl = customLogoUrl || '/unako-logo.png';
   const newInquiriesCount = inquiries.filter((i) => i.status === 'NEW').length;
 
-  // Live (Supabase) mode: the admin console requires an authenticated staff
-  // session. Offline demo keeps the original open-access behaviour.
-  if (isSupabaseConfigured()) {
-    if (authLoading) {
-      return (
-        <div className="min-h-screen bg-surface-canvas flex items-center justify-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant animate-pulse">
-            {t('सत्र जाँच गर्दै…', 'Checking session…')}
-          </span>
-        </div>
-      );
-    }
-    if (role !== 'ADMIN') {
-      return <Navigate to="/login" replace />;
-    }
+  // The admin console requires an ADMIN session backed by a verified staff role
+  // in EVERY deployment mode (fail closed). Previously this check was skipped
+  // whenever Supabase was not configured, which left the console reachable
+  // offline. The dev-only staff preset still works because it sets role=ADMIN.
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-surface-canvas flex items-center justify-center">
+        <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant animate-pulse">
+          {t('सत्र जाँच गर्दै…', 'Checking session…')}
+        </span>
+      </div>
+    );
+  }
+  if (role !== 'ADMIN' || !staffRole) {
+    return <Navigate to="/login" replace />;
   }
 
   const handleLogout = () => {

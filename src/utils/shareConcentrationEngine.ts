@@ -135,17 +135,19 @@ export function calculateShareConcentration(params: {
   };
 
   const shareholders: ShareholderRecord[] = sortedRaw.map((s) => {
-    const percentageOfTotal = totalIssuedShares > 0
-      ? Math.round((s.shareKitta / totalIssuedShares) * 10000) / 100
-      : 0;
+    // Thresholds compare the UNROUNDED percentage; the rounded value is display only
+    // (a 20.004% holding must not round to 20.00 and escape a 20% statutory limit).
+    const rawPercentageOfTotal =
+      totalIssuedShares > 0 ? (s.shareKitta / totalIssuedShares) * 100 : 0;
+    const percentageOfTotal = Math.round(rawPercentageOfTotal * 100) / 100;
 
-    const exceedsStatutoryLimit = percentageOfTotal > statutoryLimitPercent;
-    const exceedsInternalLimit = percentageOfTotal > internalLimitPercent;
+    const exceedsStatutoryLimit = rawPercentageOfTotal > statutoryLimitPercent;
+    const exceedsInternalLimit = rawPercentageOfTotal > internalLimitPercent;
 
     if (exceedsStatutoryLimit) statutoryViolationsCount++;
     if (exceedsInternalLimit) internalThresholdExceededCount++;
 
-    sumOfSquaredShares += Math.pow(percentageOfTotal, 2);
+    sumOfSquaredShares += Math.pow(rawPercentageOfTotal, 2);
 
     // Brackets
     if (s.shareKitta <= 10) bracketDistribution.bracket1To10++;

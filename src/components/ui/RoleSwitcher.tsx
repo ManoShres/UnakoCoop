@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuthStore } from '../../store/useAuthStore';
+import { useAuthStore, isPrivilegedPresetEnabled } from '../../store/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import { Shield, UserCheck, Clock, Globe, Sun, Moon } from 'lucide-react';
 import { LanguageToggle } from './LanguageToggle';
@@ -7,6 +7,10 @@ import { LanguageToggle } from './LanguageToggle';
 export const RoleSwitcher: React.FC = () => {
   const { role, currentMember, switchToPreset, theme, toggleTheme } = useAuthStore();
   const navigate = useNavigate();
+
+  // The credential-less ADMIN viewport switch only exists in development
+  // builds (see isPrivilegedPresetEnabled); it is never rendered in production.
+  const privilegedPresets = isPrivilegedPresetEnabled();
 
   const handleSwitch = (preset: 'verified-member' | 'pending-member' | 'admin' | 'guest') => {
     switchToPreset(preset);
@@ -37,44 +41,48 @@ export const RoleSwitcher: React.FC = () => {
 
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => handleSwitch('verified-member')}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors font-medium ${
-              role === 'MEMBER' && currentMember?.status === 'VERIFIED'
-                ? 'bg-[#13ec37] text-black font-bold'
-                : 'bg-emerald-900/40 hover:bg-emerald-900/70 text-slate-300'
-            }`}
-            title="Switch to Verified Member perspective"
-          >
-            <UserCheck className="size-3.5" />
-            <span>Ram (Verified)</span>
-          </button>
+          {privilegedPresets && (
+            <>
+              <button
+                onClick={() => handleSwitch('verified-member')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors font-medium ${
+                  role === 'MEMBER' && currentMember?.status === 'VERIFIED'
+                    ? 'bg-[#13ec37] text-black font-bold'
+                    : 'bg-emerald-900/40 hover:bg-emerald-900/70 text-slate-300'
+                }`}
+                title="Switch to Verified Member perspective"
+              >
+                <UserCheck className="size-3.5" />
+                <span>Ram (Verified)</span>
+              </button>
 
-          <button
-            onClick={() => handleSwitch('pending-member')}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors font-medium ${
-              role === 'MEMBER' && currentMember?.status === 'PENDING'
-                ? 'bg-amber-400 text-black font-bold'
-                : 'bg-emerald-900/40 hover:bg-emerald-900/70 text-slate-300'
-            }`}
-            title="Switch to Pending Member perspective"
-          >
-            <Clock className="size-3.5" />
-            <span>Sita (Pending Review)</span>
-          </button>
+              <button
+                onClick={() => handleSwitch('pending-member')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors font-medium ${
+                  role === 'MEMBER' && currentMember?.status === 'PENDING'
+                    ? 'bg-amber-400 text-black font-bold'
+                    : 'bg-emerald-900/40 hover:bg-emerald-900/70 text-slate-300'
+                }`}
+                title="Switch to Pending Member perspective"
+              >
+                <Clock className="size-3.5" />
+                <span>Sita (Pending Review)</span>
+              </button>
 
-          <button
-            onClick={() => handleSwitch('admin')}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors font-medium ${
-              role === 'ADMIN'
-                ? 'bg-blue-500 text-white font-bold'
-                : 'bg-emerald-900/40 hover:bg-emerald-900/70 text-slate-300'
-            }`}
-            title="Switch to Credit Committee Admin perspective"
-          >
-            <Shield className="size-3.5" />
-            <span>Coop Admin</span>
-          </button>
+              <button
+                onClick={() => handleSwitch('admin')}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded transition-colors font-medium ${
+                  role === 'ADMIN'
+                    ? 'bg-blue-500 text-white font-bold'
+                    : 'bg-emerald-900/40 hover:bg-emerald-900/70 text-slate-300'
+                }`}
+                title="Switch to Credit Committee Admin perspective"
+              >
+                <Shield className="size-3.5" />
+                <span>Coop Admin</span>
+              </button>
+            </>
+          )}
 
           <button
             onClick={() => handleSwitch('guest')}

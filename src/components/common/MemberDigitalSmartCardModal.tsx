@@ -20,7 +20,7 @@ import {
   generateBarcodeBars,
   getMemberQrImageUrl,
 } from '../../utils/memberSmartCard';
-import { printRawHtml } from '../../utils/printHelper';
+import { printRawHtml, escapeHtml } from '../../utils/printHelper';
 
 export interface MemberDigitalSmartCardModalProps {
   isOpen: boolean;
@@ -62,20 +62,23 @@ export const MemberDigitalSmartCardModal: React.FC<MemberDigitalSmartCardModalPr
   };
 
   const handlePrintCard = () => {
+    // Every dynamic value is HTML-escaped before it reaches the print iframe:
+    // member-entered fields (name, ward, address, dates) are attacker-controllable.
+    const esc = escapeHtml;
     const printContent = `
       <div style="font-family: system-ui, sans-serif; display: flex; flex-direction: column; gap: 20px; align-items: center; padding: 20px;">
-        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">${coopSettings.nameNepali} — सदस्य डिजिटल स्मार्ट कार्ड</h3>
+        <h3 style="margin: 0; font-size: 14px; text-transform: uppercase;">${esc(coopSettings.nameNepali)} — सदस्य डिजिटल स्मार्ट कार्ड</h3>
         
         <!-- FRONT SIDE -->
         <div style="width: 85.6mm; height: 53.98mm; border: 1px solid #10b981; border-radius: 4mm; padding: 3mm; box-sizing: border-box; background: linear-gradient(135deg, #064e3b, #047857); color: white; position: relative; overflow: hidden;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 0.5px solid rgba(255,255,255,0.3); padding-bottom: 2mm;">
             <div>
-              <div style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px;">${coopSettings.nameNepali}</div>
-              <div style="font-size: 6px; opacity: 0.85;">${coopSettings.name}</div>
+              <div style="font-size: 8px; font-weight: bold; letter-spacing: 0.5px;">${esc(coopSettings.nameNepali)}</div>
+              <div style="font-size: 6px; opacity: 0.85;">${esc(coopSettings.name)}</div>
             </div>
             <div style="font-size: 6px; text-align: right; opacity: 0.85;">
-              <div>दर्ता: ${coopSettings.regNo}</div>
-              <div>PAN: ${coopSettings.panNo}</div>
+              <div>दर्ता: ${esc(coopSettings.regNo)}</div>
+              <div>PAN: ${esc(coopSettings.panNo)}</div>
             </div>
           </div>
           
@@ -83,21 +86,21 @@ export const MemberDigitalSmartCardModal: React.FC<MemberDigitalSmartCardModalPr
             <div style="width: 18mm; height: 22mm; border: 1px solid #f59e0b; border-radius: 2mm; overflow: hidden; background: #ffffff; display: flex; align-items: center; justify-content: center;">
               ${
                 member.avatarUrl
-                  ? `<img src="${member.avatarUrl}" style="width:100%; height:100%; object-fit: cover;" />`
+                  ? `<img src="${esc(member.avatarUrl)}" style="width:100%; height:100%; object-fit: cover;" />`
                   : `<div style="font-size: 10px; font-weight: bold; color: #047857;">UKO</div>`
               }
             </div>
             <div style="flex: 1;">
-              <div style="font-size: 10px; font-weight: bold; line-height: 1.1;">${member.nameNepali || member.name}</div>
-              <div style="font-size: 8px; font-weight: 600; opacity: 0.9;">${member.name}</div>
-              <div style="font-size: 8px; font-family: monospace; font-weight: bold; color: #fde68a; margin-top: 1mm;">ID: ${member.memberNo}</div>
-              <div style="font-size: 6px; opacity: 0.85; margin-top: 1mm;">नागरिकता: ${member.citizenshipNo}</div>
-              <div style="font-size: 6px; opacity: 0.85;">स्थान: गढवा वडा नं ${member.wardNo || '५'}, दाङ</div>
+              <div style="font-size: 10px; font-weight: bold; line-height: 1.1;">${esc(member.nameNepali || member.name)}</div>
+              <div style="font-size: 8px; font-weight: 600; opacity: 0.9;">${esc(member.name)}</div>
+              <div style="font-size: 8px; font-family: monospace; font-weight: bold; color: #fde68a; margin-top: 1mm;">ID: ${esc(member.memberNo)}</div>
+              <div style="font-size: 6px; opacity: 0.85; margin-top: 1mm;">नागरिकता: ${esc(member.citizenshipNo)}</div>
+              <div style="font-size: 6px; opacity: 0.85;">स्थान: गढवा वडा नं ${esc(member.wardNo || '५')}, दाङ</div>
             </div>
           </div>
 
           <div style="position: absolute; bottom: 2mm; left: 3mm; right: 3mm; display: flex; justify-content: space-between; font-size: 6px; opacity: 0.75; border-top: 0.5px solid rgba(255,255,255,0.2); pt: 1mm;">
-            <span>प्रवेश मिति: ${member.joinedDate}</span>
+            <span>प्रवेश मिति: ${esc(member.joinedDate)}</span>
             <span style="font-weight: bold; color: #6ee7b7;">✓ VERIFIED SHAREHOLDER</span>
           </div>
         </div>
@@ -106,11 +109,11 @@ export const MemberDigitalSmartCardModal: React.FC<MemberDigitalSmartCardModalPr
         <div style="width: 85.6mm; height: 53.98mm; border: 1px solid #cbd5e1; border-radius: 4mm; padding: 3mm; box-sizing: border-box; background: #ffffff; color: #0f172a; position: relative;">
           <div style="height: 6mm; background: #0f172a; margin: -3mm -3mm 2mm -3mm;"></div>
           <div style="display: flex; gap: 3mm; align-items: center;">
-            <img src="${qrImageUrl}" style="width: 20mm; height: 20mm; border: 1px solid #e2e8f0; border-radius: 2mm;" />
+            <img src="${esc(qrImageUrl)}" style="width: 20mm; height: 20mm; border: 1px solid #e2e8f0; border-radius: 2mm;" />
             <div style="flex: 1; font-size: 6px; line-height: 1.3; color: #334155;">
               <div style="font-weight: bold; color: #047857; font-size: 7px;">उनको बचत तथा ऋण सहकारी संस्था लिमिटेड</div>
               <div>केन्द्रीय कार्यालय: गढवा-५, दाङ, लुम्बिनी प्रदेश</div>
-              <div>सम्पर्क: ${coopSettings.phone} | ${coopSettings.email}</div>
+              <div>सम्पर्क: ${esc(coopSettings.phone)} | ${esc(coopSettings.email)}</div>
               <div style="margin-top: 1.5mm; font-style: italic; color: #64748b;">* यो परिचयपत्र संस्थाको सम्पत्ति हो। भेटिएमा नजिकको शाखा वा कार्यालयमा बुझाइदिनुहोला।</div>
             </div>
           </div>

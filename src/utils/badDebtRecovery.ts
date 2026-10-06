@@ -180,6 +180,44 @@ export function generateLegalRecoveryNotice(
 
   const deadlineDaysNepali = toNepaliDigits(deadlineDays);
 
+  // Real statutory date arithmetic on the BS calendar. The old implementation clamped the
+  // deadline into the same BS month (`Math.min(30, deadlineDays + 1)`), so the "35-day"
+  // notice actually expired after 29 days.
+  // NEEDS SIGN-OFF: BS month lengths below follow BS 2081; a licensed BS calendar table is
+  // required for exact multi-year notice dates.
+  const BS_MONTH_DAYS: readonly number[] = [31, 31, 32, 31, 31, 31, 30, 30, 30, 30, 29, 30];
+  const addDaysToBsDate = (
+    start: { year: number; month: number; day: number },
+    days: number
+  ): { year: number; month: number; day: number } => {
+    let { year, month, day } = start;
+    let remaining = Math.max(0, days);
+    while (remaining > 0) {
+      const monthLength = BS_MONTH_DAYS[month - 1];
+      const daysLeftInMonth = monthLength - day;
+      if (remaining <= daysLeftInMonth) {
+        day += remaining;
+        remaining = 0;
+      } else {
+        remaining -= daysLeftInMonth + 1;
+        day = 1;
+        month += 1;
+        if (month > 12) {
+          month = 1;
+          year += 1;
+        }
+      }
+    }
+    return { year, month, day };
+  };
+
+  // Notice issue date is the template default (BS 2081-06-01).
+  const issueDateBs = { year: 2081, month: 6, day: 1 };
+  const deadlineBs = addDaysToBsDate(issueDateBs, deadlineDays);
+  const deadlineDateNepali = toNepaliDigits(
+    `${deadlineBs.year}-${String(deadlineBs.month).padStart(2, '0')}-${String(deadlineBs.day).padStart(2, '0')}`
+  );
+
   const statutoryCitation =
     'सहकारी ऐन २०७४ को दफा ८३ र ८४ तथा संस्थाको कर्जा असुली नियमावली २०७६';
 
@@ -193,7 +231,7 @@ export function generateLegalRecoveryNotice(
     titleNepali,
     titleEnglish,
     issueDateNepali: '२०८१-०६-०१',
-    deadlineDateNepali: `२०८१-०६-${Math.min(30, deadlineDays + 1).toString().padStart(2, '0')}`,
+    deadlineDateNepali,
     loanId: loan.id,
     loanNo: loan.loanNo,
     borrowerName: member?.name ?? 'Cooperative Member',
@@ -223,8 +261,20 @@ export function buildCibBlacklistRecord(
   primaryGuarantor?: GuarantorLegalDetail
 ): CibBlacklistRecord {
   const principal = loan.remainingBalance;
-  const interestOverdue = Math.round(principal * 0.12);
-  const penaltyOverdue = Math.round(principal * 0.03);
+  // Overdue interest accrues over the ACTUAL overdue period. The old implementation
+  // ignored `overdueDays` entirely and booked a flat 12% interest + 3% penalty of
+  // principal even for a loan one day past due.
+  // NEEDS SIGN-OFF: 12% p.a. contract + 3% p.a. penal are the existing file defaults; the
+  // loan's own `interestRate` should ultimately drive the contract component.
+  const ANNUAL_OVERDUE_INTEREST_RATE = 0.12;
+  const ANNUAL_PENAL_INTEREST_RATE = 0.03;
+  const safeOverdueDays = Number.isFinite(overdueDays) ? Math.max(0, overdueDays) : 0;
+  const interestOverdue = Math.round(
+    (principal * ANNUAL_OVERDUE_INTEREST_RATE * safeOverdueDays) / 365
+  );
+  const penaltyOverdue = Math.round(
+    (principal * ANNUAL_PENAL_INTEREST_RATE * safeOverdueDays) / 365
+  );
   const totalDefaultAmount = principal + interestOverdue + penaltyOverdue;
 
   return {
@@ -235,7 +285,7 @@ export function buildCibBlacklistRecord(
     citizenshipDistrict: 'दाङ (Dang)',
     loanAccountNo: loan.loanNo,
     loanType: loan.loanType,
-    overdueDays,
+    overdueDays: safeOverdueDays,
     provisionCategory: category,
     totalDefaultAmount,
     principalAmount: principal,

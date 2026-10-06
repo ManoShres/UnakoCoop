@@ -12,6 +12,7 @@
  */
 
 import { AmlAlert } from './amlCompliance';
+import { sanitizePrintableHtml } from './printHelper';
 
 export type GoAmlReportCode = 'TTR' | 'CTR' | 'STR';
 export type GoAmlTransactionMode = 'CASH' | 'TRANSFER' | 'CHEQUE' | 'CLEARING' | 'MOBILE';
@@ -544,7 +545,9 @@ export function printStrInvestigationDossier(report: GoAmlReportData): void {
   const html = generateStrInvestigationDossierHtml(report);
   const printWindow = window.open('', '_blank');
   if (printWindow) {
-    printWindow.document.write(html);
+    // The dossier interpolates member/alert fields, so sanitise before document.write
+    // (same-origin sink) to strip script tags, handlers and script URLs.
+    printWindow.document.write(sanitizePrintableHtml(html));
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

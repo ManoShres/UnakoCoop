@@ -111,16 +111,92 @@ export function generateRemittanceControlNo(): string {
 }
 
 /**
- * Simple deterministic PIN hash for internal verification.
+ * Security PIN hashing for remittance payout authorisation.
+ *
+ * The previous implementation was an UNSALTED 32-bit DJB2 hash (`pin_h_<hex>`), which is
+ * trivially reversible/brute-forceable and allowed the literal sentinel `hashed_pin` to be
+ * accepted as a valid stored hash.
+ *
+ * Format persisted: `pinh2$<iterations>$<salt>$<digest>` (per-record random salt, iterated mix).
+ *
+ * NEEDS SIGN-OFF: this is a synchronous client-side KDF — WebCrypto PBKDF2/scrypt is
+ * async and cannot be used in this synchronous API. It is strictly stronger than the old
+ * hash but is NOT a substitute for server-side verification with a secret-keyed KDF
+ * (Argon2id / scrypt / bcrypt) held outside the bundle. Legacy `pin_h_*` and unknown
+ * formats FAIL CLOSED (never authorised). PIN hashes must never be shipped in the client
+ * bundle — records belong server-side behind a verification endpoint.
+ * TODO(security): migrate verification to the server remittance payout API.
  */
-function hashSecurityPin(pin: string): string {
-  let hash = 0;
-  for (let i = 0; i < pin.length; i++) {
-    const char = pin.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
+export const PIN_HASH_ITERATIONS = 5000;
+export const PIN_HASH_PREFIX = 'pinh2';
+
+/** Cryptographically-random per-record salt (16 bytes hex). */
+export function generatePinSalt(bytes = 16): string {
+  const arr = new Uint8Array(bytes);
+  const cryptoObj = typeof globalThis !== 'undefined' ? (globalThis.crypto as Crypto | undefined) : undefined;
+  if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
+    cryptoObj.getRandomValues(arr);
+  } else {
+    for (let i = 0; i < bytes; i += 1) arr[i] = Math.floor(Math.random() * 256);
   }
-  return `pin_h_${Math.abs(hash).toString(16)}`;
+  return Array.from(arr)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/** Iterated mixing over a salted seed (FNV-1a based, 64-bit output). */
+function mixIterated(seed: string, rounds: number): string {
+  let h1 = 0x811c9dc5;
+  let h2 = 0x01000193;
+  for (let round = 0; round < rounds; round += 1) {
+    for (let i = 0; i < seed.length; i += 1) {
+      const c = seed.charCodeAt(i) + round;
+      h1 = Math.imul(h1 ^ c, 0x01000193) >>> 0;
+      h2 = Math.imul(h2 ^ c, 0x85ebca6b) >>> 0;
+    }
+  }
+  return (
+    (h1 >>> 0).toString(16).padStart(8, '0') + (h2 >>> 0).toString(16).padStart(8, '0')
+  );
+}
+
+/**
+ * Salted, iterated PIN hash. A fresh salt is generated per record unless one is supplied.
+ * Exported so callers/tests can produce verifiable fixtures without a plaintext PIN store.
+ */
+export function hashSecurityPin(
+  pin: string,
+  salt: string = generatePinSalt(),
+  iterations: number = PIN_HASH_ITERATIONS
+): string {
+  const digest = mixIterated(`${salt}:${pin}:${iterations}`, iterations);
+  return `${PIN_HASH_PREFIX}$${iterations}$${salt}$${digest}`;
+}
+
+/** Constant-time string comparison (length differences are not secret here). */
+function timingSafeEquals(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i += 1) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+/**
+ * Verify an entered PIN against a stored hash. Exact, constant-time comparison against the
+ * salted iterated hash. Unknown or legacy formats (including the removed `hashed_pin`
+ * sentinel) fail closed.
+ */
+export function verifySecurityPin(storedHash: string, enteredPin: string): boolean {
+  if (!storedHash || typeof storedHash !== 'string' || !enteredPin) return false;
+  const parts = storedHash.split('$');
+  if (parts.length !== 4 || parts[0] !== PIN_HASH_PREFIX) return false;
+  const iterations = Number(parts[1]);
+  const salt = parts[2];
+  if (!Number.isInteger(iterations) || iterations < 1 || iterations > 10_000_000 || !salt) {
+    return false;
+  }
+  const expected = hashSecurityPin(enteredPin, salt, iterations);
+  return timingSafeEquals(expected, storedHash);
 }
 
 /**
@@ -185,8 +261,10 @@ export function verifyAndDisburseRemittance(
     };
   }
 
-  const expectedHash = hashSecurityPin(enteredPin);
-  if (transaction.securityPinHash !== expectedHash && transaction.securityPinHash !== 'hashed_pin') {
+  // Exact, constant-time verification against the salted iterated hash. The previous
+  // `|| securityPinHash !== 'hashed_pin'` sentinel accepted a literal demo string as a
+  // valid hash, so ANY PIN authorised a payout. Unknown formats now fail closed.
+  if (!verifySecurityPin(transaction.securityPinHash, enteredPin)) {
     return {
       success: false,
       error: 'सुरक्षा PIN नमिल्दा भुक्तानी रोक्का गरिएको छ (Invalid Security PIN)।',

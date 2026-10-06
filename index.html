@@ -2,12 +2,50 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/unako-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; form-action 'self'; frame-src 'self'"
+    />
+    <!--
+      Content-Security-Policy is delivered as a <meta> tag because this repo ships a
+      static bundle with no server config. It is emitted right after <meta charset>
+      because browsers only honour a <meta> CSP declared early in the document.
+
+      - script-src 'self' .......... no inline or remote script execution. Vite emits
+        external module scripts only; add a hash here if an inline script is ever added.
+      - style-src 'unsafe-inline' .. required: React inline styles, Tailwind utilities and
+        the print helper write style attributes/elements. Google Fonts CSS is allowed.
+      - font-src ................... Google Fonts files (fonts.gstatic.com).
+      - img-src ................... self, data:/blob: previews and https: remote images
+        (logos, member avatars, QR service) used by the app today.
+      - connect-src ............... Supabase REST/realtime + Edge Functions. OpenRouter
+        is proxied exclusively through the `ai-assistant` edge function.
+      - frame-src 'self' .......... required for the hidden same-origin print iframe
+        (src/utils/printHelper.ts), which inherits this policy.
+
+      NOTE: frame-ancestors, X-Frame-Options, HSTS, X-Content-Type-Options and
+      Referrer-Policy-as-a-header cannot be set from <meta>; the hosting layer must
+      send them (see the deployment notes in README.md).
+
+      `vite dev` swaps in a slightly relaxed policy via vite.config.ts (React Refresh
+      injects an inline preamble module and HMR needs a local WebSocket); production
+      builds keep exactly the policy above.
+    -->
+    <!-- Send only the origin to third parties, never full URLs (they can contain record ids). -->
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>उनको बचत तथा ऋण सहकारी संस्था लि. | Unako SACCOS</title>
     <meta name="description" content="उनको बचत तथा ऋण सहकारी संस्था लि. (Unako Savings and Credit Co-operative Society Ltd.) Member Portal - Deukhuri, Dang." />
+    <link rel="icon" type="image/png" href="/unako-logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!--
+      No Subresource Integrity (integrity=) on the Google Fonts links: the CSS served
+      by fonts.googleapis.com/css2 varies by User-Agent (woff2 vs ttf subsets) and by
+      Google's own font releases, and the URL carries no immutable version. A pinned
+      hash would break font loading for some browsers and go stale on Google's next
+      update. See the report for the reasoning.
+    -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Inter:wght@400;500;600;700&family=Mukta:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
   </head>

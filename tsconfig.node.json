@@ -7,6 +7,8 @@
     "skipLibCheck": true,
 
     /* Bundler mode */
+    /* Declared explicitly (see tsconfig.app.json); 0 new errors with typescript 6.0.3. */
+    "strict": true,
     "module": "nodenext",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,

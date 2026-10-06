@@ -11,6 +11,7 @@ import {
   verifyFundSegregation,
   exportStaffRetirementRegisterCsv,
 } from '../../utils/staffRetirementFund';
+import { escapeHtml, sanitizePrintableHtml } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -152,11 +153,11 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
       window.print();
       return;
     }
-    printWindow.document.write(`
+    printWindow.document.write(sanitizePrintableHtml(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>अवकाश फछ्र्यौट भौचर - ${settlementVoucher.voucherNo}</title>
+        <title>अवकाश फछ्र्यौट भौचर - ${escapeHtml(settlementVoucher.voucherNo)}</title>
         <style>
           body { font-family: 'Mukti', 'Kalimati', 'Arial', sans-serif; padding: 30px; line-height: 1.6; color: #111; }
           .header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 12px; margin-bottom: 20px; }
@@ -173,36 +174,36 @@ export const StaffRetirementFundModal: React.FC<StaffRetirementFundModalProps> =
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">${coopSettings.nameNepali}</p>
-          <p class="inst-sub">${coopSettings.addressNepali} | दर्ता नं. ${coopSettings.regNo} | पान नं. ${coopSettings.panNo}</p>
+          <p class="inst-name">${escapeHtml(coopSettings.nameNepali)}</p>
+          <p class="inst-sub">${escapeHtml(coopSettings.addressNepali)} | दर्ता नं. ${escapeHtml(coopSettings.regNo)} | पान नं. ${escapeHtml(coopSettings.panNo)}</p>
           <div class="title">कर्मचारी सञ्चय कोष, उपदान तथा संचित बिदा फछ्र्यौट पत्र (Discharge Voucher)</div>
         </div>
         <div class="meta">
-          <span>कर्मचारी: <b>${selectedStaff.employeeName} (${selectedStaff.employeeNo})</b></span>
-          <span>भौचर नं: <b>${settlementVoucher.voucherNo}</b></span>
-          <span>मिति: <b>${settlementVoucher.settlementDateBS}</b></span>
+          <span>कर्मचारी: <b>${escapeHtml(selectedStaff.employeeName)} (${escapeHtml(selectedStaff.employeeNo)})</b></span>
+          <span>भौचर नं: <b>${escapeHtml(settlementVoucher.voucherNo)}</b></span>
+          <span>मिति: <b>${escapeHtml(settlementVoucher.settlementDateBS)}</b></span>
         </div>
         <table class="table">
           <thead>
             <tr><th>दाबी / हिसाब विवरण</th><th style="text-align: right;">रकम (रु.)</th></tr>
           </thead>
           <tbody>
-            <tr><td>१. कुल संचित कर्मचारी सञ्चय कोष (PF Principal + Interest)</td><td style="text-align: right;">रु. ${settlementVoucher.totalPfPayable.toLocaleString()}</td></tr>
-            <tr><td>२. संचित उपदान (Gratuity)</td><td style="text-align: right;">रु. ${settlementVoucher.gratuityPayable.toLocaleString()}</td></tr>
-            <tr><td>३. संचित बिदा बापतको रकम (${selectedStaff.accumulatedLeaveDays} दिन)</td><td style="text-align: right;">रु. ${settlementVoucher.leaveEncashmentPayable.toLocaleString()}</td></tr>
-            <tr style="font-weight: bold; background: #fafafa;"><td>कुल प्राप्त रकम (Gross Payable)</td><td style="text-align: right;">रु. ${settlementVoucher.grossSettlement.toLocaleString()}</td></tr>
-            <tr style="color: #c00;"><td>कट्टा: सञ्चय कोष सापटी कर्जा बाँकी</td><td style="text-align: right;">- रु. ${settlementVoucher.staffLoanDeduction.toLocaleString()}</td></tr>
-            <tr style="font-weight: bold; background: #e8f5e9; font-size: 13px;"><td>कर्मचारीलाई भुक्तानी हुने खुद रकम (Net Final Settlement)</td><td style="text-align: right;">रु. ${settlementVoucher.netPayableToEmployee.toLocaleString()}</td></tr>
+            <tr><td>१. कुल संचित कर्मचारी सञ्चय कोष (PF Principal + Interest)</td><td style="text-align: right;">रु. ${escapeHtml(settlementVoucher.totalPfPayable.toLocaleString())}</td></tr>
+            <tr><td>२. संचित उपदान (Gratuity)</td><td style="text-align: right;">रु. ${escapeHtml(settlementVoucher.gratuityPayable.toLocaleString())}</td></tr>
+            <tr><td>३. संचित बिदा बापतको रकम (${escapeHtml(selectedStaff.accumulatedLeaveDays)} दिन)</td><td style="text-align: right;">रु. ${escapeHtml(settlementVoucher.leaveEncashmentPayable.toLocaleString())}</td></tr>
+            <tr style="font-weight: bold; background: #fafafa;"><td>कुल प्राप्त रकम (Gross Payable)</td><td style="text-align: right;">रु. ${escapeHtml(settlementVoucher.grossSettlement.toLocaleString())}</td></tr>
+            <tr style="color: #c00;"><td>कट्टा: सञ्चय कोष सापटी कर्जा बाँकी</td><td style="text-align: right;">- रु. ${escapeHtml(settlementVoucher.staffLoanDeduction.toLocaleString())}</td></tr>
+            <tr style="font-weight: bold; background: #e8f5e9; font-size: 13px;"><td>कर्मचारीलाई भुक्तानी हुने खुद रकम (Net Final Settlement)</td><td style="text-align: right;">रु. ${escapeHtml(settlementVoucher.netPayableToEmployee.toLocaleString())}</td></tr>
           </tbody>
         </table>
         <div class="signatures">
-          <div><div class="sig-line"></div><b>${selectedStaff.employeeName}</b><br><small>अवकाश प्राप्त कर्मचारी</small></div>
-          <div><div class="sig-line"></div><b>लेखापाल / प्रशासन प्रमुख</b><br><small>${coopSettings.nameNepali}</small></div>
-          <div><div class="sig-line"></div><b>व्यवस्थापक / अध्यक्ष</b><br><small>${coopSettings.nameNepali}</small></div>
+          <div><div class="sig-line"></div><b>${escapeHtml(selectedStaff.employeeName)}</b><br><small>अवकाश प्राप्त कर्मचारी</small></div>
+          <div><div class="sig-line"></div><b>लेखापाल / प्रशासन प्रमुख</b><br><small>${escapeHtml(coopSettings.nameNepali)}</small></div>
+          <div><div class="sig-line"></div><b>व्यवस्थापक / अध्यक्ष</b><br><small>${escapeHtml(coopSettings.nameNepali)}</small></div>
         </div>
       </body>
       </html>
-    `);
+    `));
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

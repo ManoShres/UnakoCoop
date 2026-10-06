@@ -107,6 +107,25 @@ describe('passbookEngine Suite', () => {
       expect(res.isSecurityMatch).toBe(false);
       expect(res.message).toContain('प्रमाणीकरण असफल');
     });
+
+    it('rejects a structured payload that omits the CRC field entirely (mandatory CRC)', () => {
+      // Regression (C19): the CRC was optional, so a tampered payload could simply drop
+      // the checksum and always pass verification.
+      const noCrcPayload = 'PB:PB-UNAKO-2081-00101|MEM:M-00101|ACC:004-10294-88-01';
+      const res = parseAndVerifyBarcode(noCrcPayload, populatedRecords);
+
+      expect(res.isValid).toBe(false);
+      expect(res.isSecurityMatch).toBe(false);
+      expect(res.message).toContain('प्रमाणीकरण असफल');
+    });
+
+    it('rejects a structured payload that declares an empty CRC', () => {
+      const emptyCrcPayload = 'PB:PB-UNAKO-2081-00101|MEM:M-00101|ACC:004-10294-88-01|CRC:';
+      const res = parseAndVerifyBarcode(emptyCrcPayload, populatedRecords);
+
+      expect(res.isValid).toBe(false);
+      expect(res.isSecurityMatch).toBe(false);
+    });
   });
 
   describe('Barcode & QR Code Vector SVG Generators', () => {

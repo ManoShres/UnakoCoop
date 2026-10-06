@@ -13,6 +13,7 @@ import {
   RescheduledLoanRecord,
   ReschedulingTerms,
 } from '../../utils/loanRescheduling';
+import { escapeHtml, sanitizePrintableHtml } from '../../utils/printHelper';
 import {
   X,
   Printer,
@@ -219,11 +220,12 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
       window.print();
       return;
     }
-    printWindow.document.write(`
+    printWindow.document.write(
+      sanitizePrintableHtml(`
       <!DOCTYPE html>
       <html>
       <head>
-        <title>तमसुक - ${deed.deedNo}</title>
+        <title>तमसुक - ${escapeHtml(deed.deedNo)}</title>
         <style>
           body { font-family: 'Mukti', 'Kalimati', 'Arial', sans-serif; padding: 30px; line-height: 1.6; color: #111; }
           .header { text-align: center; border-bottom: 2px dashed #444; padding-bottom: 12px; margin-bottom: 20px; }
@@ -238,24 +240,25 @@ export const LoanReschedulingModal: React.FC<LoanReschedulingModalProps> = ({
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">${coopSettings.nameNepali}</p>
-          <p class="inst-sub">${coopSettings.addressNepali} | दर्ता नं. ${coopSettings.regNo} | पान नं. ${coopSettings.panNo}</p>
+          <p class="inst-name">${escapeHtml(coopSettings.nameNepali)}</p>
+          <p class="inst-sub">${escapeHtml(coopSettings.addressNepali)} | दर्ता नं. ${escapeHtml(coopSettings.regNo)} | पान नं. ${escapeHtml(coopSettings.panNo)}</p>
           <div class="title-box">कर्जा पुनर्तालिकीकरण तथा पुनर्संरचना सम्झौता पत्र (तमसुक)</div>
         </div>
         <div class="meta">
-          <span>तमसुक नं: <b>${deed.deedNo}</b></span>
-          <span>मिति: <b>${deed.executionDateNepali}</b></span>
+          <span>तमसुक नं: <b>${escapeHtml(deed.deedNo)}</b></span>
+          <span>मिति: <b>${escapeHtml(deed.executionDateNepali)}</b></span>
         </div>
-        <div class="deed-text">${deed.bodyNepaliText}</div>
+        <div class="deed-text">${escapeHtml(deed.bodyNepaliText)}</div>
         <div class="signatures">
-          <div><div class="sig-line"></div><b>${deed.borrowerName}</b><br><small>ऋणी सदस्य</small></div>
+          <div><div class="sig-line"></div><b>${escapeHtml(deed.borrowerName)}</b><br><small>ऋणी सदस्य</small></div>
           <div><div class="sig-line"></div><b>........................</b><br><small>जमानतदार / रोहबर</small></div>
-          <div><div class="sig-line"></div><b>${officerName}</b><br><small>ऋण उपसमिति / अधिकृत</small></div>
-          <div><div class="sig-line"></div><b>संस्थाको छाप / व्यवस्थापक</b><br><small>${coopSettings.nameNepali}</small></div>
+          <div><div class="sig-line"></div><b>${escapeHtml(officerName)}</b><br><small>ऋण उपसमिति / अधिकृत</small></div>
+          <div><div class="sig-line"></div><b>संस्थाको छाप / व्यवस्थापक</b><br><small>${escapeHtml(coopSettings.nameNepali)}</small></div>
         </div>
       </body>
       </html>
-    `);
+    `)
+    );
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

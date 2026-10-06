@@ -4,11 +4,22 @@ import { INITIAL_MEMBERS } from '../data/mockData';
 import { INITIAL_EMPLOYEES } from './initialData';
 import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { restoreMemberSession } from '../services/memberAuthService';
-import { rowToEmployee } from '../services/employeeService';
+import { fetchActiveEmployeeByAuthUserId } from '../services/employeeService';
 
 export const isDemoMode = (): boolean => {
   return import.meta.env.VITE_DEMO_MODE === 'true';
 };
+
+/**
+ * Privileged demo presets (the credential-less ADMIN / SUPER_ADMIN viewport
+ * switch) are compiled into development builds only.
+ *
+ * `import.meta.env.DEV` is statically replaced with `false` by Vite for
+ * production builds, so in a shipped bundle this gate is permanently closed and
+ * `switchToPreset('admin')` can never mint an ADMIN session. It is read at call
+ * time (not at module load) so the behaviour is testable.
+ */
+export const isPrivilegedPresetEnabled = (): boolean => import.meta.env.DEV === true;
 
 interface AuthState {
   role: UserRole;
@@ -56,9 +67,18 @@ const getInitialTheme = (): 'light' | 'dark' => {
 
 const initialTheme = getInitialTheme();
 
-// In demo mode (VITE_DEMO_MODE === 'true'), boot as verified member for easy previewing.
-// In standard/production mode, boot securely as GUEST (no credentials or auto-login).
-const runningDemo = isDemoMode();
+// In demo mode (VITE_DEMO_MODE === 'true'), a *development* build boots as a
+// verified member for easy previewing. Production builds (import.meta.env.DEV
+// === false) always boot securely as GUEST - the demo auto-login is compiled
+// out so a shipped bundle can never contain a credential-less session.
+const runningDemo = import.meta.env.DEV === true && isDemoMode();
+
+const CLEARED_SESSION = {
+  role: 'GUEST' as UserRole,
+  currentMember: null,
+  currentEmployee: null,
+  staffRole: null,
+};
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   role: runningDemo ? 'MEMBER' : 'GUEST',
@@ -67,10 +87,31 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   staffRole: null,
   theme: initialTheme,
   authLoading: isSupabaseConfigured(),
-  setRole: (role) => set({ role }),
+  setRole: (role) => {
+    // Fail closed: an ADMIN session must always carry a resolved staff role.
+    // Raw promotion without a verified staff record is ignored; use
+    // signInStaff() (or the development-only preset) instead.
+    if (role === 'ADMIN' && !get().staffRole) return;
+    set({ role });
+  },
   setCurrentMember: (currentMember) => set({ currentMember }),
-  setCurrentEmployee: (currentEmployee) => set({ currentEmployee, staffRole: currentEmployee?.accessRole ?? null }),
-  setStaffRole: (staffRole) => set({ staffRole }),
+  setCurrentEmployee: (currentEmployee) => {
+    const staffRole = currentEmployee?.accessRole ?? null;
+    // Clearing the employee link must also drop ADMIN authority.
+    if (!staffRole && get().role === 'ADMIN') {
+      set(CLEARED_SESSION);
+      return;
+    }
+    set({ currentEmployee, staffRole });
+  },
+  setStaffRole: (staffRole) => {
+    // Clearing the staff role while holding ADMIN must demote the session.
+    if (!staffRole && get().role === 'ADMIN') {
+      set(CLEARED_SESSION);
+      return;
+    }
+    set({ staffRole });
+  },
   toggleTheme: () => {
     const next = get().theme === 'light' ? 'dark' : 'light';
     if (typeof window !== 'undefined') {
@@ -95,6 +136,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ theme });
   },
   switchToPreset: (preset) => {
+    // 'guest' is a de-escalation (logout) and must always be available. Every
+    // other preset mints a credential-less session, so it is a development-only
+    // affordance and fails closed (no-op) in a production build.
+    if (preset !== 'guest' && !isPrivilegedPresetEnabled()) return;
+
     switch (preset) {
       case 'verified-member':
         set({
@@ -152,16 +198,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
       // 2. Check if authenticated user is linked to an ACTIVE employee row (S1 / S2)
       const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData?.session?.user) {
-        const { data: empRow, error: empErr } = await supabase
-          .from('employees')
-          .select('*')
-          .eq('auth_user_id', sessionData.session.user.id)
-          .eq('status', 'ACTIVE')
-          .maybeSingle();
+      const userId = sessionData?.session?.user?.id;
+      if (userId) {
+        const { data: emp, error: empErr } = await fetchActiveEmployeeByAuthUserId(userId);
 
-        if (!empErr && empRow) {
-          const emp = rowToEmployee(empRow);
+        // A linked employee without a resolved access role is not staff admin:
+        // fall through to the secure GUEST default instead of a null staffRole.
+        if (!empErr && emp && emp.accessRole) {
           set({
             role: 'ADMIN',
             currentMember: null,
@@ -200,14 +243,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       staffRole: null,
       authLoading: false,
     }),
-  signInStaff: (employee) =>
+  signInStaff: (employee) => {
+    // Fail closed: an employee record without a resolved access role can never
+    // become an ADMIN session (staffRole would otherwise be left null).
+    if (!employee?.accessRole) {
+      set(CLEARED_SESSION);
+      return;
+    }
     set({
       role: 'ADMIN',
       currentMember: null,
       currentEmployee: employee,
       staffRole: employee.accessRole,
       authLoading: false,
-    }),
+    });
+  },
   signOut: async () => {
     if (supabase) {
       await supabase.auth.signOut().catch(() => {});

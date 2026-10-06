@@ -102,6 +102,35 @@ describe('Cooperative Act 2074 Section 49 Deposit Mobilization Ceiling (15x Limi
     expect(analysis.flaggedConcentratedMembersCount).toBeGreaterThanOrEqual(1);
   });
 
+  it('flags concentration from the unrounded share (10.004% displays as 10.00)', () => {
+    // Regression (B11): the cap was compared against the pre-rounded share, so a 10.004%
+    // depositor rounded to 10.00 and escaped the 10% single-depositor concentration cap.
+    const savings: SavingsAccount[] = [
+      {
+        id: 'SAV-C1',
+        accountNo: '009-C1',
+        memberId: 'MEM-01',
+        accountType: 'Regular Savings',
+        balance: 100040,
+        interestRate: 8,
+      } as SavingsAccount,
+      {
+        id: 'SAV-C2',
+        accountNo: '009-C2',
+        memberId: 'MEM-02',
+        accountType: 'Regular Savings',
+        balance: 899960,
+        interestRate: 8,
+      } as SavingsAccount,
+    ];
+
+    const analysis = calculateDepositCeiling(savings, sampleMembers, sampleCapital);
+    const mem1 = analysis.topDepositors.find((d) => d.memberId === 'MEM-01');
+
+    expect(mem1?.depositSharePercent).toBe(10); // display rounds to 10.00
+    expect(mem1?.isConcentrationRisk).toBe(true); // compared unrounded (10.004 > 10)
+  });
+
   it('flags warning when deposits reach 90% of ceiling (>= 13.5x)', () => {
     // Total Core Capital = 20M. 90% of 300M = 270M (13.5x)
     const highSavings: SavingsAccount[] = [

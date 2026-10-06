@@ -72,6 +72,9 @@ describe('badDebtRecovery utilities', () => {
     expect(notice.noticeBodyText).toContain('३५ दिनभित्र');
     expect(notice.collateral.kittaNo).toBeDefined();
     expect(notice.guarantors.length).toBeGreaterThan(0);
+    // Regression (B14): the deadline must advance by the full statutory 35 days
+    // (2081-06-01 + 35 days = 2081-07-05), not clamp into the same month.
+    expect(notice.deadlineDateNepali).toBe('२०८१-०७-०५');
   });
 
   it('generates 15-day and 7-day alternative notices correctly', () => {
@@ -79,10 +82,29 @@ describe('badDebtRecovery utilities', () => {
     expect(notice15.noticeType).toBe('NOTICE_15_DAYS_FINAL_DEMAND');
     expect(notice15.legalNoticeExpenses).toBe(2500);
     expect(notice15.noticeBodyText).toContain('१५ दिनभित्र');
+    expect(notice15.deadlineDateNepali).toBe('२०८१-०६-१६');
 
     const notice7 = generateLegalRecoveryNotice(mockLoan, mockMember, 'NOTICE_7_DAYS_SEALED_TENDER');
     expect(notice7.noticeType).toBe('NOTICE_7_DAYS_SEALED_TENDER');
     expect(notice7.noticeBodyText).toContain('७ दिनभित्र');
+    expect(notice7.deadlineDateNepali).toBe('२०८१-०६-०८');
+  });
+
+  it('accrues CIB overdue interest over the actual overdue period', () => {
+    // Regression (B14): overdueDays was ignored and interest was a flat 12% of principal.
+    const shortOverdue = buildCibBlacklistRecord(mockLoan, mockMember, 30, 'BAD');
+    const longOverdue = buildCibBlacklistRecord(mockLoan, mockMember, 365, 'BAD');
+
+    expect(shortOverdue.interestOverdue).toBe(Math.round((250000 * 0.12 * 30) / 365));
+    expect(shortOverdue.penaltyOverdue).toBe(Math.round((250000 * 0.03 * 30) / 365));
+    expect(longOverdue.interestOverdue).toBeGreaterThan(shortOverdue.interestOverdue);
+    expect(shortOverdue.totalDefaultAmount).toBe(
+      shortOverdue.principalAmount + shortOverdue.interestOverdue + shortOverdue.penaltyOverdue
+    );
+
+    const zeroDays = buildCibBlacklistRecord(mockLoan, mockMember, 0, 'BAD');
+    expect(zeroDays.interestOverdue).toBe(0);
+    expect(zeroDays.penaltyOverdue).toBe(0);
   });
 
   it('builds CIB blacklist recommendation record and formats CSV properly', () => {

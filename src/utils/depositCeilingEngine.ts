@@ -119,10 +119,11 @@ export function calculateDepositCeiling(
   const depositors: DepositorProfile[] = [];
   memberDepositMap.forEach((val, memberId) => {
     const mem = memberMap.get(memberId);
-    const sharePercent =
-      totalDepositLiability > 0
-        ? Number(((val.total / totalDepositLiability) * 100).toFixed(2))
-        : 0;
+    // Compare the UNROUNDED share against the concentration cap; the rounded value is
+    // for display only (a 20.004% share must not round to 20.00 and escape a 20% cap).
+    const rawSharePercent =
+      totalDepositLiability > 0 ? (val.total / totalDepositLiability) * 100 : 0;
+    const sharePercent = Number(rawSharePercent.toFixed(2));
 
     depositors.push({
       memberId,
@@ -131,7 +132,7 @@ export function calculateDepositCeiling(
       totalDepositBalance: val.total,
       accountCount: val.count,
       depositSharePercent: sharePercent,
-      isConcentrationRisk: sharePercent > singleDepositorCap,
+      isConcentrationRisk: rawSharePercent > singleDepositorCap,
     });
   });
 

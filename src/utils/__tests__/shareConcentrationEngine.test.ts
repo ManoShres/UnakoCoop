@@ -56,6 +56,25 @@ describe('shareConcentrationEngine - Cooperative Act 2074 Sec 37 & 38', () => {
     expect(metrics.top1ShareholderPercent).toBe(30);
   });
 
+  it('flags a 20.004% holding that displays as 20.00 against the 20% statutory limit', () => {
+    // Regression (B11): the statutory limit was compared against the pre-rounded
+    // percentage, so 20.004% rounded to 20.00 and escaped Section 37 divestment.
+    const members = [
+      { id: 'big', memberNo: 'M-BIG', name: 'Big Holder', phone: '1', shareKitta: 200040, shareCapital: 20004000 },
+      { id: 'small', memberNo: 'M-SML', name: 'Small Holder', phone: '2', shareKitta: 799960, shareCapital: 79996000 },
+    ];
+
+    const { shareholders } = calculateShareConcentration({
+      members,
+      faceValue: 100,
+      internalLimitPercent: 5.0,
+    });
+
+    const big = shareholders.find((s) => s.memberId === 'big');
+    expect(big?.percentageOfTotal).toBe(20); // display rounds to 20.00
+    expect(big?.exceedsStatutoryLimit).toBe(true); // compared unrounded (20.004 > 20)
+  });
+
   it('validates share transfers and blocks transactions violating Section 37', () => {
     const totalShares = 2000;
 

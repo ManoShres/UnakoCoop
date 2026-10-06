@@ -2,12 +2,34 @@
  * Transaction and Cash Desk Domain Types
  */
 
+/**
+ * Canonical transaction-type vocabulary.
+ *
+ * This is intentionally the SAME set validated by `TRANSACTION_TYPE` in
+ * `src/schemas/financialSchema.ts` (plus the legacy `LOAN_EMI` alias). The two used to
+ * disagree (5 domain types vs 10 schema types); keep them in lock-step — the
+ * `LEGACY_TRANSACTION_TYPE_TO_CANONICAL` map there is the single shared mapping.
+ */
+export type TransactionType =
+  | 'DEPOSIT'
+  | 'WITHDRAWAL'
+  | 'TRANSFER'
+  | 'LOAN_DISBURSEMENT'
+  | 'LOAN_REPAYMENT'
+  | 'INTEREST_CREDIT'
+  | 'FEE'
+  | 'DIVIDEND'
+  | 'SHARE_PURCHASE'
+  | 'SHARE_REFUND'
+  /** @deprecated legacy alias; normalise to `LOAN_REPAYMENT` before persisting. */
+  | 'LOAN_EMI';
+
 export interface Transaction {
   id: string;
   /** Owning member id (nullable for counter/cash-office transactions). */
   memberId?: string;
   date: string;
-  type: 'DEPOSIT' | 'WITHDRAWAL' | 'LOAN_EMI' | 'DIVIDEND' | 'SHARE_PURCHASE';
+  type: TransactionType;
   description: string;
   amount: number;
   referenceNo: string;

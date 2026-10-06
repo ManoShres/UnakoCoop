@@ -10,6 +10,8 @@ import {
   verifyAndDisburseRemittance,
   computeInterBranchClearingLedger,
   exportRemittanceSettlementCsv,
+  hashSecurityPin,
+  verifySecurityPin,
   RemittanceTransaction,
 } from '../remittanceClearing';
 
@@ -169,7 +171,7 @@ describe('remittanceClearing utility', () => {
         payingBranchCommission: 60,
         headOfficeCommission: 30,
         status: 'PAID_OUT',
-        securityPinHash: 'hashed_pin',
+        securityPinHash: hashSecurityPin('1111', 'fixture-salt-2081'),
         sentTimestampBS: '2081/06/25 10:00',
         paidTimestampBS: '2081/06/25 11:30',
       };
@@ -193,7 +195,7 @@ describe('remittanceClearing utility', () => {
         payingBranchCommission: 40,
         headOfficeCommission: 20,
         status: 'PAID_OUT',
-        securityPinHash: 'hashed_pin',
+        securityPinHash: hashSecurityPin('1111', 'fixture-salt-2081'),
         sentTimestampBS: '2081/06/25 12:00',
         paidTimestampBS: '2081/06/25 13:00',
       };
@@ -238,7 +240,7 @@ describe('remittanceClearing utility', () => {
         payingBranchCommission: 60,
         headOfficeCommission: 30,
         status: 'PAID_OUT',
-        securityPinHash: 'hashed_pin',
+        securityPinHash: hashSecurityPin('1111', 'fixture-salt-2081'),
         sentTimestampBS: '2081/06/25 10:00',
         paidTimestampBS: '2081/06/25 11:30',
       };
@@ -248,6 +250,72 @@ describe('remittanceClearing utility', () => {
       expect(csv).toContain('UNAKO-AB12CD');
       expect(csv).toContain('राम बहादुर चौधरी');
       expect(csv).toContain('50000');
+    });
+  });
+
+  describe('PIN verification hardening (C18)', () => {
+    const buildOrder = () =>
+      createRemittanceOrder({
+        sendingBranchId: 'br-gadhwa',
+        sendingBranchName: 'गढवा मुख्य कार्यालय',
+        receivingBranchId: 'br-lamahi',
+        receivingBranchName: 'लमही सेवा केन्द्र',
+        senderMemberNo: 'M-10023',
+        senderName: 'राम बहादुर चौधरी',
+        senderPhone: '9844912345',
+        receiverName: 'सीता देवी चौधरी',
+        receiverPhone: '9844954321',
+        receiverCitizenshipNo: '५२-०१-७५-०३४२१',
+        remitAmount: 30000,
+        securityPin: '7829',
+        sentTimestampBS: '2081/06/25 10:30',
+      });
+
+    it('stores a salted, iterated hash rather than an unsalted 32-bit DJB2 marker', () => {
+      const order = buildOrder();
+
+      expect(order.securityPinHash).toMatch(/^pinh2\$\d+\$[0-9a-f]{32}\$[0-9a-f]{16}$/);
+      expect(order.securityPinHash).not.toContain('7829');
+      expect(order.securityPinHash.startsWith('pin_h_')).toBe(false);
+    });
+
+    it('the legacy "hashed_pin" sentinel no longer authorises a payout', () => {
+      const order = buildOrder();
+      const tampered: RemittanceTransaction = { ...order, securityPinHash: 'hashed_pin' };
+
+      const attempt = verifyAndDisburseRemittance(
+        tampered,
+        '7829',
+        '५२-०१-७५-०३४२१',
+        'TELLER-04',
+        '2081/06/25 14:15'
+      );
+
+      expect(attempt.success).toBe(false);
+      expect(attempt.updatedTransaction).toBeUndefined();
+    });
+
+    it('legacy unsalted pin_h_ hashes fail closed even with the correct PIN', () => {
+      const order = buildOrder();
+      const legacy: RemittanceTransaction = { ...order, securityPinHash: 'pin_h_7829' };
+
+      expect(
+        verifyAndDisburseRemittance(legacy, '7829', '५२-०१-७५-०३४२१', 'TELLER-04').success
+      ).toBe(false);
+    });
+
+    it('a different PIN never verifies and the correct PIN still does', () => {
+      const order = buildOrder();
+
+      expect(verifySecurityPin(order.securityPinHash, '0000')).toBe(false);
+      expect(verifySecurityPin(order.securityPinHash, '7829')).toBe(true);
+      expect(
+        verifyAndDisburseRemittance(order, '7829', '५२-०१-७५-०३४२१', 'TELLER-04').success
+      ).toBe(true);
+    });
+
+    it('salting makes identical PINs hash differently', () => {
+      expect(hashSecurityPin('7829', 'salt-a')).not.toBe(hashSecurityPin('7829', 'salt-b'));
     });
   });
 });

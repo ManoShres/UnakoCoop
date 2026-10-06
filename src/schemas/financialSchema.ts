@@ -2,6 +2,13 @@
  * Zod validation schemas for financial operations — Loans, Savings, Transactions.
  */
 import { z } from 'zod';
+import type { Transaction, TransactionType } from '../types/transaction';
+
+/**
+ * Shared money ceiling for every monetary field. Must match the server ledger ceiling
+ * (`LEDGER_MAX_AMOUNT` / `ledger_max_amount()` in supabase/migrations/0001_ledger.sql).
+ */
+export const MAX_FINANCIAL_AMOUNT = 100_000_000;
 
 // ────────────────────────────────────────────────────
 // Savings Account
@@ -12,7 +19,18 @@ export const CreateSavingsAccountSchema = z.object({
   memberId: z.string().trim().min(1, 'Member ID is required').optional(),
   accountNo: z.string().trim().min(1, 'Account number is required').max(30),
   accountType: z.string().trim().min(1, 'Account type is required').max(100),
-  balance: z.number().min(0, 'Balance cannot be negative').default(0),
+  // A new account opens EMPTY: a balance may only arrive through a posted deposit
+  // (single-entry balance injection was a ledger-integrity defect).
+  // NEEDS SIGN-OFF: fixed-deposit accounts that legitimately open funded must use a
+  // dedicated funding path, not a caller-supplied opening balance.
+  balance: z
+    .number()
+    .min(0, 'Balance cannot be negative')
+    .max(MAX_FINANCIAL_AMOUNT, `Balance must not exceed ${MAX_FINANCIAL_AMOUNT}`)
+    .default(0)
+    .refine((v) => v === 0, {
+      message: 'New savings accounts must open with a zero balance; fund the account via a deposit.',
+    }),
   interestRate: z.number().min(0, 'Interest rate cannot be negative').max(100).default(0),
   openedDate: z.string().trim().min(1, 'Opened date is required'),
   maturityDate: z.string().trim().optional(),
@@ -50,7 +68,7 @@ export const CreateLoanApplicationSchema = z.object({
   requestedAmount: z
     .number()
     .positive('Requested amount must be greater than zero')
-    .max(100_000_000, 'Amount exceeds maximum limit'),
+    .max(MAX_FINANCIAL_AMOUNT, 'Amount exceeds maximum limit'),
   purpose: z
     .string()
     .trim()
@@ -74,6 +92,12 @@ export const CreateLoanApplicationSchema = z.object({
 // ────────────────────────────────────────────────────
 // Transaction
 // ────────────────────────────────────────────────────
+
+/**
+ * Canonical transaction-type vocabulary — MUST stay in lock-step with the domain
+ * `TransactionType` union in `src/types/transaction.ts`. `LOAN_EMI` is a legacy alias
+ * that is always normalised to `LOAN_REPAYMENT` before persistence.
+ */
 export const TRANSACTION_TYPE = [
   'DEPOSIT',
   'WITHDRAWAL',
@@ -85,16 +109,51 @@ export const TRANSACTION_TYPE = [
   'DIVIDEND',
   'SHARE_PURCHASE',
   'SHARE_REFUND',
+  'LOAN_EMI',
 ] as const;
 
+export type CanonicalTransactionType = (typeof TRANSACTION_TYPE)[number];
+
+/** The single shared legacy→canonical mapping used by every service (no ad-hoc rewrites). */
+export const LEGACY_TRANSACTION_TYPE_TO_CANONICAL: Record<
+  TransactionType,
+  CanonicalTransactionType
+> = {
+  DEPOSIT: 'DEPOSIT',
+  WITHDRAWAL: 'WITHDRAWAL',
+  TRANSFER: 'TRANSFER',
+  LOAN_DISBURSEMENT: 'LOAN_DISBURSEMENT',
+  LOAN_REPAYMENT: 'LOAN_REPAYMENT',
+  INTEREST_CREDIT: 'INTEREST_CREDIT',
+  FEE: 'FEE',
+  DIVIDEND: 'DIVIDEND',
+  SHARE_PURCHASE: 'SHARE_PURCHASE',
+  SHARE_REFUND: 'SHARE_REFUND',
+  LOAN_EMI: 'LOAN_REPAYMENT',
+};
+
+/** Compile-time guard: the schema vocabulary and the domain union must not drift. */
+type DomainTransactionType = Transaction['type'];
+const _assertSchemaCoversDomain: Record<DomainTransactionType, CanonicalTransactionType> =
+  LEGACY_TRANSACTION_TYPE_TO_CANONICAL;
+void _assertSchemaCoversDomain;
+
+/** Normalises any legacy transaction type to its canonical persisted value. */
+export function normalizeTransactionType(type: string): CanonicalTransactionType {
+  const mapped = LEGACY_TRANSACTION_TYPE_TO_CANONICAL[type as DomainTransactionType];
+  if (mapped) return mapped;
+  // Unknown values are rejected by CreateTransactionSchema before reaching persistence.
+  return type as CanonicalTransactionType;
+}
+
 export const CreateTransactionSchema = z.object({
-  memberId: z.string().trim().min(1, 'Member ID is required'),
+  memberId: z.string().trim().min(1, 'Member ID is required').optional(),
   accountId: z.string().trim().min(1, 'Account is required'),
   type: z.enum(TRANSACTION_TYPE),
   amount: z
     .number()
     .positive('Amount must be greater than zero')
-    .max(100_000_000, 'Amount exceeds maximum limit'),
+    .max(MAX_FINANCIAL_AMOUNT, 'Amount exceeds maximum limit'),
   description: z
     .string()
     .trim()
@@ -133,3 +192,49 @@ export type CreateSavingsAccountInput = z.infer<typeof CreateSavingsAccountSchem
 export type CreateLoanApplicationInput = z.infer<typeof CreateLoanApplicationSchema>;
 export type CreateTransactionInput = z.infer<typeof CreateTransactionSchema>;
 export type CreateInquiryInput = z.infer<typeof CreateInquirySchema>;
+
+// ────────────────────────────────────────────────────
+// Loan persistence payloads
+// ────────────────────────────────────────────────────
+export const LOAN_STATUS = ['ACTIVE', 'UNDER_REVIEW', 'PAID_OFF', 'OVERDUE'] as const;
+
+export const CreateLoanSchema = z
+  .object({
+    memberId: z.string().trim().min(1, 'Member ID is required').optional(),
+    loanNo: z.string().trim().min(1, 'Loan number is required').max(50),
+    loanType: z.string().trim().min(1, 'Loan type is required').max(100),
+    principalAmount: z
+      .number()
+      .positive('Principal must be greater than zero')
+      .max(MAX_FINANCIAL_AMOUNT, 'Principal exceeds maximum limit'),
+    remainingBalance: z
+      .number()
+      .min(0, 'Remaining balance cannot be negative')
+      .max(MAX_FINANCIAL_AMOUNT, 'Remaining balance exceeds maximum limit'),
+    interestRate: z.number().min(0, 'Interest rate cannot be negative').max(100),
+    tenureMonths: z.number().int('Tenure must be a whole number').min(1).max(360),
+    monthlyEmi: z.number().min(0, 'EMI cannot be negative').max(MAX_FINANCIAL_AMOUNT),
+    disbursedDate: z.string().trim().min(1, 'Disbursement date is required'),
+    nextDueDate: z.string().trim().min(1, 'Next due date is required'),
+    status: z.enum(LOAN_STATUS),
+    collateralDescription: z.string().trim().max(500),
+  })
+  .refine((loan) => loan.remainingBalance <= loan.principalAmount, {
+    message: 'Remaining balance cannot exceed the principal amount.',
+    path: ['remainingBalance'],
+  });
+
+/**
+ * Metadata-only loan update. `remainingBalance` is deliberately NOT part of this schema:
+ * balances move only through the repayment path, which forbids increases.
+ */
+export const LoanMetadataUpdateSchema = z
+  .object({
+    status: z.enum(LOAN_STATUS).optional(),
+    nextDueDate: z.string().trim().min(1).optional(),
+    interestRate: z.number().min(0, 'Interest rate cannot be negative').max(100).optional(),
+  })
+  .strict();
+
+export type CreateLoanInput = z.infer<typeof CreateLoanSchema>;
+export type LoanMetadataUpdateInput = z.infer<typeof LoanMetadataUpdateSchema>;

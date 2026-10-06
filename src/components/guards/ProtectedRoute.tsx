@@ -58,7 +58,13 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // 2. Fine-grained RBAC permission check for staff
   if (role === 'ADMIN') {
     // Super admin retains supervisory access to all administrative routes
-    if (staffRole && staffRole !== 'SUPER_ADMIN') {
+    if (staffRole !== 'SUPER_ADMIN') {
+      // FAIL CLOSED: an ADMIN session without a resolved staff role is a
+      // partially-resolved session and must never satisfy a staff route.
+      if (!staffRole) {
+        return <Navigate to={redirectTo} state={{ from: location }} replace />;
+      }
+
       if (allowedStaffRoles && !allowedStaffRoles.includes(staffRole)) {
         return <Navigate to="/admin" replace />;
       }

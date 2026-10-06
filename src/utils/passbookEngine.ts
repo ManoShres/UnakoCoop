@@ -69,6 +69,12 @@ export interface PassbookVerificationResult {
 
 /**
  * Computes deterministic 32-bit CRC-style hex checksum from passbook identity
+ *
+ * NEEDS SIGN-OFF: the salt below is a public constant compiled into the bundle, so this
+ * checksum is a data-integrity guard only — it provides NO tamper-evidence against an
+ * attacker who can read the client. Real tamper-evidence requires a server-verified HMAC
+ * keyed with a secret (or a signed payload). See the mandatory-CRC enforcement in
+ * parseAndVerifyBarcode and TODO(security) below.
  */
 export function generatePassbookChecksum(
   passbookNo: string,
@@ -160,7 +166,17 @@ export function parseAndVerifyBarcode(
     matched.accountNo
   );
 
-  const isCrcValid = scannedCrc ? scannedCrc.toUpperCase() === expectedCrc : true;
+  // CRC is MANDATORY for any structured payload: the old optional check
+  // (`scannedCrc ? match : true`) meant a tampered payload could simply omit the CRC and
+  // always pass. A bare passbook-number scan declares no checksum field, so it is the only
+  // shape that skips CRC verification.
+  // TODO(security): replace this public-salt checksum with a server-verified HMAC (secret
+  // key held server-side) so tamper-evidence cannot be forged from the client bundle.
+  const isStructuredPayload = trimmed.includes('|');
+  const crcDeclared = /(^|\|)\s*CRC\s*:/i.test(trimmed);
+  const isCrcValid = isStructuredPayload
+    ? crcDeclared && scannedCrc !== '' && scannedCrc.toUpperCase() === expectedCrc
+    : true;
 
   if (!isCrcValid) {
     return {

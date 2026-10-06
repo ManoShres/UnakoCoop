@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main, master, dev]
 
+# Least privilege: no job here needs to write anything back to the repository.
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,13 +18,17 @@ jobs:
   quality-gate:
     name: Lint, Test & Build
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
+      # Actions are pinned to immutable commit SHAs (supply-chain hardening: a tag
+      # can be moved, a SHA cannot). The human-readable version is in the trailing
+      # comment; bump both together (Dependabot/Renovate can do this).
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a # v4.2.0
         with:
           node-version: 22
           cache: 'npm'
@@ -28,14 +36,38 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Code Quality & Lint Check
-        run: npm run lint
+      # Secret scan of the source tree BEFORE anything is built: fails on an
+      # OpenRouter/OpenAI/Anthropic/AWS/Google/GitHub/Slack key, a private key
+      # block, or a service_role JWT anywhere in the tree.
+      - name: Secret Scan (source tree)
+        run: npm run secret-scan
 
+      # Lint policy: oxlint always exits non-zero on ERRORS (react/rules-of-hooks and
+      # friends). Warnings are ratcheted against a budget instead of being ignored:
+      # --max-warnings is the measured baseline (~501 warnings) plus headroom, so the
+      # gate can fail on new warnings while the current tree still passes. Burn the
+      # budget down as the 469 no-unused-vars findings are cleared; never raise it.
+      - name: Code Quality & Lint Check (errors + warning budget)
+        run: npm run lint:ci
+
+      # tsconfig.app.json / tsconfig.node.json set "strict": true explicitly, so this
+      # step name is accurate (measured: 0 new errors with typescript 6.0.3).
       - name: TypeScript Strict Typecheck
-        run: npx tsc -b
+        run: npm run typecheck
+
+      - name: Dependency Audit (high and above)
+        run: npm audit --audit-level=high
 
       - name: Automated Test Suite (Vitest)
-        run: npm run test
+        run: npm test
 
-      - name: Production Bundle Build (Vite)
+      # package.json "build" first runs scripts/check-prod-build.mjs, which FAILS the
+      # build when VITE_DEMO_MODE=true, so demo affordances cannot reach a bundle.
+      - name: Production Bundle Build (Vite, demo-mode guarded)
         run: npm run build
+
+      # Post-build scan of dist/: this is the control that was missing when an
+      # OpenRouter key was compiled into dist/assets/*.js. --require-dist makes the
+      # step fail if the build produced no bundle at all.
+      - name: Secret Scan (built bundle)
+        run: npm run secret-scan:dist

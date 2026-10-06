@@ -8,6 +8,8 @@ import {
   getMemberPatronageMetric,
   getMemberPatronageDistribution,
   formatPatronageThermalSlip,
+  assertValidPatronageWeights,
+  allocateByLargestRemainder,
 } from '../patronageRefundEngine';
 
 
@@ -111,6 +113,77 @@ describe('patronageRefundEngine - Section 41 Nepal Cooperative Act 2074', () => 
       const w2 = generateWarrantNumber('२०८०/०८१', 25);
       expect(w1).toBe('PRF-UNAKO-2080-81-00001');
       expect(w2).toBe('PRF-UNAKO-2080-81-00025');
+    });
+
+    it('refuses weights that do not sum to 100 instead of over-distributing', () => {
+      // Regression (B12): 40/40/40 with a 1,000,000 pool distributed 1,200,000.
+      const badConfig: PatronageWeightConfig = {
+        ...mockConfig,
+        savingsInterestWeight: 40,
+        loanInterestWeight: 40,
+        dairyBusinessWeight: 40,
+      };
+
+      expect(() => assertValidPatronageWeights(badConfig)).toThrow(/sum to exactly 100/);
+
+      const { summary, validationError } = calculatePatronageRefund(mockMetrics, badConfig);
+      expect(validationError).toBeTruthy();
+      expect(summary.totalDistributed).toBe(0);
+      expect(summary.totalPoolAmount).toBe(0);
+    });
+
+    it('apportions by largest remainder so the pool is distributed exactly (no leakage)', () => {
+      const equalMetrics: MemberPatronageMetric[] = ['a', 'b', 'c'].map((id) => ({
+        memberId: id,
+        memberNo: id,
+        memberName: id,
+        accountNo: id,
+        annualSavingsInterestEarned: 1,
+        annualLoanInterestPaid: 0,
+        annualDairyBusinessVolume: 0,
+        isEligible: true,
+      }));
+
+      const { distributions, summary } = calculatePatronageRefund(equalMetrics, {
+        fiscalYear: '2081/82',
+        totalPoolAmount: 100,
+        savingsInterestWeight: 100,
+        loanInterestWeight: 0,
+        dairyBusinessWeight: 0,
+      });
+
+      expect(summary.totalDistributed).toBe(100);
+      expect(summary.residualAmount).toBe(0);
+      const amounts = distributions.map((d) => d.savingsShareAmount).sort((a, b) => b - a);
+      expect(amounts).toEqual([34, 33, 33]);
+    });
+
+    it('never distributes more than the approved pool across the pillars', () => {
+      const allocations = allocateByLargestRemainder([1, 1, 1, 1, 1, 1, 1], 1000);
+      expect(allocations.reduce((s, v) => s + v, 0)).toBe(1000);
+      expect(allocations).toEqual([143, 143, 143, 143, 143, 143, 142]);
+    });
+
+    it('verifies the Section 41 40% minimum against the net divisible surplus', () => {
+      const underfunded = calculatePatronageRefund(mockMetrics, {
+        ...mockConfig,
+        totalPoolAmount: 100000,
+        netDivisibleSurplus: 1000000,
+      });
+      expect(underfunded.summary.complianceCheck.section41MinimumRequired).toBe(400000);
+      expect(underfunded.summary.complianceCheck.meetsSection41Minimum).toBe(false);
+
+      const compliant = calculatePatronageRefund(mockMetrics, {
+        ...mockConfig,
+        totalPoolAmount: 500000,
+        netDivisibleSurplus: 1000000,
+      });
+      expect(compliant.summary.complianceCheck.meetsSection41Minimum).toBe(true);
+
+      // Without the surplus figure the minimum is NOT VERIFIED (never a vacuous pass).
+      const unverified = calculatePatronageRefund(mockMetrics, mockConfig);
+      expect(unverified.summary.complianceCheck.section41MinimumRequired).toBeNull();
+      expect(unverified.summary.complianceCheck.meetsSection41Minimum).toBe(false);
     });
   });
 

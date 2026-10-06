@@ -11,6 +11,7 @@ import {
   generateFdSettlementsCsv,
   FdDischargeVoucher,
 } from '../../utils/fixedDepositSettlement';
+import { escapeHtml, sanitizePrintableHtml } from '../../utils/printHelper';
 import {
   X,
   Lock,
@@ -205,7 +206,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
-    printWindow.document.write(`
+    printWindow.document.write(sanitizePrintableHtml(`
       <!DOCTYPE html>
       <html>
       <head>
@@ -227,36 +228,36 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
       </head>
       <body>
         <div class="header">
-          <p class="inst-name">${coopSettings?.nameNepali || coopSettings?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.'}</p>
-          <p class="inst-sub">${coopSettings?.addressNepali || coopSettings?.address || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश'}</p>
-          <p class="inst-sub">दर्ता नं: ${coopSettings?.regNo || '१२९०/०६७/०६८'} | पान नं: ${coopSettings?.panNo || '३००१२४८९०'}</p>
+          <p class="inst-name">${escapeHtml(coopSettings?.nameNepali || coopSettings?.name || 'उनको बचत तथा ऋण सहकारी संस्था लि.')}</p>
+          <p class="inst-sub">${escapeHtml(coopSettings?.addressNepali || coopSettings?.address || 'गढवा गाउँपालिका वडा नं. ५, दाङ, लुम्बिनी प्रदेश')}</p>
+          <p class="inst-sub">दर्ता नं: ${escapeHtml(coopSettings?.regNo || '१२९०/०६७/०६८')} | पान नं: ${escapeHtml(coopSettings?.panNo || '३००१२४८९०')}</p>
         </div>
         <div class="meta-row">
-          <span>भौचर नं: <b>${completedVoucher.voucherNo}</b></span>
-          <span>कर प्रमाणपत्र नं: <b>${completedVoucher.certificateNo}</b></span>
-          <span>मिति: <b>${completedVoucher.issueDateNepali}</b></span>
+          <span>भौचर नं: <b>${escapeHtml(completedVoucher.voucherNo)}</b></span>
+          <span>कर प्रमाणपत्र नं: <b>${escapeHtml(completedVoucher.certificateNo)}</b></span>
+          <span>मिति: <b>${escapeHtml(completedVoucher.issueDateNepali)}</b></span>
         </div>
         <div class="voucher-title">मुद्दती बचत परिपक्वता / पूर्व भुक्तानी फरफारक भरपाई तथा कर कट्टी विवरण</div>
         
         <table class="info-table">
           <tr><th colspan="2">१. खातावाला सदस्य विवरण</th></tr>
-          <tr><td width="35%">सदस्यको नाम / थर:</td><td><b>${completedVoucher.memberName}</b> (सदस्य नं: ${completedVoucher.memberNo})</td></tr>
-          <tr><td>नागरिकता नं. / पान नं:</td><td>${completedVoucher.citizenshipNo} ${completedVoucher.panNumber ? `(PAN: ${completedVoucher.panNumber})` : ''}</td></tr>
-          <tr><td>मुद्दती खाता नं. / योजना:</td><td>${completedVoucher.accountNo} (${completedVoucher.schemeName})</td></tr>
+          <tr><td width="35%">सदस्यको नाम / थर:</td><td><b>${escapeHtml(completedVoucher.memberName)}</b> (सदस्य नं: ${escapeHtml(completedVoucher.memberNo)})</td></tr>
+          <tr><td>नागरिकता नं. / पान नं:</td><td>${escapeHtml(completedVoucher.citizenshipNo)} ${completedVoucher.panNumber ? escapeHtml(`(PAN: ${completedVoucher.panNumber})`) : ''}</td></tr>
+          <tr><td>मुद्दती खाता नं. / योजना:</td><td>${escapeHtml(completedVoucher.accountNo)} (${escapeHtml(completedVoucher.schemeName)})</td></tr>
           <tr><td>भुक्तानी गन्तव्य:</td><td>${completedVoucher.payoutDestination === 'REGULAR_SAVINGS' ? 'साधारण बचत खातामा जम्मा' : 'नगद काउन्टर भुक्तानी'}</td></tr>
 
           <tr><th colspan="2">२. हिसाब किताब तथा कर कट्टी विवरण (आयकर ऐन २०५८ दफा ८८)</th></tr>
-          <tr><td>जम्मा मूल साँवा रकम:</td><td class="num">रु. ${completedVoucher.principalAmount.toLocaleString()}</td></tr>
-          <tr><td>पाकेको कुल ब्याज:</td><td class="num">रु. ${completedVoucher.grossInterest.toLocaleString()}</td></tr>
-          <tr><td>समयपूर्व फिर्ता जरिवाना (Penalty):</td><td class="num">रु. ${completedVoucher.penaltyDeduction.toLocaleString()}</td></tr>
-          <tr><td>करयोग्य खुद ब्याज:</td><td class="num">रु. ${completedVoucher.netTaxableInterest.toLocaleString()}</td></tr>
-          <tr><td><b>५% अग्रिम आयकर कट्टी (5% Statutory TDS):</b></td><td class="num" style="color: #b91c1c;">रु. ${completedVoucher.statutoryTds5Percent.toLocaleString()}</td></tr>
-          <tr><td>भुक्तानी हुने खुद ब्याज:</td><td class="num">रु. ${completedVoucher.netInterestPayable.toLocaleString()}</td></tr>
-          <tr style="background:#f8f9fa;"><td><b>कुल भुक्तानी / फरफारक रकम (साँवा + खुद ब्याज):</b></td><td class="num" style="font-size: 14px;"><b>रु. ${completedVoucher.totalDischargedAmount.toLocaleString()}</b></td></tr>
+          <tr><td>जम्मा मूल साँवा रकम:</td><td class="num">रु. ${escapeHtml(completedVoucher.principalAmount.toLocaleString())}</td></tr>
+          <tr><td>पाकेको कुल ब्याज:</td><td class="num">रु. ${escapeHtml(completedVoucher.grossInterest.toLocaleString())}</td></tr>
+          <tr><td>समयपूर्व फिर्ता जरिवाना (Penalty):</td><td class="num">रु. ${escapeHtml(completedVoucher.penaltyDeduction.toLocaleString())}</td></tr>
+          <tr><td>करयोग्य खुद ब्याज:</td><td class="num">रु. ${escapeHtml(completedVoucher.netTaxableInterest.toLocaleString())}</td></tr>
+          <tr><td><b>५% अग्रिम आयकर कट्टी (5% Statutory TDS):</b></td><td class="num" style="color: #b91c1c;">रु. ${escapeHtml(completedVoucher.statutoryTds5Percent.toLocaleString())}</td></tr>
+          <tr><td>भुक्तानी हुने खुद ब्याज:</td><td class="num">रु. ${escapeHtml(completedVoucher.netInterestPayable.toLocaleString())}</td></tr>
+          <tr style="background:#f8f9fa;"><td><b>कुल भुक्तानी / फरफारक रकम (साँवा + खुद ब्याज):</b></td><td class="num" style="font-size: 14px;"><b>रु. ${escapeHtml(completedVoucher.totalDischargedAmount.toLocaleString())}</b></td></tr>
         </table>
 
         <p style="font-size: 11px; margin-top: 12px; color: #444;">
-          कैफियत: ${completedVoucher.remarks}। माथि उल्लेखित रकम पूर्ण रुपमा बुझिलिएँ/जम्मा भयो।
+          कैफियत: ${escapeHtml(completedVoucher.remarks)}। माथि उल्लेखित रकम पूर्ण रुपमा बुझिलिएँ/जम्मा भयो।
         </p>
 
         <div class="signature-section">
@@ -266,7 +267,7 @@ export const FixedDepositSettlementModal: React.FC<FixedDepositSettlementModalPr
         </div>
       </body>
       </html>
-    `);
+    `));
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {

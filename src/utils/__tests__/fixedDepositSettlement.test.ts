@@ -110,6 +110,43 @@ describe('fixedDepositSettlement engine', () => {
     expect(settlement.totalPayoutAmount).toBe(settlement.principalAmount + settlement.netInterest);
   });
 
+  it('never applies a premature-break rate above the contracted rate', () => {
+    // Regression (B13): `Math.max(4.5, contractedRate - penalty)` paid 4.5% on a 3%
+    // contract with a 2% penalty — more than the contract rate on a broken deposit.
+    const settlement = calculateFdSettlement(
+      100000,
+      3.0,
+      12,
+      'PREMATURE_BREAK',
+      100,
+      2.0,
+      5.0,
+      mockMember.name,
+      mockMember.memberNo,
+      mockFdAccount.accountNo
+    );
+
+    expect(settlement.appliedRate).toBe(1.0); // 3% - 2%, clamped into [0, 3%]
+    expect(settlement.appliedRate).toBeLessThanOrEqual(settlement.contractedRate);
+    // Effective interest is strictly below what the contract itself would have paid.
+    expect(settlement.effectiveInterest).toBeLessThan(settlement.grossInterest);
+  });
+
+  it('clamps a penalty larger than the contract rate down to zero', () => {
+    const settlement = calculateFdSettlement(
+      100000,
+      2.0,
+      12,
+      'PREMATURE_BREAK',
+      100,
+      5.0
+    );
+
+    expect(settlement.appliedRate).toBe(0);
+    expect(settlement.effectiveInterest).toBe(0);
+    expect(settlement.totalPayoutAmount).toBe(100000);
+  });
+
   it('calculates compound auto-renewal rollover correctly', () => {
     // 100,000 principal at 10% for 1 year => Gross Interest: 10,000; TDS: 500; Net Interest: 9,500
     // Compound rollover: new principal = 100,000 + 9,500 = 109,500
@@ -127,6 +164,16 @@ describe('fixedDepositSettlement engine', () => {
     expect(renewal.newPrincipalAmount).toBe(109500);
     expect(renewal.interestPayoutToSavings).toBe(0);
     expect(renewal.newAccountNo).toContain('-R1Y');
+  });
+
+  it('generates unique renewal account numbers for repeated rollovers', () => {
+    // Regression (B13): the deterministic `${accountNo}-R${n}Y` number collided.
+    const first = calculateFdAutoRenewal(mockFdAccount, mockMember, 'COMPOUND_PRINCIPAL_AND_NET_INTEREST', 1, 10.5);
+    const second = calculateFdAutoRenewal(mockFdAccount, mockMember, 'COMPOUND_PRINCIPAL_AND_NET_INTEREST', 1, 10.5);
+
+    expect(first.newAccountNo).toContain('-R1Y');
+    expect(second.newAccountNo).toContain('-R1Y');
+    expect(first.newAccountNo).not.toBe(second.newAccountNo);
   });
 
   it('calculates principal-only auto-renewal with interest paid out to savings', () => {

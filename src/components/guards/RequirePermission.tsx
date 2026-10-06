@@ -15,6 +15,11 @@ export interface RequirePermissionProps {
  * RBAC Element & View Guard.
  * Conditionally renders children only if the authenticated staff member
  * possesses the requisite permission under Unako SACCOS role-based access policy.
+ *
+ * SECURITY (fail closed): only an explicit SUPER_ADMIN role bypasses the
+ * fine-grained checks. An ADMIN session whose `staffRole` has not been resolved
+ * (null/undefined) is treated as NOT authorized - it can never satisfy a
+ * permission requirement. Non-ADMIN sessions never see gated content.
  */
 export const RequirePermission: React.FC<RequirePermissionProps> = ({
   permission,
@@ -25,13 +30,45 @@ export const RequirePermission: React.FC<RequirePermissionProps> = ({
   const { staffRole, role } = useAuthStore();
   const { t, lang } = useLanguageStore();
 
+  const restricted = (): React.ReactNode => {
+    if (fallback !== undefined) {
+      return <>{fallback}</>;
+    }
+
+    const langKey = lang === 'en' ? 'en' : 'ne';
+    const roleName = staffRole
+      ? roleLabel(staffRole, langKey)
+      : t('अनिर्धारित भूमिका', 'unresolved role');
+
+    return (
+      <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center gap-3 text-xs">
+        <ShieldAlert className="size-5 shrink-0 text-amber-600" />
+        <div>
+          <p className="font-bold">{t('पहुँच अनुमति छैन', 'Access Restricted')}</p>
+          <p className="text-[11px] opacity-80">
+            {t(
+              `तपाईंको भूमिका (${roleName}) सँग यो कार्य सम्पादन गर्ने अनुमति छैन।`,
+              `Your assigned CBS role (${roleName}) does not have permission to execute this operation.`
+            )}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  // Only an authenticated ADMIN session is ever eligible for staff-only views.
   if (role !== 'ADMIN') {
-    return <>{fallback || null}</>;
+    return <>{fallback !== undefined ? fallback : null}</>;
   }
 
-  // Super Admin always bypasses fine-grained restrictions
-  if (!staffRole || staffRole === 'SUPER_ADMIN') {
+  // Super Admin always bypasses fine-grained restrictions.
+  if (staffRole === 'SUPER_ADMIN') {
     return <>{children}</>;
+  }
+
+  // FAIL CLOSED: a partially-resolved session (no staffRole) can never grant.
+  if (!staffRole) {
+    return restricted();
   }
 
   const granted = permission
@@ -44,26 +81,5 @@ export const RequirePermission: React.FC<RequirePermissionProps> = ({
     return <>{children}</>;
   }
 
-  if (fallback !== undefined) {
-    return <>{fallback}</>;
-  }
-
-  const langKey = lang === 'en' ? 'en' : 'ne';
-
-  return (
-    <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-amber-800 dark:text-amber-300 flex items-center gap-3 text-xs">
-      <ShieldAlert className="size-5 shrink-0 text-amber-600" />
-      <div>
-        <p className="font-bold">
-          {t('पहुँच अनुमति छैन', 'Access Restricted')}
-        </p>
-        <p className="text-[11px] opacity-80">
-          {t(
-            `तपाईंको भूमिका (${roleLabel(staffRole, langKey)}) सँग यो कार्य सम्पादन गर्ने अनुमति छैन।`,
-            `Your assigned CBS role (${roleLabel(staffRole, langKey)}) does not have permission to execute this operation.`
-          )}
-        </p>
-      </div>
-    </div>
-  );
+  return restricted();
 };

@@ -1,8 +1,16 @@
 import { CoopSettings } from '../types';
+import { isSupabaseConfigured, supabase } from '../lib/supabase';
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+/**
+ * AI assistant transport.
+ *
+ * SECURITY: there is deliberately NO client-side provider API key path. The browser must
+ * never hold an OpenRouter/LLM key — requests go exclusively through the Supabase Edge
+ * Function proxy (`ai-assistant`), which keeps the secret server-side. When the edge
+ * function is unavailable the assistant degrades gracefully to the caller's offline
+ * rule-based fallback; it never falls back to a direct browser fetch with a bearer key.
+ */
 
-const API_KEY = (import.meta.env.VITE_OPENROUTER_API_KEY as string | undefined) || '';
 const MODEL =
     (import.meta.env.VITE_OPENROUTER_MODEL as string | undefined) ||
     'meta-llama/llama-3.3-70b-instruct';
@@ -16,10 +24,12 @@ export interface OpenRouterResponse {
     success: boolean;
     content: string;
     error?: string;
+    /** True when the assistant is unavailable and the caller should use its offline fallback. */
+    offline?: boolean;
 }
 
 export const isOpenRouterConfigured = (): boolean => {
-    return Boolean(API_KEY && API_KEY.startsWith('sk-or-'));
+    return isSupabaseConfigured() && Boolean(supabase);
 };
 
 /**
@@ -77,10 +87,11 @@ GUIDELINES:
 - Do not discuss topics unrelated to the cooperative, finance, or member services. Politely redirect off-topic conversations.`.trim();
 };
 
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
-
 /**
- * Send a chat completion request to OpenRouter (proxied via Supabase Edge Function if available).
+ * Send a chat completion request through the Supabase Edge Function proxy.
+ *
+ * There is no client-key fallback: when the proxy is unconfigured or unavailable the
+ * caller receives a graceful `offline` result so it can use its own rule-based replies.
  */
 export const chatWithOpenRouter = async (
     history: ChatMessage[],
@@ -92,76 +103,37 @@ export const chatWithOpenRouter = async (
         ...history,
     ];
 
-    // 1. Production Secure Path: Proxy through Supabase Edge Function (keeps secret server-side)
-    if (isSupabaseConfigured() && supabase) {
-        try {
-            const { data, error } = await supabase.functions.invoke('ai-assistant', {
-                body: { messages, model: MODEL },
-            });
-            if (!error && data?.choices?.[0]?.message?.content) {
-                return { success: true, content: data.choices[0].message.content.trim() };
-            }
-            // If Edge Function returned specific error, report it
-            if (error) {
-                console.warn('Supabase Edge Function ai-assistant unavailable, falling back:', error.message);
-            }
-        } catch (edgeErr) {
-            console.warn('Edge function invoke error, falling back to local client:', edgeErr);
-        }
-    }
-
-    // 2. Local Development Fallback: Direct client fetch using VITE_OPENROUTER_API_KEY
-    if (!isOpenRouterConfigured()) {
+    if (!isSupabaseConfigured() || !supabase) {
         return {
             success: false,
             content: '',
-            error: 'OpenRouter AI सेवा कन्फिगर गरिएको छैन। कृपया Supabase Edge Function वा VITE_OPENROUTER_API_KEY जाँच गर्नुहोस्।',
+            error: 'AI assistant unavailable: secure proxy not configured.',
+            offline: true,
         };
     }
 
     try {
-        const response = await fetch(OPENROUTER_API_URL, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${API_KEY}`,
-                'Content-Type': 'application/json',
-                'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://unako.coop',
-                'X-Title': 'Unako SACCOS Digital Portal',
-            },
-            body: JSON.stringify({
-                model: MODEL,
-                messages,
-                temperature: 0.5,
-                max_tokens: 600,
-            }),
+        const { data, error } = await supabase.functions.invoke('ai-assistant', {
+            body: { messages, model: MODEL },
         });
-
-        if (!response.ok) {
-            const errText = await response.text().catch(() => '');
-            return {
-                success: false,
-                content: '',
-                error: `OpenRouter request failed (${response.status}): ${errText.slice(0, 200)}`,
-            };
+        if (!error && data?.choices?.[0]?.message?.content) {
+            return { success: true, content: data.choices[0].message.content.trim() };
         }
-
-        const data = await response.json();
-        const content: string | undefined = data?.choices?.[0]?.message?.content;
-
-        if (!content) {
-            return {
-                success: false,
-                content: '',
-                error: 'OpenRouter returned an empty response.',
-            };
-        }
-
-        return { success: true, content: content.trim() };
-    } catch (err) {
+        // Do NOT surface provider/edge error payloads — they can echo request metadata.
+        console.warn('[assistant] secure proxy returned no usable completion; using offline fallback.');
         return {
             success: false,
             content: '',
-            error: err instanceof Error ? err.message : 'Unknown network error contacting OpenRouter.',
+            error: 'AI assistant unavailable: secure proxy error.',
+            offline: true,
+        };
+    } catch {
+        console.warn('[assistant] secure proxy unreachable; using offline fallback.');
+        return {
+            success: false,
+            content: '',
+            error: 'AI assistant unavailable: secure proxy unreachable.',
+            offline: true,
         };
     }
 };

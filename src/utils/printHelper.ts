@@ -18,6 +18,55 @@ export interface PrintOptions {
   title?: string;
 }
 
+/**
+ * Escape a value for safe interpolation into HTML text or a quoted attribute.
+ * Always use this for any dynamic title/label before it reaches document.write.
+ */
+export function escapeHtml(value: unknown): string {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+}
+
+const DANGEROUS_TAGS = 'script|iframe|object|embed|link|base|form|svg';
+const DANGEROUS_URL_SCHEME = /^(?:javascript|vbscript|data:text\/html)/i;
+
+/**
+ * Sanitise HTML that will be written into a same-origin printing iframe.
+ *
+ * Defence-in-depth (regex based, intentionally conservative): strips script-ish tags,
+ * inline event handlers and script-bearing URL schemes while leaving ordinary markup,
+ * tables and inline classes intact. Page CSS is applied separately by the caller.
+ *
+ * NOTE: this is not a general-purpose sanitizer — never render untrusted HTML outside
+ * the isolated print iframe.
+ */
+export function sanitizePrintableHtml(html: string): string {
+  return String(html ?? '')
+    // Remove dangerous element pairs and stray/self-closing dangerous elements.
+    .replace(new RegExp(`<\\s*(${DANGEROUS_TAGS})\\b[\\s\\S]*?<\\s*\\/\\s*\\1\\s*>`, 'gi'), '')
+    .replace(new RegExp(`<\\s*(?:${DANGEROUS_TAGS})\\b[^>]*\\/?>`, 'gi'), '')
+    // Meta refresh is a script-free redirect vector; ordinary <meta charset> is kept.
+    .replace(/<meta\b[^>]*http-equiv\s*=\s*["']?refresh[\s\S]*?>/gi, '')
+    // Remove inline event handlers (onclick, onerror, onload, ...).
+    .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    // Neutralise script-bearing URL schemes in href/src/action/srcdoc.
+    .replace(
+      /\b(href|src|xlink:href|action|formaction|srcdoc)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/gi,
+      (match, attr: string, dq?: string, sq?: string, uq?: string) => {
+        const raw = (dq ?? sq ?? uq ?? '').trim();
+        if (attr.toLowerCase() === 'srcdoc' || DANGEROUS_URL_SCHEME.test(raw)) {
+          return `${attr}="#"`;
+        }
+        return match;
+      }
+    );
+}
+
 export function getPrintStyles(format: PrintFormat = 'a4'): string {
   if (format === 'thermal-80mm') {
     return `
@@ -242,14 +291,14 @@ export function printElement(elementId?: string, options?: PrintOptions): void {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${options?.title || document.title || 'Unako SACCOS Document'}</title>
+        <title>${escapeHtml(options?.title || document.title || 'Unako SACCOS Document')}</title>
         ${collectedStyles}
         <style>
           ${getPrintStyles(format)}
         </style>
       </head>
       <body class="bg-white text-slate-900 p-2">
-        ${targetEl.outerHTML}
+        ${sanitizePrintableHtml(targetEl.outerHTML)}
       </body>
     </html>
   `);
@@ -303,14 +352,14 @@ export function printRawHtml(htmlContent: string, options?: PrintOptions): void 
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>${options?.title || 'Unako SACCOS Document'}</title>
+        <title>${escapeHtml(options?.title || 'Unako SACCOS Document')}</title>
         <style>
           ${getPrintStyles(format)}
         </style>
       </head>
       <body class="bg-white text-slate-900 p-2">
         <div data-printable>
-          ${htmlContent}
+          ${sanitizePrintableHtml(htmlContent)}
         </div>
       </body>
     </html>

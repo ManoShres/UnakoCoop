@@ -5,7 +5,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.3-purple?logo=vite)](https://vitejs.dev/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4.3-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Vitest-137%20Passed-emerald?logo=vitest)](https://vitest.dev/)
+[![Tests](https://img.shields.io/badge/Vitest-676%20Passed-emerald?logo=vitest)](https://vitest.dev/)
 [![License](https://img.shields.io/badge/License-Proprietary-amber)](#)
 
 > **Reg. No:** १२९०/०६७/०६८ (1290/067/068) &nbsp;|&nbsp; **PAN:** ३००१२४८९० (300124890)  
@@ -69,7 +69,7 @@ The platform aligns with the **Nepal Cooperative Act 2074 (सहकारी �
 | **State Management** | [Zustand v5](https://github.com/pmndrs/zustand) with modular domain slices & persistence |
 | **Icons & Visuals** | [Lucide React](https://lucide.dev/) + Canvas Confetti |
 | **Validation** | [Zod v4](https://zod.dev/) schemas at boundary interfaces |
-| **Testing** | [Vitest v4](https://vitest.dev/) (16 suites, 137 unit & integration tests) |
+| **Testing** | [Vitest v4](https://vitest.dev/) (71 suites, 521 unit tests) |
 | **Backend & Auth** | [Supabase](https://supabase.com/) client (`@supabase/supabase-js`) + LocalStorage mock engine |
 | **AI Assistant** | [OpenRouter API](https://openrouter.ai/) with intelligent SACCOS system prompts |
 
@@ -119,16 +119,43 @@ cp .env.example .env
 ```
 
 ### Environment Configuration (`.env`)
-The app runs completely in offline demo mode out-of-the-box. To enable live cloud persistence or AI assistant completions, configure:
+Configure the live backend by copying `.env.example` to `.env`:
 
 ```env
-# Supabase Configuration (Optional - falls back to local storage)
+# Demo mode MUST stay false for any real deployment.
+# When true, the app boots pre-authenticated and exposes demo affordances.
+VITE_DEMO_MODE=false
+
+# Supabase Configuration (required for live auth & persistence)
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 
-# OpenRouter AI Support Assistant (Optional - falls back to offline replies)
-VITE_OPENROUTER_API_KEY=your-openrouter-key
+# OpenRouter AI Support Assistant — optional, model only.
+# The API KEY is NEVER set here. It is a server-side secret on the
+# `ai-assistant` Supabase Edge Function (see supabase/functions/ai-assistant).
 VITE_OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct
+```
+
+> ⚠️ **Never put a real API key in a `VITE_`-prefixed variable.** Vite inlines
+> every `VITE_*` value into the client bundle, so it becomes readable by anyone
+> who loads the site. All third-party keys belong in server-side secret stores
+> (Supabase Edge Function secrets, e.g. `OPENROUTER_API_KEY`).
+
+Deploy the AI proxy and set its secret:
+```bash
+supabase functions deploy ai-assistant
+supabase secrets set OPENROUTER_API_KEY=your-openrouter-key
+```
+
+Run the schema and seed once against your project, in order:
+```bash
+# In the Supabase SQL editor (or via psql):
+#   1. supabase/schema.sql   (tables, RLS policies, triggers)
+#   2. supabase/seed.sql     (reference data)
+```
+Then verify connectivity without printing any secret:
+```bash
+npm run db:check
 ```
 
 ### Development Server
@@ -137,18 +164,30 @@ npm run dev
 ```
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+> **Note on demo mode:** with `VITE_DEMO_MODE=true` the app boots as a
+> pre-authenticated member and exposes one-click demo logins. This is for local
+> development only. Production builds must use `VITE_DEMO_MODE=false`; the
+> production build script fails if demo mode is enabled.
+
 ### Running Test Suite
 ```bash
-# Run all 137 unit and integration tests
+# Run all 521 unit tests (no DOM environment; pure logic & store tests)
 npm test
+
+# Run a single suite
+npx vitest run src/utils/__tests__/loanProvisioning.test.ts
 
 # Run tests in watch mode
 npx vitest
 ```
 
+> On some sandboxed/CI Windows environments Node's child-process pipe creation is
+> blocked, which makes Vitest's default `forks` pool fail with `spawn EPERM`.
+> Use `npx vitest run --pool=threads` there.
+
 ### Production Build
 ```bash
-npm run build
+npm run build     # typecheck + build, fails if demo mode is on or a secret is inlined
 npm run preview
 ```
 
@@ -156,27 +195,73 @@ npm run preview
 
 ## 🔒 Security & Code Standards
 
-- **Strict Immutability**: All state mutations use functional updates and pure transformations.
-- **Zero Hardcoded Secrets**: Client variables are sanitized; sensitive keys are strictly managed via boundary configs.
-- **Input Validation**: All forms, monetary amounts, and member inputs are validated through Zod schemas before hitting state stores.
-- **Isolated Printing**: Print helpers generate an isolated, temporary sandboxed iframe to guarantee zero style bleed or background artifacts.
+- **Server-side authorization boundary**: Supabase Row-Level Security is the
+  authority for data access. The client UI gates are a UX layer only — they must
+  never be the sole control. See `supabase/schema.sql`.
+- **Fail-closed guards**: `ProtectedRoute` and `RequirePermission` deny access
+  when a session is unresolved or a staff role is missing. Nothing is granted by
+  default.
+- **No secrets in client code**: no API key is read from `import.meta.env` for
+  outbound third-party calls. Third-party keys live in server-side secret stores,
+  and the production build gate fails if a known key pattern appears in `dist/`.
+- **Input validation**: forms are validated with Zod schemas at the boundary
+  (`src/schemas/`), and the service layer re-validates before any write.
+- **HTML output encoding**: print/receipt helpers HTML-escape interpolated
+  values before writing to a print iframe.
+- **Isolated printing**: print helpers generate an isolated, temporary iframe to
+  avoid style bleed or background artifacts.
+
+### ⚠️ Known limitations (read before deploying)
+
+This codebase is a **front-end implementation with a database layer, not yet a
+complete core banking system**. Be aware of the following before any real use:
+
+1. **There is no server-side ledger for balances.** Member, savings, loan and
+   transaction state is held in a client-side Zustand store seeded from
+   `src/data/mockData.ts`. The Supabase CRUD services in `src/services/` are not
+   wired into the UI for money movement. Balances are therefore not durable,
+   not authoritative, and must not be used for real financial records until
+   writes are moved into transactional server-side functions.
+2. **Only `employees` and auth sessions are persisted to Supabase today.**
+3. **No MFA, password-reset, account-lockout or rate-limiting** is implemented.
+4. **No Content-Security-Policy on a real server**; `index.html` carries
+   best-effort meta hardening only. Set CSP/HSTS at the hosting layer.
+5. **No test covers RLS policy behaviour.** `supabase/schema.sql` should be
+   validated against the live project (e.g. via pgTAP) before go-live.
+
+Treat the regulatory calculations (PEARLS, provisioning, TDS, dividends) as
+**decision-support displays**, not as filing-grade output, until they are
+independently verified against the current Act/Rules.
 
 ---
 
 ## 🗺️ Engineering Roadmap
 
+Shipped:
 - [x] Fast Banking Counter Terminal & Hotkey Navigation
 - [x] Daily Field Collector Sheets & Bulk Posting
 - [x] PEARLS Financial Monitoring Engine
 - [x] Loan Provisioning & Subsidized Agriculture Window
 - [x] Shares Management & Dividend Distribution Engine
 - [x] Bilingual English / Nepali Devanagari Architecture
-- [ ] **Thermal Print Engine (58mm / 80mm)** for field & teller receipts
-- [ ] **Nepal QR / Dynamic Fonepay** payment slips for deposits and EMI
+- [x] Thermal Print Engine (58mm / 80mm) for field & teller receipts
+- [x] Nepal QR / Dynamic Fonepay payment slips for deposits and EMI
+- [x] Member Digital Smart Card with QR Verification
+
+Not yet shipped (do not assume these exist):
+- [ ] **Server-side transactional ledger** — move all balance mutations into
+      Supabase RPCs with idempotency keys. *Highest priority; required before any
+      real money is handled.*
+- [ ] **Persist member/savings/loan/transaction state to Supabase** (today only
+      employees and auth sessions are persisted)
+- [ ] **RLS policy test suite** (pgTAP or equivalent) for `supabase/schema.sql`
+- [ ] **MFA, password reset, login lockout & rate limiting**
 - [ ] **Offline PWA & Background Sync** for rural field collectors
-- [ ] **Year-End Closing (*Asar Masanta*) & TDS Calculator**
-- [ ] **COPOMIS Official XML/Excel Validator & Exporter**
-- [ ] **Member Digital Smart Card with QR Verification**
+- [ ] **Year-End Closing (*Asar Masanta*) & TDS Calculator** — engine exists, but
+      needs regulatory sign-off before use
+- [ ] **COPOMIS Official XML/Excel Validator & Exporter** — validator exists,
+      official submission format not certified
+- [ ] **Server-side CSP/HSTS headers** at the hosting layer
 
 ---
 
