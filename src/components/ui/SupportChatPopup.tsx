@@ -81,7 +81,7 @@ export const SupportChatPopup: React.FC = () => {
       id: 'm1',
       sender: 'bot',
       agentName: 'Sita Chaudhary (Member Desk)',
-      agentAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100',
+      agentAvatar: '/assets/kyc/avatar_officer.png',
       text: lang === 'ne'
         ? 'नमस्ते! उनको बचत तथा ऋण सहकारीको डिजिटल सेवा कक्षमा स्वागत छ। म वा हाम्रा कर्मचारीहरू अनलाइन छौं। के सहयोग गर्न सक्छौं?'
         : 'Namaste! Welcome to Unako SACCOS support desk. Our staff are online now to help. How can we assist you today?',
@@ -89,21 +89,37 @@ export const SupportChatPopup: React.FC = () => {
     },
   ]);
 
-  // Show only active (online) staff from the cooperative's employee registry
-  const onlineStaff = employees
-    .filter((emp) => emp.status === 'ACTIVE')
-    .slice(0, 5)
-    .map((emp) => ({
-      name: emp.name,
-      nameNe: emp.nameNepali || emp.name,
-      role: emp.designation,
-      roleNe: emp.designationNepali || emp.designation,
-      avatar: emp.avatarUrl,
-      status: 'Online' as const,
-    }));
+  // Strictly filter for ACTIVE employees only (case-insensitive and trimmed)
+  const activeStaff = employees.filter(
+    (emp) => typeof emp.status === 'string' && emp.status.trim().toUpperCase() === 'ACTIVE'
+  );
 
-  // Use real staff from the store - no fallback to hardcoded members
+  // Present top active support staff (up to 3 for clean visual header stacking)
+  const onlineStaff = activeStaff.slice(0, 3).map((emp) => ({
+    name: emp.name,
+    nameNe: emp.nameNepali || emp.name,
+    role: emp.designation,
+    roleNe: emp.designationNepali || emp.designation,
+    avatar: emp.avatarUrl || '/assets/kyc/avatar_officer.png',
+    status: 'Online' as const,
+  }));
+
   const teamMembers = onlineStaff;
+  const activeCount = activeStaff.length;
+
+  const leadDeskStaff = activeStaff.find(
+    (emp) => emp.designation.toLowerCase().includes('supervisor') || emp.accessRole === 'FIELD_OFFICER'
+  ) ?? activeStaff[0];
+
+  const leadAvatar = leadDeskStaff?.avatarUrl || '/assets/kyc/avatar_officer.png';
+  const leadName = leadDeskStaff
+    ? `${leadDeskStaff.name} (${lang === 'ne' ? leadDeskStaff.designationNepali || leadDeskStaff.designation : leadDeskStaff.designation})`
+    : 'Unako Support Desk';
+
+  const activeStaffNames = activeStaff
+    .slice(0, 2)
+    .map((s) => (lang === 'ne' ? (s.nameNepali || s.name).split(' ')[0] : s.name.split(' ')[0]))
+    .join(lang === 'ne' ? ' वा ' : ' or ');
 
   const faqs = [
     {
@@ -210,7 +226,7 @@ export const SupportChatPopup: React.FC = () => {
         id: 'bot-' + Date.now(),
         sender: 'agent',
         agentName: result.success ? 'Unako AI Assistant' : 'Sita Chaudhary (Member Desk)',
-        agentAvatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100',
+        agentAvatar: '/assets/kyc/avatar_officer.png',
         text: result.success ? result.content : getFallbackReply(query, lang),
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
@@ -283,13 +299,24 @@ export const SupportChatPopup: React.FC = () => {
                       <img
                         src={m.avatar}
                         alt={m.name}
-                        title={`${m.name} (${lang === 'ne' ? m.roleNe : m.role}) - Online Now`}
-                        className="inline-block size-8 rounded-full ring-2 ring-white object-cover shadow-sm group-hover/avatar:scale-110 transition-transform"
+                        title={`${m.name} (${lang === 'ne' ? m.roleNe : m.role}) - ${lang === 'ne' ? 'अनलाइन' : 'Online Now'}`}
+                        className="inline-block size-8 rounded-full ring-2 ring-white object-cover shadow-sm group-hover/avatar:scale-110 transition-transform bg-slate-100"
+                        onError={(e) => {
+                          e.currentTarget.src = '/assets/kyc/avatar_officer.png';
+                        }}
                       />
                       {/* Active green online status indicator on each avatar */}
                       <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-400 ring-2 ring-white shadow-xs"></span>
                     </div>
                   ))}
+                  {activeCount > 3 && (
+                    <div
+                      title={`${activeCount - 3} ${lang === 'ne' ? 'थप सक्रिय कर्मचारी' : 'more active staff'}`}
+                      className="relative size-8 rounded-full ring-2 ring-white bg-black/40 backdrop-blur-xs flex items-center justify-center text-[10px] font-bold text-white shadow-sm"
+                    >
+                      +{activeCount - 3}
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -322,7 +349,9 @@ export const SupportChatPopup: React.FC = () => {
               </span>
               <p className="leading-tight">
                 <strong className="font-bold text-emerald-300">
-                  {t('३ जना कर्मचारी अनलाइन हुनुहुन्छ', '3 staff online to help')}
+                  {lang === 'ne'
+                    ? `${activeCount} जना कर्मचारी अनलाइन हुनुहुन्छ`
+                    : `${activeCount} staff online to help`}
                 </strong>{' '}
                 • {t('यदि उपलब्ध नभएमा FAQ बाट तत्काल उत्तर पाउनुहोस्', 'If away, 24/7 FAQ will help')}
               </p>
@@ -349,7 +378,9 @@ export const SupportChatPopup: React.FC = () => {
                       <span className="size-2 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
                     </div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                      {t('सीता वा भोजराजले मिनेटभित्र उत्तर दिनुहुन्छ', 'Sita or Bhojraj typically replies in minutes')}
+                      {lang === 'ne'
+                      ? `${activeStaffNames || 'हाम्रो टोली'}ले मिनेटभित्र उत्तर दिनुहुन्छ`
+                      : `${activeStaffNames || 'Our support team'} typically replies in minutes`}
                     </p>
                   </div>
                   <div className="size-8 rounded-full bg-rose-50 dark:bg-rose-950/50 text-[#e11d48] flex items-center justify-center group-hover:translate-x-1 transition-transform shrink-0">
