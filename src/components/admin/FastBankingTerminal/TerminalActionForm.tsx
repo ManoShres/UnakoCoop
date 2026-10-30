@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { 
   CheckCircle2, 
   Printer, 
@@ -7,12 +7,20 @@ import {
   AlertCircle, 
   UserCheck, 
   Receipt, 
-  CreditCard 
+  CreditCard,
+  Banknote
 } from 'lucide-react';
 import { TerminalNode, FastTransactionSchema, FastTransactionReceipt } from './terminalTypes';
 import { useCoopStore } from '../../../store/useCoopStore';
 import { useLanguageStore } from '../../../store/useLanguageStore';
 import { printElement, PrintFormat } from '../../../utils/printHelper';
+import { numberToWordsNepali } from '../../../utils/nepaliNumberToWords';
+import { CashDenominationTally } from '../CashDenominationTally';
+import {
+  DenominationCountMap,
+  getPrintableDenominations,
+  calculateDenominations,
+} from '../../../utils/cashDenominationEngine';
 
 interface TerminalActionFormProps {
   node: TerminalNode;
@@ -36,6 +44,8 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
   const [formError, setFormError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<FastTransactionReceipt | null>(null);
   const [printFormat, setPrintFormat] = useState<PrintFormat>('thermal-80mm');
+  const [denominationCounts, setDenominationCounts] = useState<DenominationCountMap>({});
+  const [showTally, setShowTally] = useState<boolean>(false);
 
   const accountInputRef = useRef<HTMLInputElement>(null);
   const amountInputRef = useRef<HTMLInputElement>(null);
@@ -77,8 +87,19 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
     };
   }, [accountNo, members, savings, loans]);
 
+  // Reset form state for the next transaction
+  const resetForNext = useCallback(() => {
+    setReceipt(null);
+    setAccountNo('');
+    setAmount('');
+    setRemarks('');
+    setFormError(null);
+    setDenominationCounts({});
+    setShowTally(false);
+  }, []);
+
   // Form submission handler
-  const handleExecuteTransaction = () => {
+  const handleExecuteTransaction = useCallback(() => {
     setFormError(null);
     if (!node.operation) return;
 
@@ -130,6 +151,7 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
       });
     }
 
+    const hasDenominations = Object.keys(denominationCounts).length > 0;
     const newReceipt: FastTransactionReceipt = {
       referenceNo: `CBS-FST-${Math.floor(100000 + Math.random() * 900000)}`,
       timestamp: new Date().toLocaleTimeString('ne-NP', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + new Date().toLocaleDateString('ne-NP'),
@@ -141,18 +163,30 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
       newBalance: newBal,
       remarks: validRemarks,
       tellerName: 'अधिकारी / Counter Teller #01',
+      denominationCounts: hasDenominations ? { ...denominationCounts } : undefined,
     };
 
     setReceipt(newReceipt);
     if (onSuccessTransaction) {
       onSuccessTransaction(newReceipt);
     }
-  };
+  }, [
+    node,
+    amount,
+    accountNo,
+    remarks,
+    matchedData,
+    adjustSavingsBalance,
+    recordLoanRepayment,
+    addTransaction,
+    denominationCounts,
+    onSuccessTransaction,
+  ]);
 
   // Keyboard shortcut listener within form
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // If receipt is showing, Enter or Space starts next transaction, Ctrl+P prints
+      // If receipt is showing, Enter starts next transaction, Ctrl+P prints
       if (receipt) {
         if (e.key === 'Enter') {
           e.preventDefault();
@@ -179,18 +213,14 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [receipt, accountNo, amount, remarks, matchedData, node.operation]);
-
-  const resetForNext = () => {
-    setReceipt(null);
-    setAccountNo('');
-    setAmount('');
-    setRemarks('');
-    setFormError(null);
-  };
+  }, [receipt, printFormat, onBack, resetForNext, handleExecuteTransaction]);
 
   // -------------------- RENDER RECEIPT --------------------
   if (receipt) {
+    const printableNotes = receipt.denominationCounts
+      ? getPrintableDenominations(receipt.denominationCounts)
+      : [];
+
     return (
       <div className="p-6 bg-slate-900 text-white rounded-xl flex flex-col items-center animate-fade-in">
         {/* On-screen success notification (hidden when printing) */}
@@ -208,7 +238,7 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
         <div
           id="cbs-fast-slip"
           data-printable="slip"
-          className="w-full max-w-lg bg-white text-slate-900 rounded-xl p-6 my-3 shadow-xl border border-slate-300 font-sans text-xs"
+          className="w-full max-w-lg bg-white text-slate-900 rounded-xl p-6 my-3 shadow-xl border border-slate-300 font-sans text-xs print:p-2 print:m-0 print:border-none print:shadow-none print:max-w-full"
         >
           {/* Cooperative Official Header */}
           <div className="text-center pb-3 border-b-2 border-slate-800">
@@ -255,12 +285,41 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
               <span className="text-slate-600">कारोबार शीर्षक (Scheme / Type):</span>
               <span className="font-bold text-slate-800">{node.labelNe}</span>
             </div>
-            <div className="flex justify-between items-center py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-lg">
-              <span className="font-bold text-slate-700 text-xs">दाखिला/भुक्तानी रकम (Amount):</span>
-              <span className="font-mono font-black text-base text-emerald-700">
-                रु. {receipt.amount.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
-              </span>
+
+            {/* Amount & In-Words (अक्षरेपी) Block */}
+            <div className="space-y-1 py-1.5 px-3 bg-slate-50 border border-slate-200 rounded-lg">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-slate-700 text-xs">दाखिला/भुक्तानी रकम (Amount):</span>
+                <span className="font-mono font-black text-base text-emerald-700">
+                  रु. {receipt.amount.toLocaleString('ne-NP', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+              <div className="text-[11px] font-bold text-slate-800 border-t border-slate-200/80 pt-1">
+                <span className="text-slate-500 text-[10px] block font-medium">अक्षरेपी:</span>
+                {numberToWordsNepali(receipt.amount)}
+              </div>
             </div>
+
+            {/* Optional Cash Denomination Breakdown */}
+            {printableNotes.length > 0 && receipt.denominationCounts && (
+              <div className="py-2 border-t border-slate-200 text-[10.5px]">
+                <div className="font-bold text-slate-700 mb-1 flex items-center justify-between">
+                  <span>नगद गद्दी विवरण (Cash Denomination Breakdown):</span>
+                  <span className="font-mono text-[9.5px] text-slate-500">
+                    कुल: {calculateDenominations(receipt.denominationCounts).totalNotes} थान
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 font-mono text-[10px] bg-slate-50 p-2 rounded border border-slate-200">
+                  {printableNotes.map((item, idx) => (
+                    <div key={idx} className="flex justify-between border-b border-dotted border-slate-200 py-0.5">
+                      <span className="text-slate-600">{item.noteLabel} × {item.countStr}</span>
+                      <span className="font-bold text-slate-800">{item.subtotalStr}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {receipt.newBalance !== undefined && (
               <div className="flex justify-between items-center py-0.5">
                 <span className="text-slate-600">अद्यावधिक मौज्दात (Balance After Tx):</span>
@@ -294,8 +353,13 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
           {/* Slip Footer Watermark Note */}
           <div className="pt-2 border-t border-dashed border-slate-300 flex items-center justify-between text-[9px] text-slate-500">
             <span>प्रविष्टि: {receipt.tellerName}</span>
-            <span className="font-mono">प्रणाली: CBS-FAST-CORE v2.4</span>
+            <span className="font-mono">प्रणाली: CBS-FAST-CORE v2.5</span>
             <span>* आधिकारिक बैंक प्रतिलिपि</span>
+          </div>
+
+          {/* Cutting Line Marker for POS rolls */}
+          <div className="pt-2 text-center text-slate-400 font-mono text-[9px] select-none tracking-widest">
+            - - - - - - - - - - - ✂ - - - - - - - - - - -
           </div>
         </div>
 
@@ -355,6 +419,8 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
   }
 
   // -------------------- RENDER FORM --------------------
+  const currentAmountNum = parseFloat(amount);
+
   return (
     <div className="p-6 bg-slate-900 text-white rounded-xl flex flex-col space-y-5">
       {/* Header & Breadcrumb */}
@@ -407,11 +473,21 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
           />
         </div>
 
-        {/* 2. Amount Input */}
+        {/* 2. Amount Input & In-Words Display */}
         <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1.5">
-            कारोबार रकम (रु.) <span className="text-rose-400">*</span>
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-bold text-slate-300">
+              कारोबार रकम (रु.) <span className="text-rose-400">*</span>
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowTally(!showTally)}
+              className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400 hover:text-emerald-300 transition cursor-pointer"
+            >
+              <Banknote className="size-3" />
+              <span>{showTally ? 'गद्दी बन्द गर्नुहोस्' : 'गद्दी गणना (Tally)'}</span>
+            </button>
+          </div>
           <input
             ref={amountInputRef}
             type="number"
@@ -421,6 +497,11 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
             min="1"
             className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-700 rounded-lg text-sm font-mono text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder-slate-600 font-bold"
           />
+          {currentAmountNum > 0 && (
+            <p className="mt-1 text-[11px] font-medium text-emerald-400 truncate">
+              {numberToWordsNepali(currentAmountNum)}
+            </p>
+          )}
         </div>
 
         {/* 3. Remarks Input */}
@@ -438,6 +519,20 @@ export const TerminalActionForm: React.FC<TerminalActionFormProps> = ({
           />
         </div>
       </div>
+
+      {/* Expandable Cash Denomination Tally (गद्दी काउन्टर) */}
+      {showTally && (
+        <div className="animate-fade-in">
+          <CashDenominationTally
+            counts={denominationCounts}
+            onChangeCounts={setDenominationCounts}
+            targetAmount={currentAmountNum || undefined}
+            onApplyAmount={(calculatedTotal) => {
+              setAmount(calculatedTotal.toString());
+            }}
+          />
+        </div>
+      )}
 
       {/* Live Member Verification Strip */}
       {matchedData?.member ? (

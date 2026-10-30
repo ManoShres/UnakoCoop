@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { FastTransactionSchema } from '../terminalTypes';
+import { FastTransactionSchema, FastTransactionReceipt } from '../terminalTypes';
 import { CBS_TERMINAL_TREE } from '../terminalData';
 import { resolveShortcutAction } from '../../../../hooks/useKeyboardShortcuts';
+import { numberToWordsNepali } from '../../../../utils/nepaliNumberToWords';
+import { getPrintableDenominations } from '../../../../utils/cashDenominationEngine';
 
 describe('FastBankingTerminal - Schema & Security Verification', () => {
   it('validates correct deposit transaction input', () => {
@@ -129,5 +131,37 @@ describe('FastBankingTerminal - Keyboard Shortcut Resolution', () => {
       'ADMIN'
     );
     expect(action).toBe('CLOSE_MODALS');
+  });
+});
+
+describe('FastBankingTerminal - Denomination & In-Words Receipt Integration', () => {
+  it('creates receipt with valid Nepali in-words and denomination breakdown', () => {
+    const receipt: FastTransactionReceipt = {
+      referenceNo: 'CBS-FST-998877',
+      timestamp: '10:30:00 2081/06/15',
+      operation: 'SAVINGS_DEPOSIT',
+      memberName: 'राम प्रसाद शर्मा',
+      memberId: 'MEM-001',
+      accountNo: 'SAV-001',
+      amount: 15500,
+      newBalance: 65500,
+      remarks: 'मासिक बचत जम्मा',
+      tellerName: 'Teller #01',
+      denominationCounts: {
+        1000: 15,
+        500: 1,
+      },
+    };
+
+    expect(receipt.denominationCounts).toBeDefined();
+    const inWords = numberToWordsNepali(receipt.amount);
+    expect(inWords).toBe('अक्षरेपी पन्ध्र हजार पाँच सय रुपैयाँ मात्र');
+
+    const printLines = getPrintableDenominations(receipt.denominationCounts!);
+    expect(printLines).toHaveLength(2);
+    expect(printLines[0].noteLabel).toBe('रु. 1000');
+    expect(printLines[0].countStr).toBe('15');
+    expect(printLines[1].noteLabel).toBe('रु. 500');
+    expect(printLines[1].countStr).toBe('1');
   });
 });

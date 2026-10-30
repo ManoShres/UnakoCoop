@@ -70,4 +70,5 @@ export interface FastTransactionReceipt {
   newBalance?: number;
   remarks: string;
   tellerName: string;
+  denominationCounts?: Partial<Record<number, number>>;
 }
