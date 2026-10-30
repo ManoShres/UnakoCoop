@@ -20,6 +20,7 @@ import { useCoopStore } from '../../store/useCoopStore';
 import {
   authenticateStaffWithSupabase,
   LIVE_AUTH_REQUIRED,
+  STAFF_NOT_LINKED,
 } from '../../services/employeeService';
 import {
   authenticateMemberWithSupabase,
@@ -106,6 +107,11 @@ export const UnifiedLoginPage: React.FC = () => {
               'प्रत्यक्ष प्रमाणीकरण सेवा उपलब्ध छैन। कर्मचारी/एडमिन लगइनका लागि सीबीएस प्रमाणीकरण आवश्यक छ; अफलाइन कर्मचारी पहुँच अस्वीकृत।',
               'Live authentication is unavailable. Staff/admin sign-in requires the CBS authentication service; offline staff access is refused.'
             )
+          : error === STAFF_NOT_LINKED && import.meta.env.DEV
+          ? t(
+              'कर्मचारी प्रमाणीकरण असफल: यो खाता Supabase Auth मा सफल भयो तर active employees रेकर्ड (auth_user_id) सँग जोडिएको छैन। कृपया Supabase SQL Editor मा लिंक क्वेरी चलाउनुहोस् वा तलको द्रुत डेमो एडमिन बटन थिच्नुहोस्।',
+              'Staff authentication failed: Account authenticated in Supabase but is not linked to an active employee record (missing auth_user_id). Please run the linking SQL in Supabase SQL Editor or use the Quick Demo Admin button below.'
+            )
           : t(
               `कर्मचारी प्रमाणीकरण असफल: ${error || 'अज्ञात त्रुटि'}`,
               `Staff authentication failed: ${error || 'unknown error'}`
@@ -122,6 +128,11 @@ export const UnifiedLoginPage: React.FC = () => {
   const handleQuickDemoMember = () => {
     switchToPreset('verified-member');
     navigate('/member');
+  };
+
+  const handleQuickDemoAdmin = () => {
+    switchToPreset('admin');
+    navigate('/admin');
   };
 
   return (
@@ -400,13 +411,20 @@ export const UnifiedLoginPage: React.FC = () => {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block text-center">
                     {t('द्रुत डेमो पहुँच (केवल विकास बिल्ड)', 'Quick Demo Access (development build only)')}
                   </span>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={handleQuickDemoMember}
                       className="py-2 px-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 text-slate-700 dark:text-slate-300 hover:text-emerald-600 text-xs font-bold transition-all duration-150 ease-out active:scale-95 cursor-pointer text-center"
                     >
                       {t('डेमो सदस्य: राम श्रेष्ठ', 'Load Member: Ram Shrestha')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleQuickDemoAdmin}
+                      className="py-2 px-2.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-800 dark:text-blue-300 hover:text-blue-900 text-xs font-bold transition-all duration-150 ease-out active:scale-95 cursor-pointer text-center"
+                    >
+                      {t('डेमो एडमिन: सुनिता के.सी.', 'Load Staff: Sunita K.C.')}
                     </button>
                   </div>
                 </div>

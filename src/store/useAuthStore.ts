@@ -162,8 +162,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({
           role: 'ADMIN',
           currentMember: null,
-          currentEmployee: INITIAL_EMPLOYEES[0] ?? null,
-          staffRole: INITIAL_EMPLOYEES[0]?.accessRole ?? 'SUPER_ADMIN',
+          currentEmployee: (INITIAL_EMPLOYEES.find((e) => e.accessRole === 'SUPER_ADMIN') ?? INITIAL_EMPLOYEES[0]) ?? null,
+          staffRole: (INITIAL_EMPLOYEES.find((e) => e.accessRole === 'SUPER_ADMIN') ?? INITIAL_EMPLOYEES[0])?.accessRole ?? 'SUPER_ADMIN',
         });
         break;
       case 'guest':
